@@ -16,8 +16,8 @@
  with Arduino 1.5.8 (tested on Arduino Uno)
 */
 /*
-Sketch uses 7 374 bytes (22%) of program storage space. Maximum is 32 256 bytes.
-Global variables use 460 bytes (22%) of dynamic memory, leaving 1 588 bytes for local variables. Maximum is 2 048 bytes.
+Sketch uses 7 508 bytes (23%) of program storage space. Maximum is 32 256 bytes.
+Global variables use 462 bytes (22%) of dynamic memory, leaving 1 586 bytes for local variables. Maximum is 2 048 bytes.
 */
 
 #include <Wire.h> 
@@ -98,7 +98,10 @@ void setup() {
   delay(1500);
 }
 
+// buffer for uptime/100
 unsigned long int cur_sec = 0;
+// x100 ms (for example 10x100=1 sec)
+int char_ttl = 10;
 
 void loop() {
   DS1302_clock_burst_read( (uint8_t *) &rtc);
@@ -119,15 +122,15 @@ void loop() {
   lcd.setCursor(0, 1);
   lcd.print(buffer);
       
-  if(millis() - cur_sec > 1000){
-    cur_sec = millis();
+  if((millis() / 100) - cur_sec > 10){
+    cur_sec = millis() / 100;
     lcd.setCursor(15, 0);
     lcd.print(' ');    
   }
 
   char keypressed = myKeypad.getKey();
   if(keypressed != NO_KEY){
-    cur_sec = millis();
+    cur_sec = millis() / 100;
     lcd.setCursor(15, 0);
     lcd.print(keypressed);
   }
