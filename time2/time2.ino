@@ -98,7 +98,7 @@ void setup() {
   delay(1500);
 }
 
-unsigned int cur_sec = 0;
+unsigned long int cur_sec = 0;
 
 void loop() {
   DS1302_clock_burst_read( (uint8_t *) &rtc);
@@ -118,7 +118,7 @@ void loop() {
     2000 + bcd2bin( rtc.Year10, rtc.Year));
   lcd.setCursor(0, 1);
   lcd.print(buffer);
-    
+      
   if(millis() - cur_sec > 1000){
     cur_sec = millis();
     lcd.setCursor(15, 0);
