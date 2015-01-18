@@ -16,8 +16,8 @@ char keymap[numRows][numCols] =
 };
 
 //Code that shows the the keypad connections to the arduino terminals
-byte rowPins[numRows] = {6, 7, 8, 9}; //Rows 0 to 3
-byte colPins[numCols] = {5, 4, 3, 2}; //Columns 0 to 3
+byte rowPins[numRows] = {5, 4, 3, 2}; //Rows 0 to 3
+byte colPins[numCols] = {9, 8, 7, 6}; //Columns 0 to 3
 
 //initializes an instance of the Keypad class
 Keypad myKeypad = Keypad(makeKeymap(keymap), rowPins, colPins, numRows, numCols);
