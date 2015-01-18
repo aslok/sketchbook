@@ -21,12 +21,12 @@ Global variables use 295 bytes (14%) of dynamic memory, leaving 1 753 bytes for 
 
 #include <Wire.h> 
 #include <LiquidCrystal_I2C.h>
-
 LiquidCrystal_I2C lcd(0x27,16,2);
+
 
 #define DS1302_SCLK_PIN   11    // Arduino pin for the Serial Clock
 #define DS1302_IO_PIN     12    // Arduino pin for the Data I/O
-#define DS1302_CE_PIN     13   // Arduino pin for the Chip Enable
+#define DS1302_CE_PIN     13    // Arduino pin for the Chip Enable
 #define bcd2bin(h,l)    (((h)*10) + (l))
 #define bin2bcd_h(x)   ((x)/10)
 #define bin2bcd_l(x)    ((x)%10)
@@ -69,33 +69,32 @@ LiquidCrystal_I2C lcd(0x27,16,2);
 #define DS1302_TCS1  DS1302_D5
 #define DS1302_TCS2  DS1302_D6
 #define DS1302_TCS3  DS1302_D7
-typedef struct ds1302_struct{uint8_t Seconds:4;uint8_t Seconds10:3;uint8_t CH:1;uint8_t Minutes:4;uint8_t Minutes10:3;uint8_t reserved1:1;union{struct{uint8_t Hour:4;uint8_t Hour10:2;uint8_t reserved2:1;uint8_t hour_12_24:1;}h24;struct{uint8_t Hour:4;uint8_t Hour10:1;uint8_t AM_PM:1;uint8_t reserved2:1;uint8_t hour_12_24:1;}h12;};uint8_t Date:4;uint8_t Date10:2;uint8_t reserved3:2;uint8_t Month:4;uint8_t Month10:1;uint8_t reserved4:3;uint8_t Day:3;uint8_t reserved5:5;uint8_t Year:4;uint8_t Year10:4;uint8_t reserved6:7;uint8_t WP:1;};void DS1302_clock_burst_read( uint8_t *p){int i;_DS1302_start();_DS1302_togglewrite( DS1302_CLOCK_BURST_READ, true);for( i=0; i<8; i++){*p++ = _DS1302_toggleread();}_DS1302_stop();}void DS1302_clock_burst_write( uint8_t *p){int i;_DS1302_start();_DS1302_togglewrite( DS1302_CLOCK_BURST_WRITE, false);for( i=0; i<8; i++){_DS1302_togglewrite( *p++, false);}_DS1302_stop();}uint8_t DS1302_read(int address){uint8_t data;bitSet( address, DS1302_READBIT);_DS1302_start();_DS1302_togglewrite( address, true);data = _DS1302_toggleread();_DS1302_stop();return (data);}void DS1302_write( int address, uint8_t data){bitClear( address, DS1302_READBIT);_DS1302_start();_DS1302_togglewrite( address, false);_DS1302_togglewrite( data, false);_DS1302_stop();}void _DS1302_start( void){digitalWrite( DS1302_CE_PIN, LOW);pinMode( DS1302_CE_PIN, OUTPUT);digitalWrite( DS1302_SCLK_PIN, LOW);pinMode( DS1302_SCLK_PIN, OUTPUT);pinMode( DS1302_IO_PIN, OUTPUT);digitalWrite( DS1302_CE_PIN, HIGH);delayMicroseconds( 4);}void _DS1302_stop(void){digitalWrite( DS1302_CE_PIN, LOW);delayMicroseconds( 4);}uint8_t _DS1302_toggleread( void){uint8_t i, data;data = 0;for( i = 0; i <= 7; i++){digitalWrite( DS1302_SCLK_PIN, HIGH);delayMicroseconds( 1);digitalWrite( DS1302_SCLK_PIN, LOW);delayMicroseconds( 1);bitWrite( data, i, digitalRead( DS1302_IO_PIN));}return( data);}void _DS1302_togglewrite( uint8_t data, uint8_t release){int i;for( i = 0; i <= 7; i++){digitalWrite( DS1302_IO_PIN, bitRead(data, i));delayMicroseconds( 1);digitalWrite( DS1302_SCLK_PIN, HIGH);delayMicroseconds( 1);if( release && i == 7){pinMode( DS1302_IO_PIN, INPUT);}else{digitalWrite( DS1302_SCLK_PIN, LOW);delayMicroseconds( 1);}}}void ds1302_init(){DS1302_write (DS1302_ENABLE, 0);DS1302_write (DS1302_TRICKLE, 0x00);}
+typedef struct ds1302_struct{uint8_t Seconds:4;uint8_t Seconds10:3;uint8_t CH:1;uint8_t Minutes:4;uint8_t Minutes10:3;uint8_t reserved1:1;union{struct{uint8_t Hour:4;uint8_t Hour10:2;uint8_t reserved2:1;uint8_t hour_12_24:1;}h24;struct{uint8_t Hour:4;uint8_t Hour10:1;uint8_t AM_PM:1;uint8_t reserved2:1;uint8_t hour_12_24:1;}h12;};uint8_t Date:4;uint8_t Date10:2;uint8_t reserved3:2;uint8_t Month:4;uint8_t Month10:1;uint8_t reserved4:3;uint8_t Day:3;uint8_t reserved5:5;uint8_t Year:4;uint8_t Year10:4;uint8_t reserved6:7;uint8_t WP:1;};void DS1302_clock_burst_read( uint8_t *p){int i;_DS1302_start();_DS1302_togglewrite( DS1302_CLOCK_BURST_READ, true);for( i=0; i<8; i++){*p++ = _DS1302_toggleread();}_DS1302_stop();}void DS1302_clock_burst_write( uint8_t *p){int i;_DS1302_start();_DS1302_togglewrite( DS1302_CLOCK_BURST_WRITE, false);for( i=0; i<8; i++){_DS1302_togglewrite( *p++, false);}_DS1302_stop();}uint8_t DS1302_read(int address){uint8_t data;bitSet( address, DS1302_READBIT);_DS1302_start();_DS1302_togglewrite( address, true);data = _DS1302_toggleread();_DS1302_stop();return (data);}void DS1302_write( int address, uint8_t data){bitClear( address, DS1302_READBIT);_DS1302_start();_DS1302_togglewrite( address, false);_DS1302_togglewrite( data, false);_DS1302_stop();}void _DS1302_start( void){digitalWrite( DS1302_CE_PIN, LOW);pinMode( DS1302_CE_PIN, OUTPUT);digitalWrite( DS1302_SCLK_PIN, LOW);pinMode( DS1302_SCLK_PIN, OUTPUT);pinMode( DS1302_IO_PIN, OUTPUT);digitalWrite( DS1302_CE_PIN, HIGH);delayMicroseconds( 4);}void _DS1302_stop(void){digitalWrite( DS1302_CE_PIN, LOW);delayMicroseconds( 4);}uint8_t _DS1302_toggleread( void){uint8_t i, data;data = 0;for( i = 0; i <= 7; i++){digitalWrite( DS1302_SCLK_PIN, HIGH);delayMicroseconds( 1);digitalWrite( DS1302_SCLK_PIN, LOW);delayMicroseconds( 1);bitWrite( data, i, digitalRead( DS1302_IO_PIN));}return( data);}void _DS1302_togglewrite( uint8_t data, uint8_t release){int i;for( i = 0; i <= 7; i++){digitalWrite( DS1302_IO_PIN, bitRead(data, i));delayMicroseconds( 1);digitalWrite( DS1302_SCLK_PIN, HIGH);delayMicroseconds( 1);if( release && i == 7){pinMode( DS1302_IO_PIN, INPUT);}else{digitalWrite( DS1302_SCLK_PIN, LOW);delayMicroseconds( 1);}}}void ds1302_init(){DS1302_write (DS1302_ENABLE, 0);DS1302_write (DS1302_TRICKLE, 0x00);}ds1302_struct rtc;
 
 void setup() {
   ds1302_init();
 
   lcd.init();
   lcd.backlight();
-  lcd.print("     Hello!");
+  lcd.print("     Hello!     ");
   
   delay(1500);
 }
 
 
 void loop() {
-  ds1302_struct rtc;
   DS1302_clock_burst_read( (uint8_t *) &rtc);
 
   char buffer[15];
 
-  sprintf( buffer, "    %02d:%02d:%02d", \
+  sprintf( buffer, "    %02d:%02d:%02d    ", \
     bcd2bin( rtc.h24.Hour10, rtc.h24.Hour), \
     bcd2bin( rtc.Minutes10, rtc.Minutes), \
     bcd2bin( rtc.Seconds10, rtc.Seconds));
   lcd.setCursor(0, 0);
   lcd.print(buffer);
 
-  sprintf(buffer, "   %02d.%02d.%04d", \
+  sprintf(buffer, "   %02d.%02d.%04d   ", \
     bcd2bin( rtc.Date10, rtc.Date), \
     bcd2bin( rtc.Month10, rtc.Month), \
     2000 + bcd2bin( rtc.Year10, rtc.Year));
