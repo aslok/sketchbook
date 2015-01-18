@@ -24,9 +24,9 @@ Global variables use 295 bytes (14%) of dynamic memory, leaving 1 753 bytes for 
 
 LiquidCrystal_I2C lcd(0x27,16,2);
 
-#define DS1302_SCLK_PIN   8    // Arduino pin for the Serial Clock
-#define DS1302_IO_PIN     9    // Arduino pin for the Data I/O
-#define DS1302_CE_PIN     10   // Arduino pin for the Chip Enable
+#define DS1302_SCLK_PIN   11    // Arduino pin for the Serial Clock
+#define DS1302_IO_PIN     12    // Arduino pin for the Data I/O
+#define DS1302_CE_PIN     13   // Arduino pin for the Chip Enable
 #define bcd2bin(h,l)    (((h)*10) + (l))
 #define bin2bcd_h(x)   ((x)/10)
 #define bin2bcd_l(x)    ((x)%10)
