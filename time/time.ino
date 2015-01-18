@@ -76,7 +76,7 @@ void setup() {
 
   lcd.init();
   lcd.backlight();
-  lcd.print("     Hello!");
+  lcd.print("     Hello!     ");
   
   delay(1500);
 }
@@ -88,14 +88,14 @@ void loop() {
 
   char buffer[15];
 
-  sprintf( buffer, "    %02d:%02d:%02d", \
+  sprintf( buffer, "    %02d:%02d:%02d    ", \
     bcd2bin( rtc.h24.Hour10, rtc.h24.Hour), \
     bcd2bin( rtc.Minutes10, rtc.Minutes), \
     bcd2bin( rtc.Seconds10, rtc.Seconds));
   lcd.setCursor(0, 0);
   lcd.print(buffer);
 
-  sprintf(buffer, "   %02d.%02d.%04d", \
+  sprintf(buffer, "   %02d.%02d.%04d   ", \
     bcd2bin( rtc.Date10, rtc.Date), \
     bcd2bin( rtc.Month10, rtc.Month), \
     2000 + bcd2bin( rtc.Year10, rtc.Year));
