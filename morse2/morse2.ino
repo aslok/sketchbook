@@ -42,18 +42,7 @@ void dump(String& msg) {
   }
 }
 
-void dump(unsigned int chr) {
-  if (debug) {
-    if (debug_t)
-      Serial.print('<');
-    Serial.print(chr);
-    if (debug_t)
-      Serial.print('>');
-    Serial.println();
-  }
-}
-
-void dump(int& chr) {
+void dump(int chr) {
   if (debug) {
     if (debug_t)
       Serial.print('<');
@@ -65,17 +54,6 @@ void dump(int& chr) {
 }
 
 void dump(char chr) {
-  if (debug) {
-    if (debug_t)
-      Serial.print('<');
-    Serial.print(chr);
-    if (debug_t)
-      Serial.print('>');
-    Serial.println();
-  }
-}
-
-void dump(const char* chr) {
   if (debug) {
     if (debug_t)
       Serial.print('<');
