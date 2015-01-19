@@ -1,0 +1,2 @@
+LcdI2cRu	KEYWORD1
+init	KEYWORD2
