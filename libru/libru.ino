@@ -12,8 +12,8 @@ by Fust Vitaliy
 with Arduino 1.5.8 (tested on Arduino Uno)
 */
 /*
-Sketch uses 3 508 bytes (10%) of program storage space. Maximum is 32 256 bytes.
-Global variables use 309 bytes (15%) of dynamic memory, leaving 1 739 bytes for local variables. Maximum is 2 048 bytes.
+Sketch uses 6 660 bytes (20%) of program storage space. Maximum is 32 256 bytes.
+Global variables use 614 bytes (29%) of dynamic memory, leaving 1 434 bytes for local variables. Maximum is 2 048 bytes.
 */
 
 #include <Wire.h>
@@ -25,19 +25,20 @@ void setup()
 {
   Serial.begin(9600);
   
-  const char str[] PROGMEM = "ПРЕВЕТИЧЕГ!\nЙА ТУПО АРДУИНКО\nЙА УЧУ РУССКИЙ\nВЫХОДИТ ХРЕНОВО\nВИДИШЬ ЛАЖА\nНУ ТО ТАКОЕ\nМНОГО ТЕКСТА\nМАЛО ТОЛКУ\nПРОВЕРЯЕМ ДЛИНУ\nСКОЛЬКО ВЛЕЗЕТ\nПОКА ВЛАЗИТ\nДОКИНЕМ\n";
-  // set the LCD address to 0x27 for a 16 chars and 2 line display
   ru = new LcdI2cRu(0x27, 16, 2);
-  ru->init(str);
+  // Bytes -  386
+  // Chars -  218  
+  // String - 236
+  ru->init(F("ПРЕВЕТИЧЕГ!\nЙА ТУПО АРДУИНКО\nЙА УЧУ РУССКИЙ\nВЫХОДИТ ХРЕНОВО\nВИДИШЬ ЛАЖА\nНУ ТО ТАКОЕ\nМНОГО ТЕКСТА\nМАЛО ТОЛКУ\nПРОВЕРЯЕМ ДЛИНУ\nСКОЛЬКО ВЛЕЗЕТ\nПОКА ВЛАЗИТ\nДОКИНЕМ ИШО\nЧТОБ БЫЛО\nЧЕМ БОГАТЫ\nЛЕВ ТОЛСТОЙ\nВОЙНА "));
 }
 
 void loop()
 {
   for (int num = 0; num < ru->c; num++){
     ru->printn(num);
-    delay(1000);
+    delay(500);
     if (num & 1){
-      delay(500);
+      delay(250);
       ru->clear();
     }else{
       ru->setCursor(0, 1);
