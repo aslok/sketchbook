@@ -25,18 +25,19 @@ void setup()
 {
   Serial.begin(9600);
   
+  const char str[] PROGMEM = "ПРЕВЕТИЧЕГ!\nЙА ТУПО АРДУИНКО\nЙА УЧУ РУССКИЙ\nВЫХОДИТ ХРЕНОВО\nВИДИШЬ ЛАЖА\nНУ ТО ТАКОЕ\nМНОГО ТЕКСТА\nМАЛО ТОЛКУ\nПРОВЕРЯЕМ ДЛИНУ\nСКОЛЬКО ВЛЕЗЕТ\nПОКА ВЛАЗИТ\nДОКИНЕМ\n";
   // set the LCD address to 0x27 for a 16 chars and 2 line display
   ru = new LcdI2cRu(0x27, 16, 2);
-  ru->init("ПРЕВЕТИЧЕГ\nЙА ТУПО АРДУИНКО\nЙА УЧУ РУССКИЙ\nВЫХОДИТ ХРЕНОВО\nВИДИШЬ ЛАЖА\nНУ ТО ТАКОЕ\nМНОГО ТЕКСТА\nМАЛО ТОЛКУ");
+  ru->init(str);
 }
 
 void loop()
 {
   for (int num = 0; num < ru->c; num++){
     ru->printn(num);
-    delay(2000);
+    delay(1000);
     if (num & 1){
-      delay(1000);
+      delay(500);
       ru->clear();
     }else{
       ru->setCursor(0, 1);
