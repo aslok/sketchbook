@@ -127,7 +127,7 @@ void LcdI2cRu::init(const __FlashStringHelper* str){
 }
 
 void LcdI2cRu::createMap(){
-  uint8_t ru[8][8] =
+  static uint8_t ru[8][8] =
   {
     { 0x1e,0x10,0x10,0x1e,0x11,0x11,0x1e,0x0 }, // 0 Б
     { 0x1f,0x10,0x10,0x10,0x10,0x10,0x10,0x0 }, // 1 Г
@@ -189,7 +189,7 @@ void LcdI2cRu::get_str_enc(char* str, char* result){
 }
 
 void LcdI2cRu::write_enc(char* str){
-  char abc_replace[][1] = { 'A',  0,  'B',  1,   2,  'E', 'E',  6,  '3', 'U', 'U', 'K', 202, 'M', 'H', 'O',  7,  'P', 'C', 'T', 191, 236, 209, 'X', 249, 'W', 'W', 'b',  3,  'b', 214,  4,   5 };
+  static char abc_replace[][1] = { 'A',  0,  'B',  1,   2,  'E', 'E',  6,  '3', 'U', 'U', 'K', 202, 'M', 'H', 'O',  7,  'P', 'C', 'T', 191, 236, 209, 'X', 249, 'W', 'W', 'b',  3,  'b', 214,  4,   5 };
 
   if ((unsigned char) *str >= 192 && (unsigned char) *str <= 255){
     lcd->write(abc_replace[(unsigned char) *str - 192][0]);
