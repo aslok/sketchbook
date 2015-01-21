@@ -12,8 +12,10 @@ by Fust Vitaliy
 with Arduino 1.5.8 (tested on Arduino Uno)
 */
 /*
-Sketch uses 6 660 bytes (20%) of program storage space. Maximum is 32 256 bytes.
+Sketch uses 6 450 bytes (19%) of program storage space. Maximum is 32 256 bytes.
 Global variables use 614 bytes (29%) of dynamic memory, leaving 1 434 bytes for local variables. Maximum is 2 048 bytes.
+Sketch uses 6 618 bytes (20%) of program storage space. Maximum is 32 256 bytes.
+Global variables use 714 bytes (34%) of dynamic memory, leaving 1 334 bytes for local variables. Maximum is 2 048 bytes.
 */
 
 #include <Wire.h>
@@ -26,23 +28,28 @@ void setup()
   Serial.begin(9600);
   
   ru = new LcdI2cRu(0x27, 16, 2);
-  // Bytes -  386
-  // Chars -  218  
-  // String - 236
-  ru->init(F("ПРЕВЕТИЧЕГ!\nЙА ТУПО АРДУИНКО\nЙА УЧУ РУССКИЙ\nВЫХОДИТ ХРЕНОВО\nВИДИШЬ ЛАЖА\nНУ ТО ТАКОЕ\nМНОГО ТЕКСТА\nМАЛО ТОЛКУ\nПРОВЕРЯЕМ ДЛИНУ\nСКОЛЬКО ВЛЕЗЕТ\nПОКА ВЛАЗИТ\nДОКИНЕМ ИШО\nЧТОБ БЫЛО\nЧЕМ БОГАТЫ\nЛЕВ ТОЛСТОЙ\nВОЙНА "));
+  ru->backlight();
+  
+  // ru->init("");
+  // ru->init(F(""));
+  ru->init(F("Привет мир!\nЯ Ардуино Уно =)"));
+  // ru->init(F("ПРЕВЕТИЧЕГ!\nЙА ТУПО АРДУИНКО\nЙА УЧУ РУССКИЙ\nВЫХОДИТ ХРЕНОВО\nВИДИШЬ ЛАЖА\nНУ ТО ТАКОЕ\nМНОГО ТЕКСТА\nМАЛО ТОЛКУ\nПРОВЕРЯЕМ ДЛИНУ\nСКОЛЬКО ВЛЕЗЕТ\nПОКА ВЛАЗИТ\nДОКИНЕМ ИШО\nЧТОБ БЫЛО\nЧЕМ БОГАТЫ\nЛЕВ ТОЛСТОЙ\nВОЙНА "));
 }
 
 void loop()
 {
-  for (int num = 0; num < ru->c; num++){
+  int num;
+  for (num = 0; num < (ru->c - 1); num++){
+    ru->clear();
     ru->printn(num);
-    delay(500);
-    if (num & 1){
-      delay(250);
-      ru->clear();
-    }else{
-      ru->setCursor(0, 1);
-    }
+    ru->setCursor(0, 1);
+    ru->printn(num + 1);
+    delay(1000);
   }
+  ru->clear();
+  ru->printn(num);
+  ru->setCursor(0, 1);
+  ru->printn(0);
+  delay(1000);
 }
 
