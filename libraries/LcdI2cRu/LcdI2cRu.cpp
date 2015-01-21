@@ -1,3 +1,10 @@
+/*
+created 19.01.2015
+modified 21.01.2015
+by Fust Vitaliy
+with Arduino 1.5.8 (tested on Arduino Uno)
+*/
+
 #include "Arduino.h"
 #include "LiquidCrystal_I2C.h"
 #include "LcdI2cRu.h"
@@ -67,7 +74,7 @@ void LcdI2cRu::init(const __FlashStringHelper* str){
   char* ptr = (char*) str;
   int length, pos;
   char chr;
-  for (pos = 0, length = 0; (chr = (char)pgm_read_byte_near(ptr + pos)) != '\0'; pos++){
+  for (pos = 0, length = 0; (chr = (char) pgm_read_byte_near(ptr + pos)) != '\0'; pos++){
     if(chr != '\n'){
       length++;
       continue;
@@ -95,7 +102,7 @@ void LcdI2cRu::init(const __FlashStringHelper* str){
   
   char tmp[l];
   int cur_c = 0;
-  for (pos = 0, length = 0; (chr = (char)pgm_read_byte_near(ptr + pos)) != '\0'; pos++){
+  for (pos = 0, length = 0; (chr = (char) pgm_read_byte_near(ptr + pos)) != '\0'; pos++){
     if(chr != '\n'){
       tmp[length] = chr;
       length++;
@@ -137,8 +144,7 @@ void LcdI2cRu::createMap(){
 }
 
 void LcdI2cRu::get_str_enc(char* str, char* result){
-  // char abc = "АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧХЦШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфчхцшщьыъэюя";
-  char abc[][3] = { "А", "Б", "В", "Г", "Д", "Е", "Ё", "Ж", "З", "И", "Й", "К", "Л", "М", "Н", "О", "П", "Р", "С", "Т", "У", "Ф", "Ч", "Х", "Ц", "Ш", "Щ", "Ь", "Ы", "Ъ", "Э", "Ю", "Я", "а", "б", "в", "г", "д", "е", "ё", "ж", "з", "и", "й", "к", "л", "м", "н", "о", "п", "р", "с", "т", "у", "ф", "ч", "х", "ц", "ш", "щ", "ь", "ы", "ъ", "э", "ю", "я" };
+  char* abc = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧХЦШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфчхцшщьыъэюя");
   boolean found = false;
   int res_pos = 0;
   // Обходим символы строки
@@ -146,17 +152,11 @@ void LcdI2cRu::get_str_enc(char* str, char* result){
     // Совпадений ещё небыло
     found = false;
     // Обходим подстроки для поиска
-    for (int abc_num = 0; abc_num < 66; abc_num++){
+    for (int abc_num = 0; abc_num < 132; abc_num += 2){
       // Обходим символы подстрок для поиска
       for (int abc_chr_pos = 0, cur_pos = str_pos; abc_chr_pos < 2; abc_chr_pos++, cur_pos++){
-        // Если текущий символ подстроки это конец подстроки
-        if (abc[abc_num][abc_chr_pos] == '\0'){
-          // Прерываем обход символов подстроки
-          // Переходим к следующей подстроке
-          break;
-        }
         // Если текущий символ подстроки не равен текущему символу строки
-        if (str[cur_pos] != abc[abc_num][abc_chr_pos]){
+        if (str[cur_pos] != (char) pgm_read_byte_near(abc + abc_num + abc_chr_pos)){
           // Прерываем обход символов подстроки
           found = false;
           // Переходим к следующей подстроке
@@ -167,12 +167,12 @@ void LcdI2cRu::get_str_enc(char* str, char* result){
       }
       // Проверяем результаты сравнения строк
       if (found){
-        if (abc_num < 33){
+        if (abc_num < 66){
           // Пишем в результат символ для замены найденной строки
-          result[res_pos++] = abc_num + 192;
+          result[res_pos++] = (abc_num / 2) + 192;
         }else{
           // Пишем в результат символ для замены найденной строки
-          result[res_pos++] = abc_num + 159;
+          result[res_pos++] = (abc_num / 2) + 159;
         }
         // Сдвигаем текущую позицию строки на один символ (потому что всего надо на два)
         str_pos++;
@@ -191,8 +191,8 @@ void LcdI2cRu::get_str_enc(char* str, char* result){
 void LcdI2cRu::write_enc(char* str){
   char abc_replace[][1] = { 'A',  0,  'B',  1,   2,  'E', 'E',  6,  '3', 'U', 'U', 'K', 202, 'M', 'H', 'O',  7,  'P', 'C', 'T', 191, 236, 209, 'X', 249, 'W', 'W', 'b',  3,  'b', 214,  4,   5 };
 
-  if (*str >= (192 - 256) && *str <= (255 - 256)){
-    lcd->write(abc_replace[*str + 64][0]);
+  if ((unsigned char) *str >= 192 && (unsigned char) *str <= 255){
+    lcd->write(abc_replace[(unsigned char) *str - 192][0]);
   }else{
     lcd->write(*str);
   }
@@ -207,12 +207,10 @@ void LcdI2cRu::backlight(boolean state){
 }
 
 void LcdI2cRu::backlight(){
-  if (bl){
-    lcd->noBacklight();
-    bl = false;
-  }else{
+  if (bl = !bl){
     lcd->backlight();
-    bl = true;
+  }else{
+    lcd->noBacklight();
   }
 }
 
