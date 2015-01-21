@@ -17,12 +17,12 @@ class LcdI2cRu {
     void backlight(boolean state);
     void clear();
     void home();
-    void setCursor(int col, int row);
-    void printn(int num);
+    void setCursor(uint8_t col, uint8_t row);
+    void printn(uint8_t num);
     boolean bl = false;
     char** s;
-    int c = 0;
-    int l = 0;
+    uint8_t c = 0;
+    uint8_t l = 0;
   private:
     LiquidCrystal_I2C* lcd;
 };

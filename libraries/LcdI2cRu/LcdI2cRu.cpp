@@ -17,7 +17,7 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
 LcdI2cRu::~LcdI2cRu() { }
 
 void LcdI2cRu::init(const char* str){
-  int length, pos;
+  uint8_t length, pos;
   for (pos = 0, length = 0; str[pos] != '\0'; pos++){
     if(str[pos] != '\n'){
       length++;
@@ -45,7 +45,7 @@ void LcdI2cRu::init(const char* str){
   s = new char*[c];
   
   char tmp[l];
-  int cur_c = 0;
+  uint8_t cur_c = 0;
   for (pos = 0, length = 0; str[pos] != '\0'; pos++){
     if(str[pos] != '\n'){
       tmp[length] = str[pos];
@@ -72,7 +72,7 @@ void LcdI2cRu::init(const char* str){
 
 void LcdI2cRu::init(const __FlashStringHelper* str){
   char* ptr = (char*) str;
-  int length, pos;
+  uint8_t length, pos;
   char chr;
   for (pos = 0, length = 0; (chr = (char) pgm_read_byte_near(ptr + pos)) != '\0'; pos++){
     if(chr != '\n'){
@@ -101,7 +101,7 @@ void LcdI2cRu::init(const __FlashStringHelper* str){
   s = new char*[c];
   
   char tmp[l];
-  int cur_c = 0;
+  uint8_t cur_c = 0;
   for (pos = 0, length = 0; (chr = (char) pgm_read_byte_near(ptr + pos)) != '\0'; pos++){
     if(chr != '\n'){
       tmp[length] = chr;
@@ -138,7 +138,7 @@ void LcdI2cRu::createMap(){
     { 0x15,0x15,0xe, 0xe, 0xe, 0x15,0x15,0x0 }, // 6 Ж
     { 0x1f,0x11,0x11,0x11,0x11,0x11,0x11,0x0 }, // 7 П
   };
-  for (int char_num = 0; char_num < 8; char_num++){
+  for (uint8_t char_num = 0; char_num < 8; char_num++){
     lcd->createChar(char_num, ru[char_num]);
   }
 }
@@ -146,15 +146,15 @@ void LcdI2cRu::createMap(){
 void LcdI2cRu::get_str_enc(char* str, char* result){
   char* abc = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧХЦШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфчхцшщьыъэюя");
   boolean found = false;
-  int res_pos = 0;
+  uint8_t res_pos = 0;
   // Обходим символы строки
-  for (int str_pos = 0; str[str_pos] != '\0'; str_pos++){
+  for (uint8_t str_pos = 0; str[str_pos] != '\0'; str_pos++){
     // Совпадений ещё небыло
     found = false;
     // Обходим подстроки для поиска
-    for (int abc_num = 0; abc_num < 132; abc_num += 2){
+    for (uint8_t abc_num = 0; abc_num < 132; abc_num += 2){
       // Обходим символы подстрок для поиска
-      for (int abc_chr_pos = 0, cur_pos = str_pos; abc_chr_pos < 2; abc_chr_pos++, cur_pos++){
+      for (uint8_t abc_chr_pos = 0, cur_pos = str_pos; abc_chr_pos < 2; abc_chr_pos++, cur_pos++){
         // Если текущий символ подстроки не равен текущему символу строки
         if (str[cur_pos] != (char) pgm_read_byte_near(abc + abc_num + abc_chr_pos)){
           // Прерываем обход символов подстроки
@@ -222,12 +222,12 @@ void LcdI2cRu::home(){
   lcd->home();
 }
 
-void LcdI2cRu::setCursor(int col, int row){
+void LcdI2cRu::setCursor(uint8_t col, uint8_t row){
   lcd->setCursor(col, row);
 }
 
-void LcdI2cRu::printn(int num){
-  for (int cur_chr = 0; cur_chr < l; cur_chr++){
+void LcdI2cRu::printn(uint8_t num){
+  for (uint8_t cur_chr = 0; cur_chr < l; cur_chr++){
     if (!s[num][cur_chr]){
       break;
     }

@@ -13,7 +13,7 @@ by Fust Vitaliy
 with Arduino 1.5.8 (tested on Arduino Uno)
 */
 /*
-Sketch uses 6 454 bytes (20%) of program storage space. Maximum is 32 256 bytes.
+Sketch uses 6 310 bytes (19%) of program storage space. Maximum is 32 256 bytes.
 Global variables use 516 bytes (25%) of dynamic memory, leaving 1 532 bytes for local variables. Maximum is 2 048 bytes.
 */
 
@@ -36,7 +36,7 @@ void setup()
 
 void loop()
 {
-  int num;
+  uint8_t num;
   for (num = 0; num < (lcd->c - 1); num++){
     lcd->clear();
     lcd->printn(num);
