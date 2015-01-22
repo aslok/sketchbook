@@ -8,7 +8,7 @@ http://habrahabr.ru/post/219137/
 http://arduino-info.wikispaces.com/file/detail/LiquidCrystal_I2C1602V1.zip/341635514
 
 created 19.01.2015
-modified 21.01.2015
+modified 22.01.2015
 by Fust Vitaliy
 with Arduino 1.5.8 (tested on Arduino Uno)
 */
@@ -31,7 +31,7 @@ void setup(){
   // lcd->init(F("Привет мир! Я Ардуино Уно =)"));
   lcd->init(F("Привет мир!\nЯ Ардуино Уно =)"));
   lcd->printn(0);
-  //Serial.println(lcd->scr_h);
+  Serial.println(lcd->scr_h);
 }
 void loop(){
 }

@@ -8,9 +8,9 @@ with Arduino 1.5.8 (tested on Arduino Uno)
 #include "Arduino.h"
 #include "LiquidCrystal_I2C.h"
 #include "LcdI2cRu.h"
-
+  
 /*
-Кодировка использует для хранения символа один байт
+Кодировка использует для хранения символа один беззнаковый байт
 192	А
 193	Б
 194	В
@@ -48,38 +48,80 @@ with Arduino 1.5.8 (tested on Arduino Uno)
 
 LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   const uint8_t ru_chars_count = 13;
+  const uint8_t en_chars_count = 19;
   
   abc = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧХЦШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфчхцшщьыъэюя");
   ru = new uint8_t*[ru_chars_count];
-  ru_names = new uint8_t[ru_chars_count];
+  ru_num = new uint8_t[ru_chars_count];
+  en = new uint8_t[en_chars_count];
+  en_num = new uint8_t[en_chars_count];
   
-  ru_names[0]  = 193; // Б
+  ru_num[0]  = 193; // Б
   ru[0]  = new uint8_t[8]{ 0x1e,0x10,0x10,0x1e,0x11,0x11,0x1e,0x0 };
-  ru_names[1]  = 195; // Г
+  ru_num[1]  = 195; // Г
   ru[1]  = new uint8_t[8]{ 0x1f,0x10,0x10,0x10,0x10,0x10,0x10,0x0 };
-  ru_names[2]  = 196; // Д
+  ru_num[2]  = 196; // Д
   ru[2]  = new uint8_t[8]{ 0xe, 0xa, 0xa, 0xa, 0x1f,0x11,0x11,0x0 };
-  ru_names[3]  = 220; // Ы
+  ru_num[3]  = 220; // Ы
   ru[3]  = new uint8_t[8]{ 0x11,0x11,0x11,0x1d,0x13,0x13,0x1d,0x0 };
-  ru_names[4]  = 223; // Ю
+  ru_num[4]  = 223; // Ю
   ru[4]  = new uint8_t[8]{ 0x17,0x15,0x15,0x1d,0x15,0x15,0x17,0x0 };
-  ru_names[5]  = 224; // Я
+  ru_num[5]  = 224; // Я
   ru[5]  = new uint8_t[8]{ 0xf, 0x11,0x11,0xf, 0x5, 0x9, 0x11,0x0 };
-  ru_names[6]  = 199; // Ж
+  ru_num[6]  = 199; // Ж
   ru[6]  = new uint8_t[8]{ 0x15,0x15,0xe, 0xe, 0xe, 0x15,0x15,0x0 };
-  ru_names[7]  = 208; // П
+  ru_num[7]  = 208; // П
   ru[7]  = new uint8_t[8]{ 0x1f,0x11,0x11,0x11,0x11,0x11,0x11,0x0 };
-  ru_names[8]  = 214; // Ч
+  ru_num[8]  = 214; // Ч
   ru[8]  = new uint8_t[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0x1, 0x0 };
-  ru_names[9]  = 216; // Ц
+  ru_num[9]  = 216; // Ц
   ru[9]  = new uint8_t[8]{ 0x12,0x12,0x12,0x12,0x12,0x1f,0x1, 0x0 };
-  ru_names[10] = 222; // Э
+  ru_num[10] = 222; // Э
   ru[10] = new uint8_t[8]{ 0xe, 0x11,0x1, 0xf, 0x1, 0x11,0xe, 0x0 };
-  ru_names[11] = 213; // Ф
+  ru_num[11] = 213; // Ф
   ru[11] = new uint8_t[8]{ 0xe, 0x15,0x15,0x15,0xe, 0x4, 0x4, 0x0 };
-  ru_names[12] = 204; // Л
+  ru_num[12] = 204; // Л
   ru[12] = new uint8_t[8]{ 0x3, 0x5, 0x9, 0x9, 0x9, 0x9, 0x19,0x0 };
 
+  en_num[0]  = 192; // А
+  en[0]  = 'A';
+  en_num[1]  = 194; // В
+  en[1]  = 'B';
+  en_num[2]  = 197; // Е
+  en[2]  = 'E';
+  en_num[3]  = 198; // Ё
+  en[3]  = 'E';
+  en_num[4]  = 200; // З
+  en[4]  = '3';
+  en_num[5]  = 201; // И
+  en[5]  = 'U';
+  en_num[6]  = 202; // Й
+  en[6]  = 'U';
+  en_num[7]  = 203; // К
+  en[7]  = 'K';
+  en_num[8]  = 205; // М
+  en[8]  = 'M';
+  en_num[9]  = 206; // Н
+  en[9]  = 'H';
+  en_num[10] = 207; // О
+  en[10] = 'O';
+  en_num[11] = 209; // Р
+  en[11] = 'P';
+  en_num[12] = 210; // С
+  en[12] = 'C';
+  en_num[13] = 211; // Т
+  en[13] = 'T';
+  en_num[14] = 215; // Х
+  en[14] = 'X';
+  en_num[15] = 217; // Ш
+  en[15] = 'W';
+  en_num[16] = 218; // Щ
+  en[16] = 'W';
+  en_num[17] = 219; // Ь
+  en[17] = 'b';
+  en_num[18] = 221; // Ъ
+  en[18] = 'b';
+  
   lcd = new LiquidCrystal_I2C(address, width, height);
   lcd->init();
   clear_screen();
@@ -248,51 +290,6 @@ void LcdI2cRu::get_str_enc(char* str, char* result){
   result[res_pos] = '\0';
 }
 
-void LcdI2cRu::write_enc(char* str){
-  static char lcd_replace[]{ 'A', 0, 'B', 1, 2, 'E', 'E', 6, '3', 'U', 'U', 'K', 202, 'M', 'H', 'O', 7, 'P', 'C', 'T', 191, 236, 209, 'X', 249, 'W', 'W', 'b', 3, 'b', 214, 4, 5 };
-  
-  char out;
-  char out_h[3]{0, 0, 0};
-  if ((unsigned char) *str >= 192 && (unsigned char) *str <= 255){
-    out = lcd_replace[(unsigned char) *str - 192];
-    for (uint8_t pos = 0; pos < 2; pos++){
-      out_h[pos] = (char) pgm_read_byte_near(abc + (((unsigned char) *str - 192) * 2) + pos);
-    }
-  }else{
-    out = *str;
-    out_h[0] = *str;
-    out_h[1] = 0;
-  }
-  if (out == '\n'){
-    if (scr_pos < 16){
-      scr_pos = 16;
-    }else{
-      scr_pos = 0;
-    }
-  }
-  if (scr_pos > 31){
-    scr_pos = 0;
-  }
-  if (scr_pos == 0){
-    lcd->setCursor(0, 0);
-  }
-  if (scr_pos == 16){
-    lcd->setCursor(0, 1);
-  }
-  if (out == '\n'){
-    return;
-  }
-  scr_h[scr_pos * 2] = out_h[0];
-  if (!out_h[1]){
-    scr_h[scr_pos * 2 + 1] = 127;
-  }else{
-    scr_h[scr_pos * 2 + 1] = out_h[1];
-  }
-  scr[scr_pos++] = *str;
-
-  lcd->write(out);
-}
-
 void LcdI2cRu::clear_screen(){
   for (uint8_t i = 0; i < 32; i++){
     scr[i] = 26;
@@ -337,10 +334,48 @@ void LcdI2cRu::setCursor(uint8_t col, uint8_t row){
 }
 
 void LcdI2cRu::printn(uint8_t num){
-  for (uint8_t cur_chr = 0; cur_chr < l; cur_chr++){
-    if (!s[num][cur_chr] || num >= c){
-      break;
+  for (uint8_t cur_chr = 0; cur_chr < l && num < c && s[num][cur_chr]; cur_chr++){    
+    static char lcd_replace[]{ 'A', 0, 'B', 1, 2, 'E', 'E', 6, '3', 'U', 'U', 'K', 202, 'M', 'H', 'O', 7, 'P', 'C', 'T', 191, 236, 209, 'X', 249, 'W', 'W', 'b', 3, 'b', 214, 4, 5 };
+  
+    char out;
+    char out_h[3]{0, 0, 0};
+    if ((unsigned char) s[num][cur_chr] >= 192 && (unsigned char) s[num][cur_chr] <= 255){
+      out = lcd_replace[(unsigned char) s[num][cur_chr] - 192];
+      for (uint8_t pos = 0; pos < 2; pos++){
+        out_h[pos] = (char) pgm_read_byte_near(abc + (((unsigned char) s[num][cur_chr] - 192) * 2) + pos);
+      }
+    }else{
+      out      = s[num][cur_chr];
+      out_h[0] = s[num][cur_chr];
+      out_h[1] = 0;
     }
-    write_enc(&s[num][cur_chr]);
+    if (out == '\n'){
+      if (scr_pos < 16){
+        scr_pos = 16;
+      }else{
+        scr_pos = 0;
+      }
+    }
+    if (scr_pos > 31){
+      scr_pos = 0;
+    }
+    if (scr_pos == 0){
+      lcd->setCursor(0, 0);
+    }
+    if (scr_pos == 16){
+      lcd->setCursor(0, 1);
+    }
+    if (out == '\n'){
+      continue;
+    }
+    scr_h[scr_pos * 2] = out_h[0];
+    if (!out_h[1]){
+      scr_h[scr_pos * 2 + 1] = 127;
+    }else{
+      scr_h[scr_pos * 2 + 1] = out_h[1];
+    }
+    scr[scr_pos++] = s[num][cur_chr];
+
+    lcd->write(out);
   }
 }

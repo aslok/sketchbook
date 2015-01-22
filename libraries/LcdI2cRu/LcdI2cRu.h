@@ -12,7 +12,6 @@ class LcdI2cRu {
     void init(const char* str);
     void createMap();
     void get_str_enc(char* str, char* result);
-    void write_enc(char* str);
     void backlight();
     void backlight(boolean state);
     void clear();
@@ -31,7 +30,9 @@ class LcdI2cRu {
     LiquidCrystal_I2C* lcd;
     char* abc;
     uint8_t** ru;
-    uint8_t* ru_names;
+    uint8_t* ru_num;
+    uint8_t* en;
+    uint8_t* en_num;
     char null_char = 0;
 };
 
