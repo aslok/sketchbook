@@ -290,50 +290,9 @@ void LcdI2cRu::get_str_enc(char* str, char* result){
   result[res_pos] = '\0';
 }
 
-void LcdI2cRu::clear_screen(){
-  for (uint8_t i = 0; i < 32; i++){
-    scr[i] = 26;
-  }
-  scr[32] = 0;
-  for (uint8_t i = 0; i < 64; i++){
-    scr_h[i] = 127;
-  }
-  scr_h[64] = 0;
-  scr_pos = 0;
-}
-
-void LcdI2cRu::backlight(boolean state){
-  if (state){
-    lcd->backlight();
-  }else{
-    lcd->noBacklight();
-  }
-}
-
-void LcdI2cRu::backlight(){
-  if (bl = !bl){
-    lcd->backlight();
-  }else{
-    lcd->noBacklight();
-  }
-}
-
-void LcdI2cRu::clear(){
-  lcd->clear();
-  clear_screen();
-}
-
-void LcdI2cRu::home(){
-  lcd->home();
-  scr_pos = 0;
-}
-
-void LcdI2cRu::setCursor(uint8_t col, uint8_t row){
-  lcd->setCursor(col, row);
-  scr_pos = row * 16 + col;
-}
-
 void LcdI2cRu::printn(uint8_t num){
+  char next_scr[33];
+  get_next_scr(num, *next_scr);
   for (uint8_t cur_chr = 0; cur_chr < l && num < c && s[num][cur_chr]; cur_chr++){    
     static char lcd_replace[]{ 'A', 0, 'B', 1, 2, 'E', 'E', 6, '3', 'U', 'U', 'K', 202, 'M', 'H', 'O', 7, 'P', 'C', 'T', 191, 236, 209, 'X', 249, 'W', 'W', 'b', 3, 'b', 214, 4, 5 };
   
@@ -378,4 +337,70 @@ void LcdI2cRu::printn(uint8_t num){
 
     lcd->write(out);
   }
+}
+
+void LcdI2cRu::get_next_scr(uint8_t num, char& out){
+  char* next_scr = &out;
+  uint8_t next_scr_pos = scr_pos;
+  for (uint8_t i = 0; i < 33; i++){
+    next_scr[i] = scr[i];
+  }
+  for (uint8_t cur_chr = 0; cur_chr < l && num < c && s[num][cur_chr]; cur_chr++){    
+    if (s[num][cur_chr] == '\n'){
+      if (next_scr_pos < 16){
+        next_scr_pos = 16;
+      }else{
+        next_scr_pos = 0;
+      }
+    }
+    if (next_scr_pos > 31){
+      next_scr_pos = 0;
+    }
+    if (s[num][cur_chr] != '\n'){
+      next_scr[next_scr_pos++] = s[num][cur_chr];
+    }
+  }
+}
+
+void LcdI2cRu::clear_screen(){
+  for (uint8_t i = 0; i < 32; i++){
+    scr[i] = 26;
+  }
+  scr[32] = 0;
+  for (uint8_t i = 0; i < 64; i++){
+    scr_h[i] = 127;
+  }
+  scr_h[64] = 0;
+  scr_pos = 0;
+}
+
+void LcdI2cRu::backlight(boolean state){
+  if (state){
+    lcd->backlight();
+  }else{
+    lcd->noBacklight();
+  }
+}
+
+void LcdI2cRu::backlight(){
+  if (bl = !bl){
+    lcd->backlight();
+  }else{
+    lcd->noBacklight();
+  }
+}
+
+void LcdI2cRu::clear(){
+  lcd->clear();
+  clear_screen();
+}
+
+void LcdI2cRu::home(){
+  lcd->home();
+  scr_pos = 0;
+}
+
+void LcdI2cRu::setCursor(uint8_t col, uint8_t row){
+  lcd->setCursor(col, row);
+  scr_pos = row * 16 + col;
 }

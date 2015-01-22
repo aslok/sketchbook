@@ -26,6 +26,7 @@ class LcdI2cRu {
     char scr_h[65];
     uint8_t scr_pos;
   private:
+    void get_next_scr(uint8_t num, char& next_scr);
     void clear_screen();
     LiquidCrystal_I2C* lcd;
     char* abc;
