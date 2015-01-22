@@ -28,26 +28,28 @@ void setup(){
   lcd = new LcdI2cRu(0x27, 16, 2);
   lcd->backlight();
   
-  // lcd->init(F("Привет мир! Я Ардуино Уно =)"));
-  lcd->init(F("Привет мир!\nЯ Ардуино Уно =)"));
+  lcd->init(F("Arduino UNO\n     Ардуино Уно"));
   lcd->printn(0);
-  Serial.println(lcd->scr_h);
 }
 void loop(){
 }
 
 
-/*void setup(){
+/*
+// Проверка отображения символов алфавита
+void setup(){
   lcd = new LcdI2cRu(0x27, 16, 2);
   lcd->backlight();
-  lcd->init(F("АБВГДЕЖЗИКЛМНОПРСТУФЧХЦШЬЫЭЮЯ"));
+  lcd->init(F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧХЦШЬЫЪЭЮЯ"));
   lcd->printn(0);
 }
 void loop(){
 }*/
 
 
-/*void setup(){
+/*
+// Использование символа "перенос строки"
+void setup(){
   lcd = new LcdI2cRu(0x27, 16, 2);
   lcd->backlight();
   lcd->init(F("Arduino UNO\n     Ардуино Уно"));
@@ -57,7 +59,9 @@ void loop(){
 }*/
 
 
-/*void setup(){
+/*
+// Использование символа "начало новой строки"
+void setup(){
   lcd = new LcdI2cRu(0x27, 16, 2);
   lcd->backlight();
   lcd->init(F("Привет мир!\rЯ Ардуино Уно =)"));
@@ -69,7 +73,10 @@ void loop(){
 }*/
 
 
-/*void setup(){
+/*
+// Пример анимации, первая и вторая строки выводятся в одной позиции по очереди
+// Третья строка выводится один раз в начале программы
+void setup(){
   lcd = new LcdI2cRu(0x27, 16, 2);
   lcd->backlight();
   lcd->init(F("Arduino \rFunduino\r UNO\n     Ардуино Уно"));
@@ -88,7 +95,9 @@ void loop(){
 }*/
 
 
-/*void setup(){
+/*
+// Пример вывода в порт текста lcd экрана в относительно читабельном виде
+void setup(){
   Serial.begin(9600);  
   lcd = new LcdI2cRu(0x27, 16, 2);
   lcd->backlight();
@@ -101,6 +110,8 @@ void loop(){
 }*/
 
 
+
+// Пример работы с большим количеством строк
 /*void setup(){
   lcd = new LcdI2cRu(0x27, 16, 2);
   lcd->backlight();

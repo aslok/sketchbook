@@ -32,8 +32,13 @@ class LcdI2cRu {
     char* abc;
     uint8_t** ru;
     uint8_t* ru_num;
+    uint8_t ru_cnt;
     uint8_t* en;
     uint8_t* en_num;
+    uint8_t en_cnt;
+    uint8_t* ch;
+    uint8_t* ch_num;
+    uint8_t ch_cnt;
     char null_char = 0;
 };
 

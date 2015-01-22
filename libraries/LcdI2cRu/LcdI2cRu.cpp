@@ -1,6 +1,6 @@
 /*
 created 19.01.2015
-modified 21.01.2015
+modified 22.01.2015
 by Fust Vitaliy
 with Arduino 1.5.8 (tested on Arduino Uno)
 */
@@ -49,12 +49,18 @@ with Arduino 1.5.8 (tested on Arduino Uno)
 LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   const uint8_t ru_chars_count = 13;
   const uint8_t en_chars_count = 19;
+  const uint8_t ch_chars_count = 6;
   
   abc = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧХЦШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфчхцшщьыъэюя");
   ru = new uint8_t*[ru_chars_count];
   ru_num = new uint8_t[ru_chars_count];
+  ru_cnt = ru_chars_count;
   en = new uint8_t[en_chars_count];
   en_num = new uint8_t[en_chars_count];
+  en_cnt = en_chars_count;
+  ch = new uint8_t[ch_chars_count];
+  ch_num = new uint8_t[ch_chars_count];
+  ch_cnt = ch_chars_count;
   
   ru_num[0]  = 193; // Б
   ru[0]  = new uint8_t[8]{ 0x1e,0x10,0x10,0x1e,0x11,0x11,0x1e,0x0 };
@@ -121,6 +127,19 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   en[17] = 'b';
   en_num[18] = 221; // Ъ
   en[18] = 'b';
+  
+  ch_num[0]  = 204; // Л
+  ch[0]  = 202;
+  ch_num[1]  = 212; // У
+  ch[1]  = 191;
+  ch_num[2]  = 213; // Ф
+  ch[2]  = 236;
+  ch_num[3]  = 214; // Ч
+  ch[3]  = 209;
+  ch_num[4]  = 216; // Ц
+  ch[4]  = 249;
+  ch_num[5]  = 222; // Э
+  ch[5]  = 214;
   
   lcd = new LiquidCrystal_I2C(address, width, height);
   lcd->init();
@@ -293,21 +312,50 @@ void LcdI2cRu::get_str_enc(char* str, char* result){
 void LcdI2cRu::printn(uint8_t num){
   char next_scr[33];
   get_next_scr(num, *next_scr);
-  for (uint8_t cur_chr = 0; cur_chr < l && num < c && s[num][cur_chr]; cur_chr++){    
-    static char lcd_replace[]{ 'A', 0, 'B', 1, 2, 'E', 'E', 6, '3', 'U', 'U', 'K', 202, 'M', 'H', 'O', 7, 'P', 'C', 'T', 191, 236, 209, 'X', 249, 'W', 'W', 'b', 3, 'b', 214, 4, 5 };
-  
-    char out;
-    char out_h[3]{0, 0, 0};
-    if ((unsigned char) s[num][cur_chr] >= 192 && (unsigned char) s[num][cur_chr] <= 255){
-      out = lcd_replace[(unsigned char) s[num][cur_chr] - 192];
-      for (uint8_t pos = 0; pos < 2; pos++){
-        out_h[pos] = (char) pgm_read_byte_near(abc + (((unsigned char) s[num][cur_chr] - 192) * 2) + pos);
+  char lcd_replace[32];
+  boolean found = false;
+  uint8_t cur;
+  for (uint8_t cur_chr = 0; cur_chr < 32; cur_chr++){
+    found = false;
+    for (cur = 0; cur < en_cnt; cur++){
+      if (en_num[cur] == (unsigned char) next_scr[cur_chr]){
+        lcd_replace[cur_chr] = en[cur];
+        found = true;
+        break;
       }
-    }else{
-      out      = s[num][cur_chr];
-      out_h[0] = s[num][cur_chr];
-      out_h[1] = 0;
     }
+    if (found){
+      continue;
+    }
+    for (cur = 0; cur < ch_cnt; cur++){
+      if (ch_num[cur] == (unsigned char) next_scr[cur_chr]){
+        lcd_replace[cur_chr] = ch[cur];
+        found = true;
+        break;
+      }
+    }
+    if (found){
+      continue;
+    }
+    for (cur = 0; cur < 8; cur++){
+      if (ru_num[cur] == (unsigned char) next_scr[cur_chr]){
+        lcd_replace[cur_chr] = cur;
+        found = true;
+        break;
+      }
+    }
+    if (found){
+      continue;
+    }
+    lcd_replace[cur_chr] = next_scr[cur_chr];
+  }
+  
+  char out;
+  char out_h[3]{0, 0, 0};
+  for (uint8_t cur_chr = 0; cur_chr < l && num < c && s[num][cur_chr]; cur_chr++){      
+    out      = s[num][cur_chr];
+    out_h[0] = s[num][cur_chr];
+    out_h[1] = 0;
     if (out == '\n'){
       if (scr_pos < 16){
         scr_pos = 16;
@@ -326,6 +374,12 @@ void LcdI2cRu::printn(uint8_t num){
     }
     if (out == '\n'){
       continue;
+    }
+    if ((unsigned char) out >= 192 && (unsigned char) out <= 255){
+      out = lcd_replace[scr_pos];
+      for (uint8_t pos = 0; pos < 2; pos++){
+        out_h[pos] = (char) pgm_read_byte_near(abc + (((unsigned char) s[num][cur_chr] - 192) * 2) + pos);
+      }
     }
     scr_h[scr_pos * 2] = out_h[0];
     if (!out_h[1]){
