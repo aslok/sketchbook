@@ -22,32 +22,101 @@ Global variables use 516 bytes (25%) of dynamic memory, leaving 1 532 bytes for 
 #include <LcdI2cRu.h>
 LcdI2cRu* lcd;
 
-void setup()
-{
-  Serial.begin(9600);
-  
+
+void setup(){
+  Serial.begin(9600);  
   lcd = new LcdI2cRu(0x27, 16, 2);
   lcd->backlight();
   
+  // lcd->init(F("Привет мир! Я Ардуино Уно =)"));
   lcd->init(F("Привет мир!\nЯ Ардуино Уно =)"));
-  // lcd->init(F("ПРЕВЕТИЧЕГ!\nЙА ТУПО АРДУИНКО\nЙА УЧУ РУССКИЙ\nВЫХОДИТ ХРЕНОВО\nВИДИШЬ ЛАЖА\nНУ ТО ТАКОЕ\nМНОГО ТЕКСТА\nМАЛО ТОЛКУ\nПРОВЕРЯЕМ ДЛИНУ\nСКОЛЬКО ВЛЕЗЕТ\nПОКА ВЛАЗИТ\nДОКИНЕМ ИШО\nЧТОБ БЫЛО\nЧЕМ БОГАТЫ\nЛЕВ ТОЛСТОЙ\nВОЙНА "));
-  // lcd->init(F("АБВГДЕЖЗИКЛМНО\nПРСТУФЧХЦШЬЫЭЮЯ"));
+  lcd->printn(0);
+  //Serial.println(lcd->scr_h);
+}
+void loop(){
 }
 
-void loop()
-{
-  uint8_t num;
-  for (num = 0; num < (lcd->c - 1); num++){
+
+/*void setup(){
+  lcd = new LcdI2cRu(0x27, 16, 2);
+  lcd->backlight();
+  lcd->init(F("АБВГДЕЖЗИКЛМНОПРСТУФЧХЦШЬЫЭЮЯ"));
+  lcd->printn(0);
+}
+void loop(){
+}*/
+
+
+/*void setup(){
+  lcd = new LcdI2cRu(0x27, 16, 2);
+  lcd->backlight();
+  lcd->init(F("Arduino UNO\n     Ардуино Уно"));
+  lcd->printn(0);
+}
+void loop(){
+}*/
+
+
+/*void setup(){
+  lcd = new LcdI2cRu(0x27, 16, 2);
+  lcd->backlight();
+  lcd->init(F("Привет мир!\rЯ Ардуино Уно =)"));
+  lcd->printn(0);
+  lcd->setCursor(0, 1);
+  lcd->printn(1);
+}
+void loop(){
+}*/
+
+
+/*void setup(){
+  lcd = new LcdI2cRu(0x27, 16, 2);
+  lcd->backlight();
+  lcd->init(F("Arduino \rFunduino\r UNO\n     Ардуино Уно"));
+  lcd->printn(0);
+  lcd->printn(2);
+}
+void loop(){
+  for (uint8_t num = 0; num < 2; num++){
+    lcd->home();
+    lcd->printn(num);
+    if (!num){
+      delay(2500);
+    }
+  }
+  delay(700);
+}*/
+
+
+/*void setup(){
+  Serial.begin(9600);  
+  lcd = new LcdI2cRu(0x27, 16, 2);
+  lcd->backlight();
+  lcd->init(F("Привет мир!\nЯ Ардуино Уно =)"));
+  lcd->printn(0);
+  Serial.println(lcd->scr_h);
+  // ПРИВЕТ МИР!Я АРДУИНО УНО =)
+}
+void loop(){
+}*/
+
+
+/*void setup(){
+  lcd = new LcdI2cRu(0x27, 16, 2);
+  lcd->backlight();
+  lcd->init(F("ПРЕВЕТИЧЕГ!\rЙА ТУПО АРДУИНКО\rЙА УЧУ РУССКИЙ\rВЫХОДИТ ХРЕНОВО\rВИДИШЬ ЛАЖА\rНУ ТО ТАКОЕ\rМНОГО ТЕКСТА\rМАЛО ТОЛКУ\rПРОВЕРЯЕМ ДЛИНУ\rСКОЛЬКО ВЛЕЗЕТ\rПОКА ВЛАЗИТ\rДОКИНЕМ ИШО\rЧТОБ БЫЛО\rЧЕМ БОГАТЫ\rЛЕВ ТОЛСТОЙ\rВОЙНА "));
+}
+void loop(){
+  for (uint8_t num = 0; num < lcd->c; num++){
     lcd->clear();
     lcd->printn(num);
     lcd->setCursor(0, 1);
-    lcd->printn(num + 1);
+    if (num + 1 < lcd->c){
+      lcd->printn(num + 1);
+    }else{
+      lcd->printn(0);
+    }
     delay(1000);
   }
-  lcd->clear();
-  lcd->printn(num);
-  lcd->setCursor(0, 1);
-  lcd->printn(0);
-  delay(1000);
-}
+}*/
 

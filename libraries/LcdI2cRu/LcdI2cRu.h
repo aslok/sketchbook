@@ -23,8 +23,16 @@ class LcdI2cRu {
     char** s;
     uint8_t c = 0;
     uint8_t l = 0;
+    char scr[33];
+    char scr_h[65];
+    uint8_t scr_pos;
   private:
+    void clear_screen();
     LiquidCrystal_I2C* lcd;
+    char* abc;
+    uint8_t** ru;
+    uint8_t* ru_names;
+    char null_char = 0;
 };
 
 #endif
