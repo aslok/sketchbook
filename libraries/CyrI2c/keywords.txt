@@ -1,0 +1,9 @@
+CyrI2c	KEYWORD1
+init	KEYWORD2
+get_str_enc	KEYWORD2
+backlight	KEYWORD2
+clear	KEYWORD2
+home	KEYWORD2
+setCursor	KEYWORD2
+printn	KEYWORD2
+
