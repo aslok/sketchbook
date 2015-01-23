@@ -16,47 +16,45 @@ with Arduino 1.5.8 (tested on Arduino Uno)
 194	В
 195	Г
 196	Д
-
 197	Е
 198	Ё
 199	Ж
 200	З
 201	И
-
 202	Й
 203	К
 204	Л
 205	М
 206	Н
-
 207	О
 208	П
 209	Р
 210	С
 211	Т
-
 212	У
 213	Ф
 214	Х
 215	Ц
 216	Ч
-
 217	Ш
 218	Щ
 219	Ъ
 220	Ы
-222	Ь
-
+221	Ь
 222	Э
 223	Ю
 224	Я
+225	Ґ
+226	Є
+227	І
+228	Ї
 */
 
 LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
-  const uint8_t ru_chars_count = 22;
-  const uint8_t en_chars_count = 25;
+  const uint8_t ru_chars_count = 25;
+  const uint8_t en_chars_count = 29;
   
-  abc = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя");
+  abc = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяҐЄІЇґєії");
   ru = new uint8_t*[ru_chars_count];
   ru_num = new uint8_t[ru_chars_count];
   ru_cnt = ru_chars_count;
@@ -108,6 +106,12 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   ru[20] = new uint8_t[8]{ 0xe, 0x11,0x1, 0xe, 0x1, 0x11,0xe, 0x0 };
   ru_num[21] = 221; // Ь
   ru[21] = new uint8_t[8]{ 0x10,0x10,0x10,0x1c,0x12,0x12,0x1c,0x0 };
+  ru_num[22] = 226; // Є
+  ru[22] = new uint8_t[8]{ 0xf, 0x10,0x10,0x1e,0x10,0x10,0xf, 0x0 };
+  ru_num[23] = 225; // Ґ
+  ru[23] = new uint8_t[8]{ 0x1, 0x1f,0x10,0x10,0x10,0x10,0x10,0x0 };
+  ru_num[24] = 228; // Ї
+  ru[24] = new uint8_t[8]{ 0xa, 0x4, 0x4, 0x4, 0x4, 0x4, 0xe, 0x0 };
 
   en_num[0]  = 192; // А
   en[0]  = 'A';
@@ -159,6 +163,14 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   en[23] = 249;
   en_num[24] = 222; // Э
   en[24] = 214;
+  en_num[25] = 225; // Ґ
+  en[25] = 195;
+  en_num[26] = 226; // Є
+  en[26] = 'E';
+  en_num[27] = 227; // І
+  en[27] = 'I';
+  en_num[28] = 228; // Ї
+  en[28] = 'I';
 
   for (uint8_t i = 0; i < 8; i++){
     char_map[i] = 0;
@@ -286,8 +298,8 @@ void LcdI2cRu::get_str_enc(char* str, char* result){
   for (uint8_t str_pos = 0; str[str_pos] != '\0'; str_pos++){
     // Совпадений ещё небыло
     found = false;
-    // Обходим подстроки для поиска
-    for (uint8_t abc_num = 0; abc_num < 132; abc_num += 2){
+    // Обходим подстроки для поиска (74 символа, 33+33 русских и 4+4 украинских)
+    for (uint8_t abc_num = 0; abc_num < 148; abc_num += 2){
       // Обходим символы подстрок для поиска
       for (uint8_t abc_chr_pos = 0, cur_pos = str_pos; abc_chr_pos < 2; abc_chr_pos++, cur_pos++){
         // Если текущий символ подстроки не равен текущему символу строки
@@ -302,12 +314,18 @@ void LcdI2cRu::get_str_enc(char* str, char* result){
       }
       // Проверяем результаты сравнения строк
       if (found){
+        // Русский алфавит верхний регистр
         if (abc_num < 66){
           // Пишем в результат символ для замены найденной строки
           result[res_pos++] = (abc_num / 2) + 192;
-        }else{
+        // Русский алфавит нижний регистр
+        // И символы из украинского алфавита верхний регистр
+        }else if (abc_num < 140){
           // Пишем в результат символ для замены найденной строки
           result[res_pos++] = (abc_num / 2) + 159;
+        // Символы из украинского алфавита нижний регистр
+        }else{
+          result[res_pos++] = (abc_num / 2) + 155;
         }
         // Сдвигаем текущую позицию строки на один символ (потому что всего надо на два)
         str_pos++;

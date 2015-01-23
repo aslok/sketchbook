@@ -27,10 +27,11 @@ LcdI2cRu* lcd;
   lcd = new LcdI2cRu(0x27, 16, 2);
   lcd->backlight();
   
-  lcd->init(F("Я\r "));
-  lcd->setCursor(31);
+  lcd->init(F("АБВГҐД"));
   lcd->printn(0);
-  //Serial.println(lcd->scr_h);
+  //for (uint8_t num = 0; lcd->scr[num]; num++){
+  //  Serial.println((unsigned char) lcd->scr[num]);
+  //}
 }
 void loop(){
 }*/
@@ -124,7 +125,7 @@ void setup(){
   lcd->init(F("Привет мир!\nЯ Ардуино Уно =)"));
   lcd->printn(0);
   Serial.println(lcd->scr_h);
-  // ПРИВЕТ МИР!Я АРДУИНО УНО =)
+  // ПРИВЕТ МИР!     Я АРДУИНО УНО =)
 }
 void loop(){
 }*/
