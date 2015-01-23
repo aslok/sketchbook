@@ -163,10 +163,8 @@ CyrI2c::CyrI2c(uint8_t address, uint8_t width, uint8_t height) {
   en[23] = 249;
   en_num[24] = 222; // Э
   en[24] = 214;
-  // en_num[25] = 225; // Ґ
-  // en[25] = 195;
   en_num[25] = 226; // Є
-  en[25] = 'E';
+  en[25] = 211;
   en_num[26] = 227; // І
   en[26] = 'I';
   en_num[27] = 228; // Ї
