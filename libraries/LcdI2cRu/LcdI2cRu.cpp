@@ -16,31 +16,37 @@ with Arduino 1.5.8 (tested on Arduino Uno)
 194	В
 195	Г
 196	Д
+
 197	Е
 198	Ё
 199	Ж
 200	З
 201	И
+
 202	Й
 203	К
 204	Л
 205	М
 206	Н
+
 207	О
 208	П
 209	Р
 210	С
 211	Т
+
 212	У
 213	Ф
-214	Ч
-215	Х
-216	Ц
+214	Х
+215	Ц
+216	Ч
+
 217	Ш
 218	Щ
-219	Ь
+219	Ъ
 220	Ы
-221	Ъ
+222	Ь
+
 222	Э
 223	Ю
 224	Я
@@ -50,7 +56,7 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   const uint8_t ru_chars_count = 22;
   const uint8_t en_chars_count = 25;
   
-  abc = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧХЦШЩЬЫЪЭЮЯабвгдеёжзийклмнопрстуфчхцшщьыъэюя");
+  abc = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюя");
   ru = new uint8_t*[ru_chars_count];
   ru_num = new uint8_t[ru_chars_count];
   ru_cnt = ru_chars_count;
@@ -74,7 +80,7 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   ru[6]  = new uint8_t[8]{ 0x15,0x15,0xe, 0xe, 0xe, 0x15,0x15,0x0 };
   ru_num[7]  = 208; // П
   ru[7]  = new uint8_t[8]{ 0x1f,0x11,0x11,0x11,0x11,0x11,0x11,0x0 };
-  ru_num[8]  = 214; // Ч
+  ru_num[8]  = 216; // Ч
   ru[8]  = new uint8_t[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0x1, 0x0 };
   ru_num[9]  = 204; // Л
   ru[9]  = new uint8_t[8]{ 0x3, 0x5, 0x9, 0x9, 0x9, 0x9, 0x19,0x0 };
@@ -82,11 +88,11 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   ru[10] = new uint8_t[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0xe, 0x0 };
   ru_num[11] = 213; // Ф
   ru[11] = new uint8_t[8]{ 0xe, 0x15,0x15,0x15,0xe, 0x4, 0x4, 0x0 };
-  ru_num[12] = 216; // Ц
+  ru_num[12] = 215; // Ц
   ru[12] = new uint8_t[8]{ 0x12,0x12,0x12,0x12,0x12,0x12,0x1f,0x1 };
   ru_num[13] = 222; // Э
   ru[13] = new uint8_t[8]{ 0x1e,0x1, 0x1, 0xf, 0x1, 0x1, 0x1e,0x0 };
-  ru_num[14] = 221; // Ъ
+  ru_num[14] = 219; // Ъ
   ru[14] = new uint8_t[8]{ 0x18,0x8, 0x8, 0xe, 0x9, 0x9, 0xe, 0x0 };
   ru_num[15] = 218; // Щ
   ru[15] = new uint8_t[8]{ 0x15,0x15,0x15,0x15,0x15,0x15,0x1e,0x1 };
@@ -100,7 +106,7 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   ru[19] = new uint8_t[8]{ 0xa, 0x1f,0x10,0x1e,0x10,0x10,0x1f,0x0 };
   ru_num[20] = 200; // З
   ru[20] = new uint8_t[8]{ 0xe, 0x11,0x1, 0xe, 0x1, 0x11,0xe, 0x0 };
-  ru_num[21] = 219; // Ь
+  ru_num[21] = 221; // Ь
   ru[21] = new uint8_t[8]{ 0x10,0x10,0x10,0x1c,0x12,0x12,0x1c,0x0 };
 
   en_num[0]  = 192; // А
@@ -131,15 +137,15 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   en[12] = 'C';
   en_num[13] = 211; // Т
   en[13] = 'T';
-  en_num[14] = 215; // Х
+  en_num[14] = 214; // Х
   en[14] = 'X';
   en_num[15] = 217; // Ш
   en[15] = 'W';
   en_num[16] = 218; // Щ
   en[16] = 'W';
-  en_num[17] = 219; // Ь
+  en_num[17] = 221; // Ь
   en[17] = 'b';
-  en_num[18] = 221; // Ъ
+  en_num[18] = 219; // Ъ
   en[18] = 'b';
   en_num[19] = 204; // Л
   en[19] = 202;
@@ -147,9 +153,9 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   en[20] = 191;
   en_num[21] = 213; // Ф
   en[21] = 236;
-  en_num[22] = 214; // Ч
+  en_num[22] = 216; // Ч
   en[22] = 209;
-  en_num[23] = 216; // Ц
+  en_num[23] = 215; // Ц
   en[23] = 249;
   en_num[24] = 222; // Э
   en[24] = 214;

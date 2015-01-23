@@ -91,12 +91,13 @@ void setup(){
   lcd = new LcdI2cRu(0x27, 16, 2);
   lcd->backlight();
   
-  lcd->init(F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФЧХЦШЬЫЪЭЮЯ\r "));
+  lcd->init(F("АБВГДЕЁЖЗИЙКЛМНОПРСУФХЦЧШЩЪЫЬЭЮЯ\r "));
 }
 void loop(){
   lcd->home();
   lcd->printn(0);
-  for (uint8_t num = 0; num < 22; num++){
+  delay(1000);
+  for (uint8_t num = 0; num < 24; num++){
     delay(2000);
     lcd->setCursor(num);
     lcd->printn(1);
@@ -104,6 +105,7 @@ void loop(){
   delay(2000);
   lcd->home();
   lcd->printn(0);
+  delay(1000);
   for (uint8_t num = 32; num-- > 10; ){
     delay(2000);
     lcd->setCursor(num);
