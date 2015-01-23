@@ -1,13 +1,12 @@
-#ifndef LcdI2cRu_h
-#define LcdI2cRu_h
+#ifndef CyrI2c_h
+#define CyrI2c_h
 
 #include <Arduino.h>
 #include <LiquidCrystal_I2C.h>
 
-class LcdI2cRu {
+class CyrI2c {
   public:
-    LcdI2cRu(uint8_t address, uint8_t width, uint8_t height);
-    ~LcdI2cRu();
+    CyrI2c(uint8_t address, uint8_t width, uint8_t height);
     void init(const __FlashStringHelper* str);
     void init(const char* str);
     void get_str_enc(char* str, char* result);

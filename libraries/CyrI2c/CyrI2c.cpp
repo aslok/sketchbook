@@ -7,7 +7,7 @@ with Arduino 1.5.8 (tested on Arduino Uno)
 
 #include "Arduino.h"
 #include "LiquidCrystal_I2C.h"
-#include "LcdI2cRu.h"
+#include "CyrI2c.h"
   
 /*
 Кодировка использует для хранения символа один беззнаковый байт
@@ -50,9 +50,9 @@ with Arduino 1.5.8 (tested on Arduino Uno)
 228	Ї
 */
 
-LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
+CyrI2c::CyrI2c(uint8_t address, uint8_t width, uint8_t height) {
   const uint8_t ru_chars_count = 25;
-  const uint8_t en_chars_count = 29;
+  const uint8_t en_chars_count = 28;
   
   abc = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяҐЄІЇґєії");
   ru = new uint8_t*[ru_chars_count];
@@ -78,40 +78,40 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   ru[6]  = new uint8_t[8]{ 0x15,0x15,0xe, 0xe, 0xe, 0x15,0x15,0x0 };
   ru_num[7]  = 208; // П
   ru[7]  = new uint8_t[8]{ 0x1f,0x11,0x11,0x11,0x11,0x11,0x11,0x0 };
-  ru_num[8]  = 216; // Ч
-  ru[8]  = new uint8_t[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0x1, 0x0 };
-  ru_num[9]  = 204; // Л
-  ru[9]  = new uint8_t[8]{ 0x3, 0x5, 0x9, 0x9, 0x9, 0x9, 0x19,0x0 };
-  ru_num[10] = 212; // У
-  ru[10] = new uint8_t[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0xe, 0x0 };
-  ru_num[11] = 213; // Ф
-  ru[11] = new uint8_t[8]{ 0xe, 0x15,0x15,0x15,0xe, 0x4, 0x4, 0x0 };
-  ru_num[12] = 215; // Ц
-  ru[12] = new uint8_t[8]{ 0x12,0x12,0x12,0x12,0x12,0x12,0x1f,0x1 };
-  ru_num[13] = 222; // Э
-  ru[13] = new uint8_t[8]{ 0x1e,0x1, 0x1, 0xf, 0x1, 0x1, 0x1e,0x0 };
-  ru_num[14] = 219; // Ъ
-  ru[14] = new uint8_t[8]{ 0x18,0x8, 0x8, 0xe, 0x9, 0x9, 0xe, 0x0 };
-  ru_num[15] = 218; // Щ
-  ru[15] = new uint8_t[8]{ 0x15,0x15,0x15,0x15,0x15,0x15,0x1e,0x1 };
-  ru_num[16] = 217; // Ш
-  ru[16] = new uint8_t[8]{ 0x15,0x15,0x15,0x15,0x15,0x15,0x1f,0x0 };
-  ru_num[17] = 202; // Й
-  ru[17] = new uint8_t[8]{ 0x15,0x11,0x11,0x13,0x15,0x19,0x11,0x0 };
-  ru_num[18] = 201; // И
-  ru[18] = new uint8_t[8]{ 0x11,0x11,0x11,0x13,0x15,0x19,0x11,0x0 };
-  ru_num[19] = 198; // Ё
-  ru[19] = new uint8_t[8]{ 0xa, 0x1f,0x10,0x1e,0x10,0x10,0x1f,0x0 };
-  ru_num[20] = 200; // З
-  ru[20] = new uint8_t[8]{ 0xe, 0x11,0x1, 0xe, 0x1, 0x11,0xe, 0x0 };
-  ru_num[21] = 221; // Ь
-  ru[21] = new uint8_t[8]{ 0x10,0x10,0x10,0x1c,0x12,0x12,0x1c,0x0 };
-  ru_num[22] = 226; // Є
-  ru[22] = new uint8_t[8]{ 0xf, 0x10,0x10,0x1e,0x10,0x10,0xf, 0x0 };
-  ru_num[23] = 225; // Ґ
-  ru[23] = new uint8_t[8]{ 0x1, 0x1f,0x10,0x10,0x10,0x10,0x10,0x0 };
-  ru_num[24] = 228; // Ї
-  ru[24] = new uint8_t[8]{ 0xa, 0x4, 0x4, 0x4, 0x4, 0x4, 0xe, 0x0 };
+  ru_num[8]  = 225; // Ґ
+  ru[8]  = new uint8_t[8]{ 0x1, 0x1f,0x10,0x10,0x10,0x10,0x10,0x0 };
+  ru_num[9]  = 216; // Ч
+  ru[9]  = new uint8_t[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0x1, 0x0 };
+  ru_num[10] = 226; // Є
+  ru[10] = new uint8_t[8]{ 0xf, 0x10,0x10,0x1e,0x10,0x10,0xf, 0x0 };
+  ru_num[11] = 204; // Л
+  ru[11] = new uint8_t[8]{ 0x3, 0x5, 0x9, 0x9, 0x9, 0x9, 0x19,0x0 };
+  ru_num[12] = 212; // У
+  ru[12] = new uint8_t[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0xe, 0x0 };
+  ru_num[13] = 213; // Ф
+  ru[13] = new uint8_t[8]{ 0xe, 0x15,0x15,0x15,0xe, 0x4, 0x4, 0x0 };
+  ru_num[14] = 215; // Ц
+  ru[14] = new uint8_t[8]{ 0x12,0x12,0x12,0x12,0x12,0x12,0x1f,0x1 };
+  ru_num[15] = 222; // Э
+  ru[15] = new uint8_t[8]{ 0x1e,0x1, 0x1, 0xf, 0x1, 0x1, 0x1e,0x0 };
+  ru_num[16] = 219; // Ъ
+  ru[16] = new uint8_t[8]{ 0x18,0x8, 0x8, 0xe, 0x9, 0x9, 0xe, 0x0 };
+  ru_num[17] = 218; // Щ
+  ru[17] = new uint8_t[8]{ 0x15,0x15,0x15,0x15,0x15,0x15,0x1e,0x1 };
+  ru_num[18] = 228; // Ї
+  ru[18] = new uint8_t[8]{ 0xa, 0x4, 0x4, 0x4, 0x4, 0x4, 0xe, 0x0 };
+  ru_num[19] = 217; // Ш
+  ru[19] = new uint8_t[8]{ 0x15,0x15,0x15,0x15,0x15,0x15,0x1f,0x0 };
+  ru_num[20] = 202; // Й
+  ru[20] = new uint8_t[8]{ 0x15,0x11,0x11,0x13,0x15,0x19,0x11,0x0 };
+  ru_num[21] = 201; // И
+  ru[21] = new uint8_t[8]{ 0x11,0x11,0x11,0x13,0x15,0x19,0x11,0x0 };
+  ru_num[22] = 198; // Ё
+  ru[22] = new uint8_t[8]{ 0xa, 0x1f,0x10,0x1e,0x10,0x10,0x1f,0x0 };
+  ru_num[23] = 200; // З
+  ru[23] = new uint8_t[8]{ 0xe, 0x11,0x1, 0xe, 0x1, 0x11,0xe, 0x0 };
+  ru_num[24] = 221; // Ь
+  ru[24] = new uint8_t[8]{ 0x10,0x10,0x10,0x1c,0x12,0x12,0x1c,0x0 };
 
   en_num[0]  = 192; // А
   en[0]  = 'A';
@@ -163,14 +163,14 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   en[23] = 249;
   en_num[24] = 222; // Э
   en[24] = 214;
-  en_num[25] = 225; // Ґ
-  en[25] = 195;
-  en_num[26] = 226; // Є
-  en[26] = 'E';
-  en_num[27] = 227; // І
+  // en_num[25] = 225; // Ґ
+  // en[25] = 195;
+  en_num[25] = 226; // Є
+  en[25] = 'E';
+  en_num[26] = 227; // І
+  en[26] = 'I';
+  en_num[27] = 228; // Ї
   en[27] = 'I';
-  en_num[28] = 228; // Ї
-  en[28] = 'I';
 
   for (uint8_t i = 0; i < 8; i++){
     char_map[i] = 0;
@@ -181,9 +181,7 @@ LcdI2cRu::LcdI2cRu(uint8_t address, uint8_t width, uint8_t height) {
   clear();
 }
 
-LcdI2cRu::~LcdI2cRu() { }
-
-void LcdI2cRu::init(const char* str){
+void CyrI2c::init(const char* str){
   word length, pos;
   for (pos = 0, length = 0; str[pos] != '\0'; pos++){
     if(str[pos] != '\r'){
@@ -236,7 +234,7 @@ void LcdI2cRu::init(const char* str){
   }
 }
 
-void LcdI2cRu::init(const __FlashStringHelper* str){
+void CyrI2c::init(const __FlashStringHelper* str){
   char* ptr = (char*) str;
   word length, pos;
   char chr;
@@ -291,7 +289,7 @@ void LcdI2cRu::init(const __FlashStringHelper* str){
   }
 }
 
-void LcdI2cRu::get_str_enc(char* str, char* result){
+void CyrI2c::get_str_enc(char* str, char* result){
   boolean found = false;
   uint8_t res_pos = 0;
   // Обходим символы строки
@@ -341,7 +339,7 @@ void LcdI2cRu::get_str_enc(char* str, char* result){
   result[res_pos] = '\0';
 }
 
-void LcdI2cRu::printn(uint8_t num){
+void CyrI2c::printn(uint8_t num){
   // Массив символов которые будут отображаться после вывода
   // Порядок соответствует порядку отображения
   char next_scr[33];
@@ -382,7 +380,8 @@ void LcdI2cRu::printn(uint8_t num){
     lcd_replace[cur_chr] = next_scr[cur_chr];
   }
   
-  // Ищем символы которые заменить нужно, но текущими средствами не получилось
+  // Выполнена предварительная замена, lcd_replace почти во внутренней кодировке
+  // Ищем символы которые нужно и можно заменить, их коды в области 192-255
   for (cur_chr = 0; cur_chr < 32; cur_chr++){
     if ((unsigned char) lcd_replace[cur_chr] < 192 || (unsigned char) lcd_replace[cur_chr] > 255){
       continue;
@@ -394,7 +393,7 @@ void LcdI2cRu::printn(uint8_t num){
     
     found = false;
     // Обходим набор самодельных символов для замены 
-    for (cur = 0; cur < 8; cur++){
+    for (cur = 0; cur < 9; cur++){
       // Если мы можем заменить его одним из восьми первых
       if (ru_num[cur] == (unsigned char) lcd_replace[cur_chr]){
         found = true;
@@ -415,8 +414,8 @@ void LcdI2cRu::printn(uint8_t num){
         continue;
       }
       found = true;
-      // Сохраняем в ячейку номер символа
-      char_map[i] = ru_num[cur];
+      // Сохраняем в ячейку номер символа который заменяем
+      char_map[i] = next_scr[cur_chr];
       /*Serial.println("lcd->createChar(i, ru[cur]);");
       Serial.println(i);
       Serial.println(cur);
@@ -442,14 +441,16 @@ void LcdI2cRu::printn(uint8_t num){
     
     // Закончились ячейки для хранения символов :(
     // Ищем что заменить
-    // Обходим набор самодельных символов для замены 
-    for (cur_pos = ru_cnt; cur_pos-- > 7; ){
-      // Ищем ячейку с этим символом
+    // Обходим набор самодельных символов для замены с конца
+    // Никогда не выселяем символы 0-8 потому что заменить нечем :(
+    for (cur_pos = ru_cnt; cur_pos-- > 8; ){
+      // Ищем ячейку занятую этим символом
       for (i = 0; i < 8; i++){
         // Если есть кандидат на выселение
         if (ru_num[cur_pos] == char_map[i]){
           found = false;
           // Обходим основной набор символов для замены
+          // После выселения будет отображаться оттуда
           for (pos = 0; pos < en_cnt; pos++){
             if (en_num[pos] == char_map[i]){
               found = true;
@@ -458,11 +459,18 @@ void LcdI2cRu::printn(uint8_t num){
             }
           }
           if (!found){
-            // Если так, то я не знаю, что за хуйня
+            // Если так случится - будет глюк
+            // Выход один - добавить этот символ в en
+            // Второй выход - переместить в начало ru
+            // Этот выход невозможен:
+            // 1. Количество невыселяемых символов ограничено драйвером 8 штук
+            // 2. Набор одновременно отображаемых символов ограничен алфавитом
+            // Одновременный вывод частей украинского и русского алфавитов
+            // может привести к глюкам
             continue;
           }
-          // Сохраняем в ячейку номер символа
-          char_map[i] = ru_num[cur];
+          // Сохраняем в ячейку номер символа который заменяем
+          char_map[i] = next_scr[cur_chr];
           // Будем заменять его при выводе на номер ячейки
           for (pos = 0; pos < 32; pos++){
             if ((unsigned char) lcd_replace[pos] == ru_num[cur]){
@@ -520,7 +528,7 @@ void LcdI2cRu::printn(uint8_t num){
     }
     
     // Обходим дополнительные символы самодельного набора, ищем что бы ещё заменить
-    for (uint8_t ru_cur = 8; ru_cur < ru_cnt; ru_cur++){
+    for (uint8_t ru_cur = 9; ru_cur < ru_cnt; ru_cur++){
       // Обходим массив символов, которые будут отображаться после вывода
       for (cur_chr = 0; cur_chr < 32; cur_chr++){
         if ((unsigned char) next_scr[cur_chr] != ru_num[ru_cur]){
@@ -613,7 +621,7 @@ void LcdI2cRu::printn(uint8_t num){
   //Serial.println("--------------------------------------------------------");
 }
 
-void LcdI2cRu::get_next_scr(uint8_t num, char& out){
+void CyrI2c::get_next_scr(uint8_t num, char& out){
   char* next_scr = &out;
   uint8_t next_scr_pos = scr_pos;
   for (uint8_t i = 0; i < 33; i++){
@@ -636,7 +644,7 @@ void LcdI2cRu::get_next_scr(uint8_t num, char& out){
   }
 }
 
-void LcdI2cRu::clear_screen(){
+void CyrI2c::clear_screen(){
   uint8_t i;
   for (i = 0; i < 32; i++){
     scr[i] = ' ';
@@ -648,7 +656,7 @@ void LcdI2cRu::clear_screen(){
   scr_pos = 0;
 }
 
-void LcdI2cRu::backlight(boolean state){
+void CyrI2c::backlight(boolean state){
   if (state){
     lcd->backlight();
   }else{
@@ -656,7 +664,7 @@ void LcdI2cRu::backlight(boolean state){
   }
 }
 
-void LcdI2cRu::backlight(){
+void CyrI2c::backlight(){
   if (bl = !bl){
     lcd->backlight();
   }else{
@@ -664,17 +672,17 @@ void LcdI2cRu::backlight(){
   }
 }
 
-void LcdI2cRu::clear(){
+void CyrI2c::clear(){
   lcd->clear();
   clear_screen();
 }
 
-void LcdI2cRu::home(){
+void CyrI2c::home(){
   lcd->home();
   scr_pos = 0;
 }
 
-void LcdI2cRu::setCursor(uint8_t col, uint8_t row){
+void CyrI2c::setCursor(uint8_t col, uint8_t row){
   //Serial.println("setCursor");
   //Serial.println(col);
   //Serial.println(row);
@@ -684,7 +692,7 @@ void LcdI2cRu::setCursor(uint8_t col, uint8_t row){
   }
 }
 
-void LcdI2cRu::setCursor(uint8_t col){
+void CyrI2c::setCursor(uint8_t col){
   if (col < 32){
     setCursor(col - col / 16 * 16, col / 16);
   }

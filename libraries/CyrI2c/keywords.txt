@@ -1,4 +1,4 @@
-LcdI2cRu	KEYWORD1
+CyrI2c	KEYWORD1
 init	KEYWORD2
 get_str_enc	KEYWORD2
 backlight	KEYWORD2
