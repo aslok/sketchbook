@@ -1,8 +1,6 @@
 LcdI2cRu	KEYWORD1
 init	KEYWORD2
-createMap	KEYWORD2
 get_str_enc	KEYWORD2
-write_enc	KEYWORD2
 backlight	KEYWORD2
 clear	KEYWORD2
 home	KEYWORD2
