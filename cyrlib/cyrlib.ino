@@ -22,75 +22,18 @@ Global variables use 245 bytes (11%) of dynamic memory, leaving 1 803 bytes for 
 #include <CyrI2c.h>
 CyrI2c* lcd;
 
-/*void setup(){
+void setup(){
   Serial.begin(9600);  
   lcd = new CyrI2c(0x27, 16, 2);
   lcd->backlight();
   
-  lcd->init(F("АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСУФХЦЧШЩЬЮЯ\r "));
+  lcd->init(F("Arduino \rFunduino\r UNO\n     Ардуино Уно"));
+  lcd->printn(0);
+  lcd->printn(2);
   //lcd->printn(0);
   //for (uint8_t num = 0; lcd->scr[num]; num++){
   //  Serial.println((unsigned char) lcd->scr[num]);
   //}
-}
-void loop(){
-  lcd->home();
-  lcd->printn(0);
-  delay(1000);
-  for (uint8_t num = 0; num < 24; num++){
-    delay(2000);
-    lcd->setCursor(num);
-    lcd->printn(1);
-  }
-  delay(2000);
-  lcd->home();
-  lcd->printn(0);
-  delay(1000);
-  for (uint8_t num = 32; num-- > 8; ){
-    delay(2000);
-    lcd->setCursor(num);
-    lcd->printn(1);
-  }
-  delay(2000);
-}*/
-
-
-
-/*
-// Использование символа "перенос строки"
-void setup(){
-  lcd = new CyrI2c(0x27, 16, 2);
-  lcd->backlight();
-  lcd->init(F("Arduino UNO\n     Ардуино Уно"));
-  lcd->printn(0);
-}
-void loop(){
-}*/
-
-
-/*
-// Использование символа "начало новой строки"
-void setup(){
-  lcd = new CyrI2c(0x27, 16, 2);
-  lcd->backlight();
-  lcd->init(F("Привет мир!\rЯ Ардуино Уно =)"));
-  lcd->printn(0);
-  lcd->setCursor(0, 1);
-  lcd->printn(1);
-}
-void loop(){
-}*/
-
-
-/*
-// Пример анимации, первая и вторая строки выводятся в одной позиции по очереди
-// Третья строка выводится один раз в начале программы
-void setup(){
-  lcd = new CyrI2c(0x27, 16, 2);
-  lcd->backlight();
-  lcd->init(F("Arduino \rFunduino\r UNO\n     Ардуино Уно"));
-  lcd->printn(0);
-  lcd->printn(2);
 }
 void loop(){
   for (uint8_t num = 0; num < 2; num++){
@@ -101,102 +44,5 @@ void loop(){
     }
   }
   delay(700);
-}*/
-
-
-/*
-// Проверка отображения символов русского алфавита
-void setup(){
-  lcd = new CyrI2c(0x27, 16, 2);
-  lcd->backlight();
-  
-  lcd->init(F("АБВГДЕЁЖЗИЙКЛМНОПРСУФХЦЧШЩЪЫЬЭЮЯ\r "));
 }
-void loop(){
-  lcd->home();
-  lcd->printn(0);
-  delay(1000);
-  for (uint8_t num = 0; num < 24; num++){
-    delay(2000);
-    lcd->setCursor(num);
-    lcd->printn(1);
-  }
-  delay(2000);
-  lcd->home();
-  lcd->printn(0);
-  delay(1000);
-  for (uint8_t num = 32; num-- > 10; ){
-    delay(2000);
-    lcd->setCursor(num);
-    lcd->printn(1);
-  }
-  delay(2000);
-}*/
-
-
-
-// Проверка отображения символов украинского алфавита
-void setup(){
-  lcd = new CyrI2c(0x27, 16, 2);
-  lcd->backlight();
-  
-  lcd->init(F("АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСУФХЦЧШЩЬЮЯ\r "));
-}
-void loop(){
-  lcd->home();
-  lcd->printn(0);
-  delay(1000);
-  for (uint8_t num = 0; num < 24; num++){
-    delay(2000);
-    lcd->setCursor(num);
-    lcd->printn(1);
-  }
-  delay(2000);
-  lcd->home();
-  lcd->printn(0);
-  delay(1000);
-  for (uint8_t num = 32; num-- > 10; ){
-    delay(2000);
-    lcd->setCursor(num);
-    lcd->printn(1);
-  }
-  delay(2000);
-}
-
-
-/*
-// Пример вывода в порт текста lcd экрана в относительно читабельном виде
-void setup(){
-  Serial.begin(9600);  
-  lcd = new CyrI2c(0x27, 16, 2);
-  lcd->backlight();
-  lcd->init(F("Привет мир!\nЯ Ардуино Уно =)"));
-  lcd->printn(0);
-  Serial.println(lcd->scr_h);
-  // ПРИВЕТ МИР!     Я АРДУИНО УНО =)
-}
-void loop(){
-}*/
-
-
-/*
-// Пример работы с большим количеством строк
-void setup(){
-  lcd = new CyrI2c(0x27, 16, 2);
-  lcd->backlight();
-  lcd->init(F("ПРЕВЕТИЧЕГ!\rЯ ТУПО АРДУИНКО\rЙА УЧУ РУССКИЙ\rВЫХОДИТ ХРЕНОВО\rВИДИШЬ ЛАЖА\rНУ ТО ТАКОЕ\rМНОГО ТЕКСТА\rМАЛО ТОЛКУ\rПРОВЕРЯЕМ ДЛИНУ\rСКОЛЬКО ВЛЕЗЕТ\rПОКА ВЛАЗИТ\rДОКИНЕМ ИШО\rЧТОБ БЫЛО\rЧЕМ БОГАТЫ\rЛЕВ ТОЛСТОЙ\rВОЙНА "));
-}
-void loop(){
-  for (uint8_t num = 0; num < lcd->c; num++){
-    lcd->clear();
-    lcd->printn(num);
-    lcd->setCursor(0, 1);
-    if (num + 1 < lcd->c){
-      lcd->printn(num + 1);
-    }else{
-      lcd->printn(0);
-    }
-    delay(1000);
-  }
-}*/
 
