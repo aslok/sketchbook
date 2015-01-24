@@ -46,9 +46,13 @@ Keypad myKeypad = Keypad(makeKeymap(keymap), rowPins, colPins, numRows, numCols)
 #include <Time.h>
 #include <DS1302RTC.h>
 // Set pins:  CE, IO,CLK
-DS1302RTC RTC(13, 12, 11);
+DS1302RTC RTC(12, 11, 10);
+
+const uint8_t pin = 13;
 
 void setup() {
+  pinMode(pin, OUTPUT);
+
   lcd = new CyrI2c(0x27, 16, 2);
   lcd->backlight();
 
@@ -77,10 +81,15 @@ void loop() {
   while(prevtime == RTC.get()){
     char keypressed = myKeypad.getKey();
     if (keypressed != NO_KEY){
-      if (keypressed != 'A') {
-        hello(tm.Hour);
-        break;
+      digitalWrite(pin, HIGH);
+      switch (keypressed) {
+        case 'A':
+          hello(tm.Hour);
+          break;
+        default:
+          delay(200);
       }
+      digitalWrite(pin, LOW);
     }
   }
 }
@@ -88,9 +97,9 @@ void loop() {
 void hello(uint8_t hour){
   lcd->clear();
   lcd->init(F("Доброї ночі!\rДоброго ранку!\rДоброго дня!\rДоброго вечора!\rЯ годинник :)"));  
-  lcd->printn((hour - 1) / 6, 0, 0);
+  lcd->printn((hour + 1) / 6, 0, 0);
   lcd->printn(4, 3, 1);  
-  delay(3000);
+  delay(2000);
   lcd->clear();
 }
 
