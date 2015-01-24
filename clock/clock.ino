@@ -3,7 +3,6 @@
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
 #include <Time.h>
-#include <DateTime.h>
 #include <DS1302RTC.h>
 // Set pins:  CE, IO,CLK
 DS1302RTC RTC(13, 12, 11);
@@ -11,8 +10,6 @@ LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars
 
 byte LT[8] = 
 {
-
-
   B00111,
   B01111,
   B11111,
@@ -107,11 +104,7 @@ byte block[8] =
 // loop counter
 int count = 0;
 
-
-
 void setup () {
-  Serial.begin(57600);
-  Wire.begin();
   lcd.init();                      // initialize the lcd 
   lcd.backlight();
   lcd.home();
@@ -127,11 +120,7 @@ void setup () {
 
   // sets the LCD's rows and colums:
   lcd.clear();  
-
-
-
 }
-
 
 
 void custom0(int x)
@@ -256,16 +245,6 @@ void custom9(int x)
 
 }
 
-//void clearnumber(int x)
-//{ // clears the area the custom number is displayed in 
-// lcd.setCursor(x,0);
-// lcd.print("   ");
-// lcd.setCursor(x,1); 
-// lcd.print("   ");
-//}
-
-
-
 
 void loop () {
 
@@ -285,11 +264,6 @@ void digitalClockDisplay(){
 
   printDigits(tm.Minute/10,9);
   printDigits(tm.Minute%10,13);
-
-  // lcd.setCursor(7, 1);
-  //  lcd.print(now.second()/10);
-  //   lcd.print(now.second()%10);
-
 
   if (tm.Second%10%2==0){
     lcd.setCursor(7, 0);
@@ -323,8 +297,6 @@ void digitalClockDisplay(){
   //нарисовали двоеточие
 
 }
-
-
 
 void printDigits(int digits, int x){
   // utility function for digital clock display: prints preceding colon and leading 0
@@ -362,8 +334,5 @@ void printDigits(int digits, int x){
     break;
 
   }
-
-
-
 }
 
