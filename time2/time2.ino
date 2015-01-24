@@ -1,17 +1,18 @@
 /*
- Time 2
+ Time v2
  Time and date on lcd display (used rtc timer) with control by keypad 4x4
 
  Hardware:
  Trickle-Charge Timekeeping Chip DS1302
  http://www.maximintegrated.com/en/products/digital/real-time-clocks/DS1302.html
- http://playground.arduino.cc/Main/DS1302
+ http://playground.arduino.cc/Main/DS1302RTC
  LCD I2C PCF8574
  http://habrahabr.ru/post/219137/
  http://arduino-info.wikispaces.com/file/detail/LiquidCrystal_I2C1602V1.zip/341635514
  Keypad 4x4
 
  created 18.01.2015
+ modifid 24.01.2015
  by Fust Vitaliy
  with Arduino 1.5.8 (tested on Arduino Uno)
 */
@@ -92,3 +93,4 @@ void hello(uint8_t hour){
   delay(3000);
   lcd->clear();
 }
+
