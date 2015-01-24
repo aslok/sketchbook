@@ -88,7 +88,7 @@ void loop() {
 void hello(uint8_t hour){
   lcd->clear();
   lcd->init(F("Доброї ночі!\rДоброго ранку!\rДоброго дня!\rДоброго вечора!\rЯ годинник :)"));  
-  lcd->printn((hour - 1) / 6, 0, 0);
+  lcd->printn((hour + 1) / 6, 0, 0);
   lcd->printn(4, 3, 1);  
   delay(3000);
   lcd->clear();
