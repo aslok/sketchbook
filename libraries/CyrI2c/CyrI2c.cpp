@@ -54,11 +54,12 @@ CyrI2c::CyrI2c(uint8_t address, uint8_t width, uint8_t height) {
   const uint8_t ru_chars_count = 25;
   const uint8_t en_chars_count = 28;
   
-  abc = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяҐЄІЇґєії");
-  ru = new uint8_t*[ru_chars_count];
+  s      = NULL;
+  abc    = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяҐЄІЇґєії");
+  ru     = new uint8_t*[ru_chars_count];
   ru_num = new uint8_t[ru_chars_count];
   ru_cnt = ru_chars_count;
-  en = new uint8_t[en_chars_count];
+  en     = new uint8_t[en_chars_count];
   en_num = new uint8_t[en_chars_count];
   en_cnt = en_chars_count;
   
@@ -181,6 +182,13 @@ CyrI2c::CyrI2c(uint8_t address, uint8_t width, uint8_t height) {
 
 void CyrI2c::init(const char* str){
   word length, pos;
+  if (c){
+    for (pos = c; pos--; ){
+      delete s[pos];
+    }
+    c = 0;
+    l = 0;
+  }
   for (pos = 0, length = 0; str[pos] != '\0'; pos++){
     if(str[pos] != '\r'){
       length++;
@@ -205,6 +213,7 @@ void CyrI2c::init(const char* str){
     length = 0;
   }
   
+  delete s;
   s = new char*[c];
   
   char tmp[l];
@@ -235,6 +244,13 @@ void CyrI2c::init(const char* str){
 void CyrI2c::init(const __FlashStringHelper* str){
   char* ptr = (char*) str;
   word length, pos;
+  if (c){
+    for (pos = c; pos--; ){
+      delete s[pos];
+    }
+    c = 0;
+    l = 0;
+  }
   char chr;
   for (pos = 0, length = 0; (chr = (char) pgm_read_byte_near(ptr + pos)) != '\0'; pos++){
     if(chr != '\r'){
@@ -260,6 +276,7 @@ void CyrI2c::init(const __FlashStringHelper* str){
     length = 0;
   }
   
+  delete s;
   s = new char*[c];
   
   char tmp[l];
@@ -337,17 +354,117 @@ void CyrI2c::get_str_enc(char* str, char* result){
   result[res_pos] = '\0';
 }
 
+void CyrI2c::write_str_enc(char* str, char* lcd_chars){
+  char out;
+  char out_h[3]{0, 0, 0};
+  for (uint8_t cur_chr = 0; cur_chr < l && str[cur_chr]; cur_chr++){
+    out      = str[cur_chr];
+    out_h[0] = str[cur_chr];
+    out_h[1] = 0;
+    if (out == '\n'){
+      if (scr_pos < 16){
+        scr_pos = 16;
+      }else{
+        scr_pos = 0;
+      }
+    }
+    if (scr_pos > 31){
+      scr_pos = 0;
+    }
+    if (scr_pos == 0 || scr_pos == 16){
+      setCursor();
+    }
+    if (out == '\n'){
+      continue;
+    }
+    if ((unsigned char) out >= 192 && (unsigned char) out <= 255){
+      out = lcd_chars[scr_pos];
+      for (uint8_t pos = 0; pos < 2; pos++){
+        out_h[pos] = (char) pgm_read_byte_near(abc + (((unsigned char) str[cur_chr] - 192) * 2) + pos);
+      }
+    }
+    scr_h[scr_pos * 2] = out_h[0];
+    if (!out_h[1]){
+      scr_h[scr_pos * 2 + 1] = 127;
+    }else{
+      scr_h[scr_pos * 2 + 1] = out_h[1];
+    }
+    scr[scr_pos++] = str[cur_chr];
+
+    //Serial.println((unsigned char) out);
+    //Serial.println(out_h);
+    lcd->write(out);
+  }
+  //Serial.println("--------------------------------------------------------");
+}
+
 void CyrI2c::printn(uint8_t num){
+  if (num >= c){
+    return;
+  }
+  print(s[num], 127, 255);
+}
+
+void CyrI2c::print(char chr){
+  char tmp[2]{chr, 0};
+  print(tmp, 127, 255);
+}
+
+void CyrI2c::print(char* str){
+  print(str, 127, 255);
+}
+
+void CyrI2c::printn(uint8_t num, int8_t position){
+  if (num >= c){
+    return;
+  }
+  print(s[num], position, 255);
+}
+
+void CyrI2c::print(char chr, int8_t position){
+  char tmp[2]{chr, 0};
+  print(tmp, position, 255);
+}
+
+void CyrI2c::print(char* str, int8_t position){
+  print(str, position, 255);
+}
+
+void CyrI2c::printn(uint8_t num, int8_t position, uint8_t go_ln){
+  if (num >= c){
+    return;
+  }
+  print(s[num], position, go_ln);
+}
+
+void CyrI2c::print(char chr, int8_t position, uint8_t go_ln){
+  char tmp[2]{chr, 0};
+  print(tmp, position, go_ln);
+}
+
+void CyrI2c::print(char* str, int8_t position, uint8_t go_ln){
+  uint8_t cur, old_cur, cur_chr, i, cur_pos, pos;
+  if (go_ln != 255 && go_ln < 2){
+    ln(go_ln);
+  }
+  if (position != 127 && position < 16 && position > -16){
+    for (cur_chr = 0; str[cur_chr] && str[cur_chr] != '\n'; cur_chr++){
+    }
+    if (position < 0){
+      setCursor(17 - cur_chr + position, scr_pos / 16);
+    }else{
+      setCursor(position, scr_pos / 16);
+    }
+  }
   // Массив символов которые будут отображаться после вывода
   // Порядок соответствует порядку отображения
   char next_scr[33];
-  get_next_scr(num, *next_scr);
+  get_next_scr(str, *next_scr);
   // Массив символов, на которые нужно будет заменить соответствующие
   // символы кирилицы при выводе
   char lcd_replace[32];
-  boolean found = false;
-  uint8_t cur, old_cur, cur_chr, i, cur_pos, pos;
   // Обходим next_scr
+  boolean found = false;
   for (cur_chr = 0; cur_chr < 32; cur_chr++){
     found = false;
     // Обходим набор использованных самодельных символов для замены 
@@ -572,61 +689,18 @@ void CyrI2c::printn(uint8_t num){
       }
     }
   }
-  
-  char out;
-  char out_h[3]{0, 0, 0};
-  for (cur_chr = 0; cur_chr < l && num < c && s[num][cur_chr]; cur_chr++){      
-    out      = s[num][cur_chr];
-    out_h[0] = s[num][cur_chr];
-    out_h[1] = 0;
-    if (out == '\n'){
-      if (scr_pos < 16){
-        scr_pos = 16;
-      }else{
-        scr_pos = 0;
-      }
-    }
-    if (scr_pos > 31){
-      scr_pos = 0;
-    }
-    if (scr_pos == 0){
-      setCursor(0, 0);
-    }
-    if (scr_pos == 16){
-      setCursor(0, 1);
-    }
-    if (out == '\n'){
-      continue;
-    }
-    if ((unsigned char) out >= 192 && (unsigned char) out <= 255){
-      out = lcd_replace[scr_pos];
-      for (pos = 0; pos < 2; pos++){
-        out_h[pos] = (char) pgm_read_byte_near(abc + (((unsigned char) s[num][cur_chr] - 192) * 2) + pos);
-      }
-    }
-    scr_h[scr_pos * 2] = out_h[0];
-    if (!out_h[1]){
-      scr_h[scr_pos * 2 + 1] = 127;
-    }else{
-      scr_h[scr_pos * 2 + 1] = out_h[1];
-    }
-    scr[scr_pos++] = s[num][cur_chr];
 
-    //Serial.println((unsigned char) out);
-    //Serial.println(out_h);
-    lcd->write(out);
-  }
-  //Serial.println("--------------------------------------------------------");
+  write_str_enc(str, lcd_replace);
 }
 
-void CyrI2c::get_next_scr(uint8_t num, char& out){
+void CyrI2c::get_next_scr(char* str, char& out){
   char* next_scr = &out;
   uint8_t next_scr_pos = scr_pos;
   for (uint8_t i = 0; i < 33; i++){
     next_scr[i] = scr[i];
   }
-  for (uint8_t cur_chr = 0; cur_chr < l && num < c && s[num][cur_chr]; cur_chr++){    
-    if (s[num][cur_chr] == '\n'){
+  for (uint8_t cur_chr = 0; cur_chr < l && str[cur_chr]; cur_chr++){
+    if (str[cur_chr] == '\n'){
       if (next_scr_pos < 16){
         next_scr_pos = 16;
       }else{
@@ -636,8 +710,8 @@ void CyrI2c::get_next_scr(uint8_t num, char& out){
     if (next_scr_pos > 31){
       next_scr_pos = 0;
     }
-    if (s[num][cur_chr] != '\n'){
-      next_scr[next_scr_pos++] = s[num][cur_chr];
+    if (str[cur_chr] != '\n'){
+      next_scr[next_scr_pos++] = str[cur_chr];
     }
   }
 }
@@ -697,4 +771,8 @@ void CyrI2c::setCursor(uint8_t col){
   if (col == 32){
     setCursor(scr_pos);
   }
+}
+
+void CyrI2c::ln(uint8_t row){
+  setCursor(0, row);
 }
