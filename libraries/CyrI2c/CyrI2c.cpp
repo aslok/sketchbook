@@ -391,8 +391,8 @@ void CyrI2c::write_str_enc(char* str, char* lcd_chars){
     }
     scr[scr_pos++] = str[cur_chr];
 
-    //Serial.println((unsigned char) out);
-    //Serial.println(out_h);
+    /*Serial.println((unsigned char) out);
+    Serial.println(out_h);*/
     lcd->write(out);
   }
   //Serial.println("--------------------------------------------------------");
@@ -467,18 +467,6 @@ void CyrI2c::print(char* str, int8_t position, uint8_t go_ln){
   boolean found = false;
   for (cur_chr = 0; cur_chr < 32; cur_chr++){
     found = false;
-    // Обходим набор использованных самодельных символов для замены 
-    for (i = 0; i < 8; i++){
-      if (char_map[i] && char_map[i] == (unsigned char) next_scr[cur_chr]){
-        // Символ для замены найден, запоминаем по позиции в next_scr
-        lcd_replace[cur_chr] = i;
-        found = true;
-        break;
-      }
-    }
-    if (found){
-      continue;
-    }
     // Обходим основной набор символов для замены
     for (cur = 0; cur < en_cnt; cur++){
       if (en_num[cur] == (unsigned char) next_scr[cur_chr]){
@@ -505,7 +493,19 @@ void CyrI2c::print(char* str, int8_t position, uint8_t go_ln){
     Serial.println(cur_chr);
     Serial.println((int) (unsigned char) lcd_replace[cur_chr]);
     Serial.println("----------------------------");*/
-    
+    found = false;
+    // Обходим набор использованных самодельных символов для замены 
+    for (i = 0; i < 8; i++){
+      if (char_map[i] && char_map[i] == (unsigned char) next_scr[cur_chr]){
+        // Символ для замены найден, запоминаем по позиции в next_scr
+        lcd_replace[cur_chr] = i;
+        found = true;
+        break;
+      }
+    }
+    if (found){
+      continue;
+    }
     found = false;
     // Обходим набор самодельных символов для замены 
     for (cur = 0; cur < 9; cur++){
@@ -530,7 +530,7 @@ void CyrI2c::print(char* str, int8_t position, uint8_t go_ln){
       }
       found = true;
       // Сохраняем в ячейку номер символа который заменяем
-      char_map[i] = next_scr[cur_chr];
+      char_map[i] = ru_num[cur];
       /*Serial.println("lcd->createChar(i, ru[cur]);");
       Serial.println(i);
       Serial.println(cur);
@@ -585,7 +585,7 @@ void CyrI2c::print(char* str, int8_t position, uint8_t go_ln){
             continue;
           }
           // Сохраняем в ячейку номер символа который заменяем
-          char_map[i] = next_scr[cur_chr];
+          char_map[i] = ru_num[cur];
           // Будем заменять его при выводе на номер ячейки
           for (pos = 0; pos < 32; pos++){
             if ((unsigned char) lcd_replace[pos] == ru_num[cur]){
@@ -594,7 +594,7 @@ void CyrI2c::print(char* str, int8_t position, uint8_t go_ln){
               Serial.println(i);
               Serial.println("----------------------------");*/
               lcd_replace[pos] = i;
-            }            
+            }
             // Хак - динамическое обновление символов
             // Перетираем отображающееся предыдущее содержимое ячейки
             if ((unsigned char) next_scr[pos] == ru_num[cur_pos]){
