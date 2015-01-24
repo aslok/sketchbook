@@ -17,6 +17,15 @@ class CyrI2c {
     void setCursor(uint8_t col, uint8_t row);
     void setCursor(uint8_t col = 32);
     void printn(uint8_t num);
+    void print(char chr);
+    void print(char* str);
+    void printn(uint8_t num, int8_t position);
+    void print(char chr, int8_t position);
+    void print(char* str, int8_t position);
+    void printn(uint8_t num, int8_t position, uint8_t go_ln);
+    void print(char chr, int8_t position, uint8_t go_ln);
+    void print(char* str, int8_t position, uint8_t go_ln);
+    void ln(uint8_t row);
     boolean bl = false;
     char** s;
     uint8_t c = 0;
@@ -26,7 +35,8 @@ class CyrI2c {
     uint8_t scr_pos;
     uint8_t char_map[8];
   private:
-    void get_next_scr(uint8_t num, char& next_scr);
+    void get_next_scr(char* str, char& next_scr);
+    void write_str_enc(char* str, char* lcd);
     void clear_screen();
     LiquidCrystal_I2C* lcd;
     char* abc;

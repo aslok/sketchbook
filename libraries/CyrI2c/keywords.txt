@@ -6,4 +6,5 @@ clear	KEYWORD2
 home	KEYWORD2
 setCursor	KEYWORD2
 printn	KEYWORD2
-
+print	KEYWORD2
+ln	KEYWORD2
