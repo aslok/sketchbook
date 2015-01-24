@@ -1,9 +1,12 @@
 // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 
 #include <Wire.h>
-#include "RTClib.h"
 #include <LiquidCrystal_I2C.h>
-RTC_DS1307 rtc;
+#include <Time.h>
+#include <DateTime.h>
+#include <DS1302RTC.h>
+// Set pins:  CE, IO,CLK
+DS1302RTC RTC(13, 12, 11);
 LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
 
 byte LT[8] = 
@@ -109,7 +112,6 @@ int count = 0;
 void setup () {
   Serial.begin(57600);
   Wire.begin();
-  rtc.begin();
   lcd.init();                      // initialize the lcd 
   lcd.backlight();
   lcd.home();
@@ -128,11 +130,6 @@ void setup () {
 
 
 
-  if (! rtc.isrunning()) {
-    Serial.println("RTC is NOT running!");
-    // following line sets the RTC to the date & time this sketch was compiled
-    // rtc.adjust(DateTime(__DATE__, __TIME__));
-  }
 }
 
 
@@ -280,20 +277,21 @@ void loop () {
 
 void digitalClockDisplay(){
   // digital clock display of the time
-  DateTime now = rtc.now();
+  tmElements_t tm;
+  RTC.read(tm);
 
-  printDigits(now.hour()/10,0); 
-  printDigits(now.hour()%10,4); 
+  printDigits(tm.Hour/10,0); 
+  printDigits(tm.Hour%10,4); 
 
-  printDigits(now.minute()/10,9);
-  printDigits(now.minute()%10,13);
+  printDigits(tm.Minute/10,9);
+  printDigits(tm.Minute%10,13);
 
   // lcd.setCursor(7, 1);
   //  lcd.print(now.second()/10);
   //   lcd.print(now.second()%10);
 
 
-  if (now.second()%10%2==0){
+  if (tm.Second%10%2==0){
     lcd.setCursor(7, 0);
     lcd.print("+ ");
     lcd.setCursor(7, 1);
