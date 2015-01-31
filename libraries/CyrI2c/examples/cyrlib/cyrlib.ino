@@ -22,41 +22,7 @@ Global variables use 245 bytes (11%) of dynamic memory, leaving 1 803 bytes for 
 #include <CyrI2c.h>
 CyrI2c* lcd;
 
-/*void setup(){
-  Serial.begin(9600);  
-  lcd = new CyrI2c(0x27, 16, 2);
-  lcd->backlight();
-  
-  lcd->init(F("АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСУФХЦЧШЩЬЮЯ\r "));
-  //lcd->printn(0);
-  //for (uint8_t num = 0; lcd->scr[num]; num++){
-  //  Serial.println((unsigned char) lcd->scr[num]);
-  //}
-}
-void loop(){
-  lcd->home();
-  lcd->printn(0);
-  delay(1000);
-  for (uint8_t num = 0; num < 24; num++){
-    delay(2000);
-    lcd->setCursor(num);
-    lcd->printn(1);
-  }
-  delay(2000);
-  lcd->home();
-  lcd->printn(0);
-  delay(1000);
-  for (uint8_t num = 32; num-- > 8; ){
-    delay(2000);
-    lcd->setCursor(num);
-    lcd->printn(1);
-  }
-  delay(2000);
-}*/
 
-
-
-/*
 // Использование символа "перенос строки"
 void setup(){
   lcd = new CyrI2c(0x27, 16, 2);
@@ -65,7 +31,7 @@ void setup(){
   lcd->printn(0);
 }
 void loop(){
-}*/
+}
 
 
 /*
@@ -105,11 +71,57 @@ void loop(){
 
 
 /*
+// Пример анимации, первая и вторая строки выводятся в разных позициях
+void setup(){
+  lcd = new CyrI2c(0x27, 16, 2);
+  lcd->backlight();
+
+  lcd->init(F("Arduino Nano\rАрдуино Нано"));
+}
+void loop(){
+  for (uint8_t num = 0; num < 4; num++){
+    lcd->clear();
+    switch (num){
+      case (0):
+        lcd->setCursor(0, 0);
+        break;
+      case (1):
+        lcd->setCursor(4, 1);
+        break;
+      case (2):
+        lcd->setCursor(0, 1);
+        break;
+      case (3):
+        lcd->setCursor(4, 0);
+        break;
+    }
+    lcd->printn(0);
+    switch (num){
+      case (0):
+        lcd->setCursor(4, 1);
+        break;
+      case (1):
+        lcd->setCursor(0, 0);
+        break;
+      case (2):
+        lcd->setCursor(4, 0);
+        break;
+      case (3):
+        lcd->setCursor(0, 1);
+        break;
+    }
+    lcd->printn(1);
+    delay(1700);
+  }
+}*/
+
+
+/*
 // Проверка отображения символов русского алфавита
 void setup(){
   lcd = new CyrI2c(0x27, 16, 2);
   lcd->backlight();
-  
+
   lcd->init(F("АБВГДЕЁЖЗИЙКЛМНОПРСУФХЦЧШЩЪЫЬЭЮЯ\r "));
 }
 void loop(){
@@ -134,12 +146,12 @@ void loop(){
 }*/
 
 
-
+/*
 // Проверка отображения символов украинского алфавита
 void setup(){
   lcd = new CyrI2c(0x27, 16, 2);
   lcd->backlight();
-  
+
   lcd->init(F("АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСУФХЦЧШЩЬЮЯ\r "));
 }
 void loop(){
@@ -161,21 +173,6 @@ void loop(){
     lcd->printn(1);
   }
   delay(2000);
-}
-
-
-/*
-// Пример вывода в порт текста lcd экрана в относительно читабельном виде
-void setup(){
-  Serial.begin(9600);  
-  lcd = new CyrI2c(0x27, 16, 2);
-  lcd->backlight();
-  lcd->init(F("Привет мир!\nЯ Ардуино Уно =)"));
-  lcd->printn(0);
-  Serial.println(lcd->scr_h);
-  // ПРИВЕТ МИР!     Я АРДУИНО УНО =)
-}
-void loop(){
 }*/
 
 
