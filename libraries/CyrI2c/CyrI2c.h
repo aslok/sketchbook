@@ -15,6 +15,12 @@ class CyrI2c {
 
     void backlight();
     void backlight(boolean state);
+    void power();
+    void power(boolean state);
+    void cursor();
+    void cursor(boolean state);
+    void blink();
+    void blink(boolean state);
     void clear();
     void home();
     void setCursor(uint8_t col, uint8_t row);
@@ -24,7 +30,10 @@ class CyrI2c {
     void init(const __FlashStringHelper* str);
     void printn(uint8_t num, int8_t position = 127, uint8_t go_ln = 255);
 
-    boolean bl;
+    boolean bl = false;
+    boolean pwr = true;
+    boolean crsr = false;
+    boolean blnk = false;
 
 
   private:

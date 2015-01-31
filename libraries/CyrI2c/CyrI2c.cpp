@@ -606,7 +606,7 @@ void CyrI2c::clear_screen(){
 }
 
 void CyrI2c::backlight(boolean state){
-  if (state){
+  if (bl = state){
     lcd->backlight();
   }else{
     lcd->noBacklight();
@@ -618,6 +618,54 @@ void CyrI2c::backlight(){
     lcd->backlight();
   }else{
     lcd->noBacklight();
+  }
+}
+
+void CyrI2c::power(boolean state){
+  if (pwr = state){
+    lcd->display();
+  }else{
+    lcd->noDisplay();
+  }
+}
+
+void CyrI2c::power(){
+  if (pwr = !pwr){
+    lcd->display();
+  }else{
+    lcd->noDisplay();
+  }
+}
+
+void CyrI2c::cursor(boolean state){
+  if (crsr = state){
+    lcd->cursor();
+  }else{
+    lcd->noCursor();
+  }
+}
+
+void CyrI2c::cursor(){
+  if (crsr = !crsr){
+    lcd->cursor();
+  }else{
+    lcd->noCursor();
+  }
+}
+
+void CyrI2c::blink(boolean state){
+  if (blnk = state){
+    lcd->blink();
+  }else{
+    lcd->noBlink();
+  }
+}
+
+void CyrI2c::blink(){
+  if (blnk = !blnk){
+    lcd->blink();
+  }else{
+    lcd->noBlink();
   }
 }
 
