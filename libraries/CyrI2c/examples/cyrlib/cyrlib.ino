@@ -59,7 +59,7 @@ void setup(){
   lcd->printn(2);
 }
 void loop(){
-  for (uint8_t num = 0; num < 2; num++){
+  for (byte num = 0; num < 2; num++){
     lcd->home();
     lcd->printn(num);
     if (!num){
@@ -79,7 +79,7 @@ void setup(){
   lcd->init(F("Arduino Nano\rАрдуино Нано"));
 }
 void loop(){
-  for (uint8_t num = 0; num < 4; num++){
+  for (byte num = 0; num < 4; num++){
     lcd->clear();
     switch (num){
       case (0):
@@ -128,7 +128,7 @@ void loop(){
   lcd->home();
   lcd->printn(0);
   delay(1000);
-  for (uint8_t num = 0; num < 24; num++){
+  for (byte num = 0; num < 24; num++){
     delay(2000);
     lcd->setCursor(num);
     lcd->printn(1);
@@ -137,7 +137,7 @@ void loop(){
   lcd->home();
   lcd->printn(0);
   delay(1000);
-  for (uint8_t num = 32; num-- > 10; ){
+  for (byte num = 32; num-- > 10; ){
     delay(2000);
     lcd->setCursor(num);
     lcd->printn(1);
@@ -158,7 +158,7 @@ void loop(){
   lcd->home();
   lcd->printn(0);
   delay(1000);
-  for (uint8_t num = 0; num < 24; num++){
+  for (byte num = 0; num < 24; num++){
     delay(2000);
     lcd->setCursor(num);
     lcd->printn(1);
@@ -167,7 +167,7 @@ void loop(){
   lcd->home();
   lcd->printn(0);
   delay(1000);
-  for (uint8_t num = 32; num-- > 10; ){
+  for (byte num = 32; num-- > 10; ){
     delay(2000);
     lcd->setCursor(num);
     lcd->printn(1);
@@ -184,7 +184,7 @@ void setup(){
   lcd->init(F("ПРЕВЕТИЧЕГ!\rЯ ТУПО АРДУИНКО\rЙА УЧУ РУССКИЙ\rВЫХОДИТ ХРЕНОВО\rВИДИШЬ ЛАЖА\rНУ ТО ТАКОЕ\rМНОГО ТЕКСТА\rМАЛО ТОЛКУ\rПРОВЕРЯЕМ ДЛИНУ\rСКОЛЬКО ВЛЕЗЕТ\rПОКА ВЛАЗИТ\rДОКИНЕМ ИШО\rЧТОБ БЫЛО\rЧЕМ БОГАТЫ\rЛЕВ ТОЛСТОЙ\rВОЙНА "));
 }
 void loop(){
-  for (uint8_t num = 0; num < lcd->c; num++){
+  for (byte num = 0; num < lcd->c; num++){
     lcd->clear();
     lcd->printn(num);
     lcd->setCursor(0, 1);

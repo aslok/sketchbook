@@ -6,11 +6,11 @@
 
 class CyrI2c {
   public:
-    CyrI2c(uint8_t address, uint8_t width, uint8_t height);
-    void print(const __FlashStringHelper* str, int8_t position = 127, uint8_t go_ln = 255);
-    void print(char chr, int8_t position = 127, uint8_t go_ln = 255);
-    void print(char* str, int8_t position = 127, uint8_t go_ln = 255);
-    void print_enc(char* str, int8_t position, uint8_t go_ln);
+    CyrI2c(byte address, byte width, byte height);
+    void print(const __FlashStringHelper* str, int8_t position = 127, byte go_ln = 255);
+    void print(char chr, int8_t position = 127, byte go_ln = 255);
+    void print(char* str, int8_t position = 127, byte go_ln = 255);
+    void print_enc(char* str, int8_t position, byte go_ln);
     void get_str_enc(char* str, char* result);
 
     void backlight();
@@ -23,12 +23,12 @@ class CyrI2c {
     void blink(boolean state);
     void clear();
     void home();
-    void setCursor(uint8_t col, uint8_t row);
-    void setCursor(uint8_t col = 32);
+    void setCursor(byte col, byte row);
+    void setCursor(byte col = 32);
 
     void init(const char* str);
     void init(const __FlashStringHelper* str);
-    void printn(uint8_t num, int8_t position = 127, uint8_t go_ln = 255);
+    void printn(byte num, int8_t position = 127, byte go_ln = 255);
 
     boolean bl = false;
     boolean pwr = true;
@@ -42,24 +42,24 @@ class CyrI2c {
 
     void clear_screen();
 
-    void printn_str(uint8_t num, int8_t position, uint8_t go_ln);
-		void printn_flash(uint8_t num, int8_t position, uint8_t go_ln);
+    void printn_str(byte num, int8_t position, byte go_ln);
+		void printn_flash(byte num, int8_t position, byte go_ln);
 
     LiquidCrystal_I2C* lcd;
     char* abc;
-    uint8_t** ru;
-    uint8_t* ru_num;
-    uint8_t ru_cnt;
-    uint8_t* en;
-    uint8_t* en_num;
-    uint8_t en_cnt;
+    byte** ru;
+    byte* ru_num;
+    byte ru_cnt;
+    byte* en;
+    byte* en_num;
+    byte en_cnt;
 
 		const char* s;
 		char* p_s;
-		uint8_t f;
+		byte f;
     char scr[33];
-    uint8_t scr_pos;
-    uint8_t char_map[8];
+    byte scr_pos;
+    byte char_map[8];
 };
 
 #endif
