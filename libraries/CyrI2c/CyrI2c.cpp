@@ -11,43 +11,43 @@ with Arduino 1.5.8 (tested on Arduino Uno)
 
 /*
 Кодировка использует для хранения символа один беззнаковый байт
-192	А
-193	Б
-194	В
-195	Г
-196	Д
-197	Е
-198	Ё
-199	Ж
-200	З
-201	И
-202	Й
-203	К
-204	Л
-205	М
-206	Н
-207	О
-208	П
-209	Р
-210	С
-211	Т
-212	У
-213	Ф
-214	Х
-215	Ц
-216	Ч
-217	Ш
-218	Щ
-219	Ъ
-220	Ы
-221	Ь
-222	Э
-223	Ю
-224	Я
-225	Ґ
-226	Є
-227	І
-228	Ї
+128	А
+129	Б
+130	В
+131	Г
+132	Д
+133	Е
+134	Ё
+135	Ж
+136	З
+137	И
+138	Й
+139	К
+140	Л
+141	М
+142	Н
+143	О
+144	П
+145	Р
+146	С
+147	Т
+148	У
+149	Ф
+150	Х
+151	Ц
+152	Ч
+153	Ш
+154	Щ
+155	Ъ
+156	Ы
+157	Ь
+158	Э
+159	Ю
+160	Я
+161	Ґ
+162	Є
+163	І
+164	Ї
 */
 
 CyrI2c::CyrI2c(byte address, byte width, byte height) {
@@ -62,112 +62,112 @@ CyrI2c::CyrI2c(byte address, byte width, byte height) {
   en_num = new byte[en_chars_count];
   en_cnt = en_chars_count;
 
-  ru_num[0]  = 193; // Б
+  ru_num[0]  = 129; // Б
   ru[0]  = new byte[8]{ 0x1e,0x10,0x10,0x1e,0x11,0x11,0x1e,0x0 };
-  ru_num[1]  = 195; // Г
+  ru_num[1]  = 131; // Г
   ru[1]  = new byte[8]{ 0x1f,0x10,0x10,0x10,0x10,0x10,0x10,0x0 };
-  ru_num[2]  = 196; // Д
+  ru_num[2]  = 132; // Д
   ru[2]  = new byte[8]{ 0xe, 0xa, 0xa, 0xa, 0xa, 0x1f,0x11,0x0 };
-  ru_num[3]  = 220; // Ы
+  ru_num[3]  = 156; // Ы
   ru[3]  = new byte[8]{ 0x11,0x11,0x11,0x1d,0x13,0x13,0x1d,0x0 };
-  ru_num[4]  = 223; // Ю
+  ru_num[4]  = 159; // Ю
   ru[4]  = new byte[8]{ 0x17,0x15,0x15,0x1d,0x15,0x15,0x17,0x0 };
-  ru_num[5]  = 224; // Я
+  ru_num[5]  = 160; // Я
   ru[5]  = new byte[8]{ 0xf, 0x11,0x11,0xf, 0x5, 0x9, 0x11,0x0 };
-  ru_num[6]  = 199; // Ж
+  ru_num[6]  = 135; // Ж
   ru[6]  = new byte[8]{ 0x15,0x15,0xe, 0xe, 0xe, 0x15,0x15,0x0 };
-  ru_num[7]  = 208; // П
+  ru_num[7]  = 144; // П
   ru[7]  = new byte[8]{ 0x1f,0x11,0x11,0x11,0x11,0x11,0x11,0x0 };
-  ru_num[8]  = 225; // Ґ
+  ru_num[8]  = 161; // Ґ
   ru[8]  = new byte[8]{ 0x1, 0x1f,0x10,0x10,0x10,0x10,0x10,0x0 };
-  ru_num[9]  = 216; // Ч
+  ru_num[9]  = 152; // Ч
   ru[9]  = new byte[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0x1, 0x0 };
-  ru_num[10] = 226; // Є
+  ru_num[10] = 162; // Є
   ru[10] = new byte[8]{ 0xf, 0x10,0x10,0x1e,0x10,0x10,0xf, 0x0 };
-  ru_num[11] = 204; // Л
+  ru_num[11] = 140; // Л
   ru[11] = new byte[8]{ 0x3, 0x5, 0x9, 0x9, 0x9, 0x9, 0x19,0x0 };
-  ru_num[12] = 212; // У
+  ru_num[12] = 148; // У
   ru[12] = new byte[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0xe, 0x0 };
-  ru_num[13] = 213; // Ф
+  ru_num[13] = 149; // Ф
   ru[13] = new byte[8]{ 0xe, 0x15,0x15,0x15,0xe, 0x4, 0x4, 0x0 };
-  ru_num[14] = 215; // Ц
+  ru_num[14] = 151; // Ц
   ru[14] = new byte[8]{ 0x12,0x12,0x12,0x12,0x12,0x12,0x1f,0x1 };
-  ru_num[15] = 222; // Э
+  ru_num[15] = 158; // Э
   ru[15] = new byte[8]{ 0x1e,0x1, 0x1, 0xf, 0x1, 0x1, 0x1e,0x0 };
-  ru_num[16] = 219; // Ъ
+  ru_num[16] = 155; // Ъ
   ru[16] = new byte[8]{ 0x18,0x8, 0x8, 0xe, 0x9, 0x9, 0xe, 0x0 };
-  ru_num[17] = 218; // Щ
+  ru_num[17] = 154; // Щ
   ru[17] = new byte[8]{ 0x15,0x15,0x15,0x15,0x15,0x15,0x1e,0x1 };
-  ru_num[18] = 228; // Ї
+  ru_num[18] = 164; // Ї
   ru[18] = new byte[8]{ 0xa, 0x4, 0x4, 0x4, 0x4, 0x4, 0xe, 0x0 };
-  ru_num[19] = 217; // Ш
+  ru_num[19] = 153; // Ш
   ru[19] = new byte[8]{ 0x15,0x15,0x15,0x15,0x15,0x15,0x1f,0x0 };
-  ru_num[20] = 202; // Й
+  ru_num[20] = 138; // Й
   ru[20] = new byte[8]{ 0x15,0x11,0x11,0x13,0x15,0x19,0x11,0x0 };
-  ru_num[21] = 201; // И
+  ru_num[21] = 137; // И
   ru[21] = new byte[8]{ 0x11,0x11,0x11,0x13,0x15,0x19,0x11,0x0 };
-  ru_num[22] = 198; // Ё
+  ru_num[22] = 134; // Ё
   ru[22] = new byte[8]{ 0xa, 0x1f,0x10,0x1e,0x10,0x10,0x1f,0x0 };
-  ru_num[23] = 200; // З
+  ru_num[23] = 136; // З
   ru[23] = new byte[8]{ 0xe, 0x11,0x1, 0xe, 0x1, 0x11,0xe, 0x0 };
-  ru_num[24] = 221; // Ь
+  ru_num[24] = 157; // Ь
   ru[24] = new byte[8]{ 0x10,0x10,0x10,0x1c,0x12,0x12,0x1c,0x0 };
 
-  en_num[0]  = 192; // А
+  en_num[0]  = 128; // А
   en[0]  = 'A';
-  en_num[1]  = 194; // В
+  en_num[1]  = 130; // В
   en[1]  = 'B';
-  en_num[2]  = 197; // Е
+  en_num[2]  = 133; // Е
   en[2]  = 'E';
-  en_num[3]  = 198; // Ё
+  en_num[3]  = 134; // Ё
   en[3]  = 'E';
-  en_num[4]  = 200; // З
+  en_num[4]  = 136; // З
   en[4]  = '3';
-  en_num[5]  = 201; // И
+  en_num[5]  = 137; // И
   en[5]  = 'U';
-  en_num[6]  = 202; // Й
+  en_num[6]  = 138; // Й
   en[6]  = 'U';
-  en_num[7]  = 203; // К
+  en_num[7]  = 139; // К
   en[7]  = 'K';
-  en_num[8]  = 205; // М
+  en_num[8]  = 141; // М
   en[8]  = 'M';
-  en_num[9]  = 206; // Н
+  en_num[9]  = 142; // Н
   en[9]  = 'H';
-  en_num[10] = 207; // О
+  en_num[10] = 143; // О
   en[10] = 'O';
-  en_num[11] = 209; // Р
+  en_num[11] = 145; // Р
   en[11] = 'P';
-  en_num[12] = 210; // С
+  en_num[12] = 146; // С
   en[12] = 'C';
-  en_num[13] = 211; // Т
+  en_num[13] = 147; // Т
   en[13] = 'T';
-  en_num[14] = 214; // Х
+  en_num[14] = 150; // Х
   en[14] = 'X';
-  en_num[15] = 217; // Ш
+  en_num[15] = 153; // Ш
   en[15] = 'W';
-  en_num[16] = 218; // Щ
+  en_num[16] = 154; // Щ
   en[16] = 'W';
-  en_num[17] = 221; // Ь
+  en_num[17] = 157; // Ь
   en[17] = 'b';
-  en_num[18] = 219; // Ъ
+  en_num[18] = 155; // Ъ
   en[18] = 'b';
-  en_num[19] = 204; // Л
+  en_num[19] = 140; // Л
   en[19] = 202;
-  en_num[20] = 212; // У
+  en_num[20] = 148; // У
   en[20] = 191;
-  en_num[21] = 213; // Ф
+  en_num[21] = 149; // Ф
   en[21] = 236;
-  en_num[22] = 216; // Ч
+  en_num[22] = 152; // Ч
   en[22] = 209;
-  en_num[23] = 215; // Ц
+  en_num[23] = 151; // Ц
   en[23] = 249;
-  en_num[24] = 222; // Э
+  en_num[24] = 158; // Э
   en[24] = 214;
-  en_num[25] = 226; // Є
+  en_num[25] = 162; // Є
   en[25] = 211;
-  en_num[26] = 227; // І
+  en_num[26] = 163; // І
   en[26] = 'I';
-  en_num[27] = 228; // Ї
+  en_num[27] = 164; // Ї
   en[27] = 'I';
 
   s      = NULL;
@@ -264,9 +264,9 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln){
   }
 
   // Выполнена предварительная замена, lcd_replace почти во внутренней кодировке
-  // Ищем символы которые нужно и можно заменить, их коды в области 192-255
+  // Ищем символы которые нужно и можно заменить, их коды в области 128-180
   for (cur_chr = 0; cur_chr < 32; cur_chr++){
-    if ((byte) lcd_replace[cur_chr] < 192 || (byte) lcd_replace[cur_chr] > 255){
+    if ((byte) lcd_replace[cur_chr] < 128 || (byte) lcd_replace[cur_chr] > 180){
       continue;
     }
     /*Serial.println("(byte) lcd_replace[cur_chr]");
@@ -532,7 +532,7 @@ void CyrI2c::write_str_enc(char* str, char* lcd_chars){
     if (scr_pos == 0 || scr_pos == 16){
       setCursor();
     }
-    if ((byte) out >= 192 && (byte) out <= 255){
+    if ((byte) out >= 128 && (byte) out <= 180){
       out = lcd_chars[scr_pos];
     }
     scr[scr_pos++] = str[cur_chr];
@@ -572,15 +572,15 @@ void CyrI2c::get_str_enc(char* str, char* result){
         // Русский алфавит верхний регистр
         if (abc_num < 66){
           // Пишем в результат символ для замены найденной строки
-          result[res_pos++] = (abc_num / 2) + 192;
+          result[res_pos++] = (abc_num / 2) + 128;
         // Русский алфавит нижний регистр
         // И символы из украинского алфавита верхний регистр
         }else if (abc_num < 140){
           // Пишем в результат символ для замены найденной строки
-          result[res_pos++] = (abc_num / 2) + 159;
+          result[res_pos++] = (abc_num / 2) + 95;
         // Символы из украинского алфавита нижний регистр
         }else{
-          result[res_pos++] = (abc_num / 2) + 155;
+          result[res_pos++] = (abc_num / 2) + 91;
         }
         // Сдвигаем текущую позицию строки на один символ (потому что всего надо на два)
         str_pos++;
