@@ -1,13 +1,11 @@
 CyrI2c	KEYWORD1
 print	KEYWORD2
-get_str_enc	KEYWORD2
 backlight	KEYWORD2
 power	KEYWORD2
 cursor	KEYWORD2
 blink	KEYWORD2
 clear	KEYWORD2
-home	KEYWORD2
-setCursor	KEYWORD2
+go	KEYWORD2
 init	KEYWORD2
 printn	KEYWORD2
 bl	KEYWORD2
