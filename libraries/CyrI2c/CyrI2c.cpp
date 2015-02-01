@@ -185,7 +185,7 @@ CyrI2c::CyrI2c(byte address, byte width, byte height) {
 
 void CyrI2c::print(const __FlashStringHelper* str, int8_t position, byte go_ln){
   char* ptr = (char*) str;
-  char* tmp = new char[256];
+  char tmp[256];
 	char chr;
 	byte cur_chr;
   for (cur_chr = 0; cur_chr < 255 && (chr = (char) pgm_read_byte_near(ptr + cur_chr)); cur_chr++){
@@ -193,13 +193,11 @@ void CyrI2c::print(const __FlashStringHelper* str, int8_t position, byte go_ln){
 	}
 	tmp[cur_chr] = 0;
 	print(tmp, position, go_ln);
-	delete[] tmp;
 }
 
 void CyrI2c::print(char chr, int8_t position, byte go_ln){
-	char* str = new char[2]{chr};
+	char str[2]{chr};
   print(str, position, go_ln);
-	delete[] str;
 }
 
 void CyrI2c::print(char* str, int8_t position, byte go_ln){
@@ -227,7 +225,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln){
   }
   // Массив символов которые будут отображаться после вывода
   // Порядок соответствует порядку отображения
-  char* next_scr = new char[33];
+  char next_scr[33];
 	//Serial.println(str);
   get_next_scr(str, next_scr);
 	//Serial.println(next_scr);
@@ -483,7 +481,6 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln){
   }
 
   write_str_enc(str, lcd_replace);
-	delete[] next_scr;
 }
 
 void CyrI2c::get_next_scr(char* str, char* next_scr){
@@ -699,13 +696,11 @@ void CyrI2c::setCursor(byte col){
 }
 
 void CyrI2c::init(const __FlashStringHelper* str){
-	delete p_s;
   p_s = (char*) str;
 	f = 1;
 }
 
 void CyrI2c::init(const char* str){
-	delete s;
   s = str;
 	f = 2;
 }
