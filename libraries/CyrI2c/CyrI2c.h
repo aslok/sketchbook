@@ -11,7 +11,6 @@ class CyrI2c {
     void print(char chr, int8_t position = 127, byte go_ln = 255);
     void print(char* str, int8_t position = 127, byte go_ln = 255);
     void print_enc(char* str, int8_t position, byte go_ln);
-    void get_str_enc(char* str, char* result);
 
     void backlight();
     void backlight(boolean state);
@@ -22,9 +21,8 @@ class CyrI2c {
     void blink();
     void blink(boolean state);
     void clear();
-    void home();
-    void setCursor(byte col, byte row);
-    void setCursor(byte col = 32);
+    void go(byte col, byte row);
+    void go(byte col = 32);
 
     void init(const char* str);
     void init(const __FlashStringHelper* str);
@@ -39,8 +37,7 @@ class CyrI2c {
   private:
     void get_next_scr(char* str, char* next_scr);
     void write_str_enc(char* str, char* lcd);
-
-    void clear_screen();
+    void get_str_enc(char* str, char* result);
 
     void printn_str(byte num, int8_t position, byte go_ln);
 		void printn_flash(byte num, int8_t position, byte go_ln);

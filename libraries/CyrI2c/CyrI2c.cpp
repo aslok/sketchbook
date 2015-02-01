@@ -1,8 +1,8 @@
 /*
 created 19.01.2015
-modified 23.01.2015
+modified 01.02.2015
 by Fust Vitaliy
-with Arduino 1.5.8 (tested on Arduino Uno)
+with Arduino 1.5.8 (tested on Arduino Nano)
 */
 
 #include "Arduino.h"
@@ -212,15 +212,15 @@ void CyrI2c::print(char* str, int8_t position, byte go_ln){
 void CyrI2c::print_enc(char* str, int8_t position, byte go_ln){
   byte cur, old_cur, cur_chr, i, cur_pos, pos;
 	if (go_ln != 255 && go_ln < 2){
-    setCursor(0, go_ln);
+    go(0, go_ln);
   }
   if (position != 127 && position < 16 && position > -17){
     if (position < 0){
       // Выясняем длину строки
       for (cur_chr = 0; str[cur_chr] && str[cur_chr] != '\n'; cur_chr++);
-      setCursor(17 - cur_chr + position, scr_pos / 16);
+      go(17 - cur_chr + position, scr_pos / 16);
     }else{
-      setCursor(position, scr_pos / 16);
+      go(position, scr_pos / 16);
     }
   }
   // Массив символов которые будут отображаться после вывода
@@ -317,7 +317,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln){
       Serial.println("----------------------------");*/
       lcd->createChar(i, ru[cur]);
       // Бага lcd->createChar - приходится обновлять курсор
-      setCursor();
+      go();
       // Будем заменять его при выводе на номер ячейки
       for (cur_pos = cur_chr; cur_pos < 32; cur_pos++){
         if ((byte) lcd_replace[cur_pos] == ru_num[cur]){
@@ -389,7 +389,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln){
           // Отображающееся предыдущее содержимое перетерто, можем подменять
           lcd->createChar(i, ru[cur]);
           // Бага lcd->createChar - приходится обновлять курсор
-          setCursor();
+          go();
           break;
         }
       }
@@ -471,7 +471,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln){
           }
         }
         // Бага lcd->createChar - приходится обновлять курсор
-        setCursor();
+        go();
       }
       if (found){
         // Переходим к следующей ячейке
@@ -520,14 +520,14 @@ void CyrI2c::write_str_enc(char* str, char* lcd_chars){
       }else{
         scr_pos = 0;
       }
-      setCursor();
+      go();
       continue;
     }
     if (scr_pos > 31){
       scr_pos = 0;
     }
     if (scr_pos == 0 || scr_pos == 16){
-      setCursor();
+      go();
     }
     if ((byte) out >= 128 && (byte) out <= 180){
       out = lcd_chars[scr_pos];
@@ -591,15 +591,6 @@ void CyrI2c::get_str_enc(char* str, char* result){
     }
   }
   result[res_pos] = 0;
-}
-
-void CyrI2c::clear_screen(){
-  byte i;
-  for (i = 0; i < 32; i++){
-    scr[i] = ' ';
-  }
-  scr[32] = 0;
-  scr_pos = 0;
 }
 
 void CyrI2c::backlight(boolean state){
@@ -667,17 +658,17 @@ void CyrI2c::blink(){
 }
 
 void CyrI2c::clear(){
-  lcd->clear();
-  clear_screen();
-}
-
-void CyrI2c::home(){
-  lcd->home();
+  byte i;
+  for (i = 0; i < 32; i++){
+    scr[i] = ' ';
+  }
+  scr[32] = 0;
   scr_pos = 0;
+  lcd->clear();
 }
 
-void CyrI2c::setCursor(byte col, byte row){
-  //Serial.println("setCursor");
+void CyrI2c::go(byte col, byte row){
+  //Serial.println("go");
   //Serial.println(col);
   //Serial.println(row);
   if (col < 16 && row < 2){
@@ -686,12 +677,12 @@ void CyrI2c::setCursor(byte col, byte row){
   }
 }
 
-void CyrI2c::setCursor(byte col){
+void CyrI2c::go(byte col){
   if (col < 32){
-    setCursor(col - col / 16 * 16, col / 16);
+    go(col - col / 16 * 16, col / 16);
   }
   if (col == 32){
-    setCursor(scr_pos);
+    go(scr_pos);
   }
 }
 
