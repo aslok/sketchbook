@@ -12,13 +12,13 @@
  Keypad 4x4
 
  created 18.01.2015
- modifid 24.01.2015
+ modifid 01.02.2015
  by Fust Vitaliy
- with Arduino 1.5.8 (tested on Arduino Uno)
+ with Arduino 1.5.8 (tested on Arduino Nano)
 */
 /*
-Sketch uses 14 592 bytes (45%) of program storage space. Maximum is 32 256 bytes.
-Global variables use 422 bytes (20%) of dynamic memory, leaving 1 626 bytes for local variables. Maximum is 2 048 bytes.
+Sketch uses 15 048 bytes (48%) of program storage space. Maximum is 30 720 bytes.
+Global variables use 435 bytes (21%) of dynamic memory, leaving 1 613 bytes for local variables. Maximum is 2 048 bytes.
 */
 
 #include <Wire.h>
@@ -55,6 +55,7 @@ void setup() {
 
   rtc.begin();
   DateTime now = rtc.now();
+
   hello(now.hour());
 }
 
@@ -62,22 +63,35 @@ void loop() {
   DateTime now = rtc.now();
   DHT.read11(DHT11_PIN);
 
-  lcd->init(F("Нд\rПн\rВт\rСр\rЧт\rПт\rСб"));
-  lcd->printn(now.dayOfWeek(), -1, 0);
-  lcd->init(F("січня\rлютого\rберезня\rквітня\rтравня\rчервня\rлипня\rсерпня\rвересня\rжовтня\rлистопада\rгрудня"));
-  lcd->printn(now.month() - 1, 3, 0);
-
   char buffer[9];
-  buffer[8] = 0;
-  sprintf(buffer, "%02d", now.day());
-  lcd->print(buffer, 0, 0);
+  char suf[3]{223, 'C'};
+
+  // День недели
+  //lcd->init(F("Нд\rПн\rВт\rСр\rЧт\rПт\rСб"));
+  //lcd->printn(now.dayOfWeek(), -1, 0);
+  lcd->init(F("Неділя\rПонеділок\rВівторок\rСереда\rЧетвер\rП'ятниця\rСубота"));
+  lcd->printn(now.dayOfWeek(), 0, 0);
+
+  // Дата
+  //sprintf(buffer, "%02d.%02d", now.day(), now.month());
+  sprintf(buffer, "%d", now.day());
+  lcd->print(buffer, -5, 0);
+
+  // Месяц
+  //lcd->init(F("січня\rлютого\rберезня\rквітня\rтравня\rчервня\rлипня\rсерпня\rвересня\rжовтня\rлистопада\rгрудня"));
+  //lcd->printn(now.month() - 1, 3, 0);
+  lcd->init(F("січ\rлют\rбер\rкві\rтра\rчер\rлип\rсер\rвер\rжов\rлис\rгру"));
+  lcd->printn(now.month() - 1, -1, 0);
+
+  // Время
   sprintf(buffer, "%02d:%02d:%02d", now.hour(), now.minute(), now.second());
   lcd->print(buffer, -1, 1);
-  char suf[3]{223, 'C'};
-  sprintf(buffer, "%d%s", (byte) DHT.temperature, suf);
+
+  // Температура
+  sprintf(buffer, "%d%s", (byte) DHT.temperature + 2, suf);
   lcd->print(buffer, 0, 1);
 
-
+  // Ждем до конца секунды, проверяем клавиатуру
   unsigned long prevtime = now.unixtime();
   while(prevtime == rtc.now().unixtime()){
     char keypressed = myKeypad.getKey();
@@ -93,6 +107,7 @@ void loop() {
   }
 }
 
+// Приветствие
 void hello(uint8_t hour){
   lcd->clear();
   lcd->init(F("Доброї ночі!\rДоброго ранку!\rДоброго дня!\rДоброго вечора!\rЯ годинник :)"));

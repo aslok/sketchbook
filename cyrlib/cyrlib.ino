@@ -13,38 +13,4 @@ void setup(){
   lcd->backlight();
 }
 void loop(){
-  for (uint8_t num = 0; num < 4; num++){
-    lcd->clear();
-    switch (num){
-      case (0):
-        lcd->setCursor(0, 0);
-        break;
-      case (1):
-        lcd->setCursor(4, 1);
-        break;
-      case (2):
-        lcd->setCursor(0, 1);
-        break;
-      case (3):
-        lcd->setCursor(4, 0);
-        break;
-    }
-    lcd->print(F("Arduino Nano"));
-    switch (num){
-      case (0):
-        lcd->setCursor(4, 1);
-        break;
-      case (1):
-        lcd->setCursor(0, 0);
-        break;
-      case (2):
-        lcd->setCursor(4, 0);
-        break;
-      case (3):
-        lcd->setCursor(0, 1);
-        break;
-    }
-    lcd->print(F("Ардуино Нано"));
-    delay(1700);
-  }
 }
