@@ -5,7 +5,6 @@
 
 const byte numRows = 5;
 const byte numCols = 4;
-
 char keymap[numRows][numCols] = {
   {'+', '-', '#', '*'},
   {'1', '2', '3', 'W'},
@@ -13,9 +12,8 @@ char keymap[numRows][numCols] = {
   {'7', '8', '9', 'B'},
   {'A', '0', 'D', 'E'}
 };
-byte rowPins[numRows] = {2, 3, 4, 5, 6}; //Rows 0 to 3
-byte colPins[numCols] = {10, 9, 8, 7}; //Columns 0 to 3
-
+byte rowPins[numRows] = {4, 5, 6, 7, 8};
+byte colPins[numCols] = {12, 11, 10, 9};
 Keypad myKeypad = Keypad(makeKeymap(keymap), rowPins, colPins, numRows, numCols);
 CyrI2c* lcd;
 
