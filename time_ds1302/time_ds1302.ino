@@ -85,7 +85,7 @@ void setup() {
 void loop() {
   DS1302_clock_burst_read( (uint8_t *) &rtc);
 
-  char buffer[15];
+  char buffer[16];
 
   sprintf( buffer, "    %02d:%02d:%02d    ", \
     bcd2bin( rtc.h24.Hour10, rtc.h24.Hour), \
