@@ -1,4 +1,4 @@
-// Date and time functions using a DS1307 RTC connected via I2C and Wire lib
+// Date and time functions using a DS1302 RTC connected via I2C and Wire lib
 
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -6,9 +6,10 @@
 #include <DS1302RTC.h>
 // Set pins:  CE, IO,CLK
 DS1302RTC RTC(13, 12, 11);
-LiquidCrystal_I2C lcd(0x27,16,2);  // set the LCD address to 0x27 for a 16 chars and 2 line display
+// set the LCD address to 0x27 for a 16 chars and 2 line display
+LiquidCrystal_I2C lcd(0x27,16,2);
 
-byte LT[8] = 
+byte LT[8] =
 {
   B00111,
   B01111,
@@ -105,7 +106,7 @@ byte block[8] =
 int count = 0;
 
 void setup () {
-  lcd.init();                      // initialize the lcd 
+  lcd.init();                      // initialize the lcd
   lcd.backlight();
   lcd.home();
 
@@ -119,7 +120,7 @@ void setup () {
   lcd.createChar(7,block);
 
   // sets the LCD's rows and colums:
-  lcd.clear();  
+  lcd.clear();
 }
 
 
@@ -169,7 +170,7 @@ void custom3(int x)
   lcd.setCursor(x, 1);
   lcd.write(4);
   lcd.write(4);
-  lcd.write(5); 
+  lcd.write(5);
 }
 
 void custom4(int x)
@@ -248,7 +249,7 @@ void custom9(int x)
 
 void loop () {
 
-  digitalClockDisplay();  
+  digitalClockDisplay();
   delay(1000);
 
 }
@@ -259,8 +260,8 @@ void digitalClockDisplay(){
   tmElements_t tm;
   RTC.read(tm);
 
-  printDigits(tm.Hour/10,0); 
-  printDigits(tm.Hour%10,4); 
+  printDigits(tm.Hour/10,0);
+  printDigits(tm.Hour%10,4);
 
   printDigits(tm.Minute/10,9);
   printDigits(tm.Minute%10,13);
@@ -302,34 +303,34 @@ void printDigits(int digits, int x){
   // utility function for digital clock display: prints preceding colon and leading 0
 
   switch (digits) {
-  case 0:  
+  case 0:
     custom0(x);
     break;
-  case 1:  
+  case 1:
     custom1(x);
     break;
-  case 2:  
+  case 2:
     custom2(x);
     break;
-  case 3:  
+  case 3:
     custom3(x);
     break;
-  case 4:  
+  case 4:
     custom4(x);
     break;
-  case 5:  
+  case 5:
     custom5(x);
     break;
-  case 6:  
+  case 6:
     custom6(x);
     break;
-  case 7:  
+  case 7:
     custom7(x);
     break;
-  case 8:  
+  case 8:
     custom8(x);
     break;
-  case 9:  
+  case 9:
     custom9(x);
     break;
 
