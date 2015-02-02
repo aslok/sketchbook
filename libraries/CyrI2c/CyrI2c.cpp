@@ -1,6 +1,6 @@
 /*
 created 19.01.2015
-modified 01.02.2015
+modified 02.02.2015
 by Fust Vitaliy
 with Arduino 1.5.8 (tested on Arduino Nano)
 */
@@ -50,10 +50,14 @@ with Arduino 1.5.8 (tested on Arduino Nano)
 164	Ї
 */
 
+// Конструктор
 CyrI2c::CyrI2c(byte address, byte width, byte height) {
+  // Кол-во самодельных символов для замены
   const byte ru_chars_count = 25;
+  // Кол-во символов, которые можно использовать
   const byte en_chars_count = 28;
 
+  // Строка для поиска символов для замены
 	abc    = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяҐЄІЇґєії");
   ru     = new byte*[ru_chars_count];
   ru_num = new byte[ru_chars_count];
@@ -183,7 +187,8 @@ CyrI2c::CyrI2c(byte address, byte width, byte height) {
   clear();
 }
 
-void CyrI2c::print(const __FlashStringHelper* str, int8_t position, byte go_ln){
+// Ф-ия печати строк переданных с помощью F()
+void CyrI2c::print(const __FlashStringHelper* str, int8_t position, byte go_ln, byte space){
   char* ptr = (char*) str;
   char tmp[256];
 	char chr;
@@ -192,24 +197,42 @@ void CyrI2c::print(const __FlashStringHelper* str, int8_t position, byte go_ln){
 		tmp[cur_chr] = chr;
 	}
 	tmp[cur_chr] = 0;
-	print(tmp, position, go_ln);
+	print(tmp, position, go_ln, space);
 }
 
-void CyrI2c::print(char chr, int8_t position, byte go_ln){
-	char str[2]{chr};
+// Ф-ия печати целых чисел
+void CyrI2c::print(int chr, int8_t position, byte go_ln, byte space){
+	char str[33];
+  sprintf(str, "%d", chr);
+  print(str, position, go_ln, space);
+}
+
+// Печать чисел с плавающей точкой
+void CyrI2c::print(double chr, int8_t position, byte go_ln, byte width, byte prec){
+	char str[33];
+  dtostrf(chr, width, prec, str);
   print(str, position, go_ln);
 }
 
-void CyrI2c::print(char* str, int8_t position, byte go_ln){
+// Печать отдельного символа
+void CyrI2c::print(char chr, int8_t position, byte go_ln, byte space){
+	char str[2]{chr};
+  print(str, position, go_ln, space);
+}
+
+// Печать отдельного символа
+// Печать массива символов по указателю
+void CyrI2c::print(char* str, int8_t position, byte go_ln, byte space){
 	byte cur_chr;
   for (cur_chr = 0; cur_chr < 255 && str[cur_chr]; cur_chr++);
 	char* tmp = new char[cur_chr + 1];
 	get_str_enc(str, tmp);
-  print_enc(tmp, position, go_ln);
+  print_enc(tmp, position, go_ln, space);
 	delete[] tmp;
 }
 
-void CyrI2c::print_enc(char* str, int8_t position, byte go_ln){
+// Печать массива символов во внутренней кодировке
+void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
   byte cur, old_cur, cur_chr, i, cur_pos, pos;
 	if (go_ln != 255 && go_ln < 2){
     go(0, go_ln);
@@ -222,6 +245,11 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln){
     }else{
       go(position, scr_pos / 16);
     }
+  }
+  if (space){
+    // Выясняем длину строки
+    for (cur_chr = 0; str[cur_chr] && str[cur_chr] != '\n'; cur_chr++);
+    go((space - cur_chr) / 2 + scr_pos);
   }
   // Массив символов которые будут отображаться после вывода
   // Порядок соответствует порядку отображения
@@ -483,6 +511,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln){
   write_str_enc(str, lcd_replace);
 }
 
+// Получаем массив символов, которые будут отображаться после вывода строки
 void CyrI2c::get_next_scr(char* str, char* next_scr){
   byte next_scr_pos = scr_pos;
 	// Копируем текущий экран
@@ -510,6 +539,7 @@ void CyrI2c::get_next_scr(char* str, char* next_scr){
   }
 }
 
+// Печатаем строку сгенерированную для экрана по строке во внутренней кодировке
 void CyrI2c::write_str_enc(char* str, char* lcd_chars){
   char out;
   for (byte cur_chr = 0; str[cur_chr] && cur_chr < 255; cur_chr++){
@@ -543,6 +573,7 @@ void CyrI2c::write_str_enc(char* str, char* lcd_chars){
   //Serial.println("--------------------------------------------------------");
 }
 
+// Конвертируем строку во внутреннюю кодировку
 void CyrI2c::get_str_enc(char* str, char* result){
   boolean found = false;
   byte res_pos = 0;
@@ -593,6 +624,7 @@ void CyrI2c::get_str_enc(char* str, char* result){
   result[res_pos] = 0;
 }
 
+// Подсветка экрана
 void CyrI2c::backlight(boolean state){
   if (bl = state){
     lcd->backlight();
@@ -601,6 +633,7 @@ void CyrI2c::backlight(boolean state){
   }
 }
 
+// Подсветка экрана
 void CyrI2c::backlight(){
   if (bl = !bl){
     lcd->backlight();
@@ -609,6 +642,7 @@ void CyrI2c::backlight(){
   }
 }
 
+// Символы
 void CyrI2c::power(boolean state){
   if (pwr = state){
     lcd->display();
@@ -617,6 +651,7 @@ void CyrI2c::power(boolean state){
   }
 }
 
+// Символы
 void CyrI2c::power(){
   if (pwr = !pwr){
     lcd->display();
@@ -625,6 +660,7 @@ void CyrI2c::power(){
   }
 }
 
+// Курсор _
 void CyrI2c::cursor(boolean state){
   if (crsr = state){
     lcd->cursor();
@@ -633,6 +669,7 @@ void CyrI2c::cursor(boolean state){
   }
 }
 
+// Курсор _
 void CyrI2c::cursor(){
   if (crsr = !crsr){
     lcd->cursor();
@@ -641,6 +678,7 @@ void CyrI2c::cursor(){
   }
 }
 
+// Курсор []
 void CyrI2c::blink(boolean state){
   if (blnk = state){
     lcd->blink();
@@ -649,6 +687,7 @@ void CyrI2c::blink(boolean state){
   }
 }
 
+// Курсор []
 void CyrI2c::blink(){
   if (blnk = !blnk){
     lcd->blink();
@@ -657,6 +696,7 @@ void CyrI2c::blink(){
   }
 }
 
+// Очистка экрана и установка курсора на ноль
 void CyrI2c::clear(){
   byte i;
   for (i = 0; i < 32; i++){
@@ -667,6 +707,7 @@ void CyrI2c::clear(){
   lcd->clear();
 }
 
+// Установка курсора в выбранные столбец-строка
 void CyrI2c::go(byte col, byte row){
   //Serial.println("go");
   //Serial.println(col);
@@ -677,6 +718,7 @@ void CyrI2c::go(byte col, byte row){
   }
 }
 
+// Установка курсора в выбранную позицию справа-налево сверху-вниз
 void CyrI2c::go(byte col){
   if (col < 32){
     go(col - col / 16 * 16, col / 16);
@@ -686,28 +728,32 @@ void CyrI2c::go(byte col){
   }
 }
 
+// Инициализация массива строк разделенных символом \r переданного через F()
 void CyrI2c::init(const __FlashStringHelper* str){
   p_s = (char*) str;
 	f = 1;
 }
 
+// Инициализация массива строк разделенных символом \r переданного через указатель
 void CyrI2c::init(const char* str){
   s = str;
 	f = 2;
 }
 
-void CyrI2c::printn(byte num, int8_t position, byte go_ln){
+// Печать строки из ранее переданного массива по её номеру
+void CyrI2c::printn(byte num, int8_t position, byte go_ln, byte space){
   if (f == 1){
-    printn_flash(num, position, go_ln);
+    printn_flash(num, position, go_ln, space);
 		return;
   }
   if (f == 2){
-    printn_str(num, position, go_ln);
+    printn_str(num, position, go_ln, space);
 		return;
   }
 }
 
-void CyrI2c::printn_str(byte num, int8_t position, byte go_ln){
+// Печать строки из ранее переданного массива символов по её номеру
+void CyrI2c::printn_str(byte num, int8_t position, byte go_ln, byte space){
   char str[255];
 	byte count = 0, str_pos;
 	word pos = 0;
@@ -727,10 +773,11 @@ void CyrI2c::printn_str(byte num, int8_t position, byte go_ln){
     str[str_pos++] = s[pos];
 	}
 	str[str_pos] = 0;
-	print(str, position, go_ln);
+	print(str, position, go_ln, space);
 }
 
-void CyrI2c::printn_flash(byte num, int8_t position, byte go_ln){
+// Печать строки из ранее переданного внутри F() массива по её номеру
+void CyrI2c::printn_flash(byte num, int8_t position, byte go_ln, byte space){
   char str[255];
 	byte count = 0, str_pos;
 	word pos = 0;
@@ -738,7 +785,6 @@ void CyrI2c::printn_flash(byte num, int8_t position, byte go_ln){
   while (count < num && pos < 65000 && (chr = (char) pgm_read_byte_near(p_s + pos++))){
 		if (chr == '\r'){
       count++;
-      continue;
 		}
   }
 	if (count != num){
@@ -751,5 +797,5 @@ void CyrI2c::printn_flash(byte num, int8_t position, byte go_ln){
     str[str_pos++] = chr;
 	}
 	str[str_pos] = 0;
-	print(str, position, go_ln);
+	print(str, position, go_ln, space);
 }
