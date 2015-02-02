@@ -12,16 +12,14 @@
  между знаками в слове — 3 точки, между словами — 7 точек
 
  created 15.01.2015
- modifid 17.01.2015
+ modifid 02.02.2015
  by Fust Vitaliy
  with Arduino 1.5.8 (tested on Arduino Uno)
  */
- 
-// Sketch uses 6 784 bytes (21%) of program storage space. Maximum is 32 256 bytes.
-// Global variables use 1 094 bytes (53%) of dynamic memory, leaving 954 bytes for local variables. Maximum is 2 048 bytes.
-
-// Sketch uses 5 302 bytes (16%) of program storage space. Maximum is 32 256 bytes.
-// Global variables use 921 bytes (44%) of dynamic memory, leaving 1 127 bytes for local variables. Maximum is 2 048 bytes.
+/*
+Sketch uses 4 806 bytes (15%) of program storage space. Maximum is 30 720 bytes.
+Global variables use 553 bytes (27%) of dynamic memory, leaving 1 495 bytes for local variables. Maximum is 2 048 bytes.
+*/
 
 // Строка для ввода
 const String str = "Jah Rastafari!";
@@ -30,22 +28,24 @@ const String str = "Jah Rastafari!";
 // Очевидно используется общая куча для строк String в которой просто заканчивается место
 // Пример хорошей строки без переполнения
 // qwertyuiopasdfghjklzxcv
-// --.- .-- . .-. - -.-- ..- .. --- .--. .- ... -.. ..-. --. .... .--- -.- .-.. --.. -..- -.-. ...- 
+// --.- .-- . .-. - -.-- ..- .. --- .--. .- ... -.. ..-. --. .... .--- -.- .-.. --.. -..- -.-. ...-
 // Примеры плохих строк с переполнением
 // qwertyuiopasdfghjklzxcvb
-// --.- .-- . .-. - -.-- ..- .. --- .--. .- ... -.. ..-. --. .... .--- -.- .-.. --.. -..- -.-. ...- 
+// --.- .-- . .-. - -.-- ..- .. --- .--. .- ... -.. ..-. --. .... .--- -.- .-.. --.. -..- -.-. ...-
 // qwertyuiopasdfghjklzxcvbnm
-// --.- .-- . .-. - -.-- ..- .. --- .--. .- ... -.. ..-. --. .... .--- -.- .-.. --.. -..- -. 
+// --.- .-- . .-. - -.-- ..- .. --- .--. .- ... -.. ..-. --. .... .--- -.- .-.. --.. -..- -.
 
 // Флаг для отладки через порт
 const boolean debug = false;
 
 // Продолжительность "точки"
-// Нормальный радист примерно в темпе 100-150
-// int ms = 150;
-const int ms = 200;
-// Служебный пин для вспышек
-const int pin = 13;
+const int ms = 100;
+// Задержка при уменьшении яркости
+const int msd = 300;
+// Тире в три раза длиннее точки
+const int dashx = 3;
+// Пин для вспышек (ШИМ)
+const int pin = 9;
 
 // Размер алфавита (Chars Lines)
 const int CL = 26;
@@ -63,17 +63,17 @@ String out;
 
 
 // Алфавиты - массивы символов для замены (CHars)
-String CH[CA][CL] = {
+char CH[CA][CL] = {
   {
-    "q", "w", "e", "r", "t", "y", "u", "i", "o", "p",
-    "a", "s", "d", "f", "g", "h", "j", "k", "l",
-    "z", "x", "c", "v", "b", "n", "m"
+    'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p',
+    'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l',
+    'z', 'x', 'c', 'v', 'b', 'n', 'm'
   }
   ,
   {
-    "1", "2", "3", "4", "5", "6", "7", "8", "9", "0",
-    ".", ",", ":", ";", "(", ")", "'", "`", "@",
-    "\"", "-", "—", "!", "?", "§", " "
+    '1', '2', '3', '4', '5', '6', '7', '8', '9', '0',
+    '.', ',', ':', ';', '(', ')', '\'', '`', '@',
+    '"', '-', '—', '!', '?', '§', ' '
   }
 };
 
@@ -115,16 +115,28 @@ void dump(const char * chr) {
 
 // Короткая вспышка
 void dot() {
-  digitalWrite(pin, HIGH);
+  for (int fadeValue = 0 ; fadeValue <= 255; fadeValue++) {
+    analogWrite(pin, fadeValue);
+    delayMicroseconds(msd);
+  }
   delay(ms);
-  digitalWrite(pin, LOW);
+  for (int fadeValue = 255 ; fadeValue--; ) {
+    analogWrite(pin, fadeValue);
+    delayMicroseconds(msd);
+  }
 }
 
 // Длиная (х3) вспышка
 void dash() {
-  digitalWrite(pin, HIGH);
-  delay(ms * 3);
-  digitalWrite(pin, LOW);
+  for (int fadeValue = 0 ; fadeValue <= 255; fadeValue++) {
+    analogWrite(pin, fadeValue);
+    delayMicroseconds(msd * dashx);
+  }
+  delay(ms * dashx);
+  for (int fadeValue = 255 ; fadeValue--; ) {
+    analogWrite(pin, fadeValue);
+    delayMicroseconds(msd * dashx);
+  }
 }
 
 // Отображения символа морзянки вспышками
@@ -142,14 +154,14 @@ void show_chr(char chr) {
     // Ждем
     case ' ':
     case '|':
-      delay(ms * 2);
+      delay(ms * 4);
       break;
     // Очевидно какая-то ошибка
     default:
       break;
   }
   // Ждем после вывода
-  delay(ms);
+  delay(ms * 2);
 }
 
 // Вывод строки морзянки посимвольно вспышками
@@ -171,9 +183,9 @@ void setup() {
   // Настраиваем диод для вспышек и порт для отладки
   pinMode(pin, OUTPUT);
   if (debug) {
-    Serial.begin(9600);
+    Serial.begin(57200);
   }
-  
+
   // Строка для морзянки пока пустая
   out = "";
   // Делаем копию строки текта
@@ -200,20 +212,20 @@ void setup() {
       }
       // Обходим символы-строки словаря (Chars Lines)
       for (int CL_num = 0; CL_num < CL; CL_num++) {
-        // Длина символа-строки словаря
-        substr_len = CH[CA_num][CL_num].length();
+        if (str_pos != str_lr.indexOf(CH[CA_num][CL_num], str_pos)) {
+          continue;
+        }
         // Если длина символа-строки не нулевая и позиция вхождения этой подстроки
         // в строку текста равна текущей позиции конвертера
-        if (substr_len && str_pos == str_lr.indexOf(CH[CA_num][CL_num], str_pos)) {
-          // Добавляем соответствующий символ-строку в строку морзянки и ещё в конце пробел 
-          out += MH[CA_num][CL_num] + " ";
-          // Сдвигаем текущую позицию конвертера на длину найденного символа-строки
-          str_pos += substr_len;
-          // Символ найден
-          br = true;
-          // Заканчиваем с этим словарём
-          break;
-        }
+        // Добавляем соответствующий символ-строку в строку морзянки и ещё в конце пробел
+        out += MH[CA_num][CL_num];
+        out += " ";
+        // Сдвигаем текущую позицию конвертера на длину найденного символа-строки
+        str_pos++;
+        // Символ найден
+        br = true;
+        // Заканчиваем с этим словарём
+        break;
       }
     }
   }
@@ -232,7 +244,7 @@ void loop() {
   if (ew == -1) {
     while(true);
   }
-  // Ничего не делаем 3 секунды
+  // Ничего не делаем ew секунды
   delay(ew);
 }
 
