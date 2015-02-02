@@ -1,24 +1,26 @@
 /*
  Time v2
- Time and date on lcd display (used rtc timer) with control by keypad 4x4
+ Time and date on lcd display (used rtc timer) with control by keypad 4x5
 
  Hardware:
- Trickle-Charge Timekeeping Chip DS1302
- http://www.maximintegrated.com/en/products/digital/real-time-clocks/DS1302.html
- http://playground.arduino.cc/Main/DS1302RTC
- LCD I2C PCF8574
- http://habrahabr.ru/post/219137/
- http://arduino-info.wikispaces.com/file/detail/LiquidCrystal_I2C1602V1.zip/341635514
- Keypad 4x4
+   LCD I2C PCF8574
+     http://habrahabr.ru/post/219137/
+     http://arduino-info.wikispaces.com/file/detail/LiquidCrystal_I2C1602V1.zip/341635514
+   Trickle-Charge Timekeeping Chip DS1307 (RTC Module V1.1 I2C)
+     http://codehaus.blogspot.com/2012/02/i2c-rtc-ds1307-at24c32-real-time-clock.html
+   4x5 20 Key Matrix Membrane Switch Keypad Keyboard Super Slim
+     http://i00.i.aliimg.com/img/pb/237/100/706/706100237_585.jpg
+   Humidity & Temperature Sensor DHT11
+     http://electronics-lab.ru/blog/mcu/46.html
 
  created 18.01.2015
- modifid 01.02.2015
+ modifid 02.02.2015
  by Fust Vitaliy
  with Arduino 1.5.8 (tested on Arduino Nano)
 */
 /*
-Sketch uses 15 048 bytes (48%) of program storage space. Maximum is 30 720 bytes.
-Global variables use 435 bytes (21%) of dynamic memory, leaving 1 613 bytes for local variables. Maximum is 2 048 bytes.
+Sketch uses 17 046 bytes (55%) of program storage space. Maximum is 30 720 bytes.
+Global variables use 431 bytes (21%) of dynamic memory, leaving 1 617 bytes for local variables. Maximum is 2 048 bytes.
 */
 
 #include <Wire.h>
@@ -63,33 +65,26 @@ void loop() {
   DateTime now = rtc.now();
   DHT.read11(DHT11_PIN);
 
-  char buffer[9];
-  char suf[3]{223, 'C'};
-
   // День недели
-  //lcd->init(F("Нд\rПн\rВт\rСр\rЧт\rПт\rСб"));
-  //lcd->printn(now.dayOfWeek(), -1, 0);
   lcd->init(F("Неділя\rПонеділок\rВівторок\rСереда\rЧетвер\rП'ятниця\rСубота"));
-  lcd->printn(now.dayOfWeek(), 0, 0);
+  lcd->printn(now.dayOfWeek(), 0, 0, now.day() < 10 ? 10 : 9);
 
   // Дата
-  //sprintf(buffer, "%02d.%02d", now.day(), now.month());
-  sprintf(buffer, "%d", now.day());
-  lcd->print(buffer, -5, 0);
+  lcd->print(now.day(), -5, 0);
 
   // Месяц
-  //lcd->init(F("січня\rлютого\rберезня\rквітня\rтравня\rчервня\rлипня\rсерпня\rвересня\rжовтня\rлистопада\rгрудня"));
-  //lcd->printn(now.month() - 1, 3, 0);
   lcd->init(F("січ\rлют\rбер\rкві\rтра\rчер\rлип\rсер\rвер\rжов\rлис\rгру"));
   lcd->printn(now.month() - 1, -1, 0);
 
   // Время
+  char buffer[9];
   sprintf(buffer, "%02d:%02d:%02d", now.hour(), now.minute(), now.second());
-  lcd->print(buffer, -1, 1);
+  lcd->print(buffer, 6, 1, 10);
 
   // Температура
-  sprintf(buffer, "%d%s", (byte) DHT.temperature + 2, suf);
-  lcd->print(buffer, 0, 1);
+  lcd->print(DHT.temperature + 2, 0, 1, 2, 0);
+  char suf[3]{223, 'C'};
+  lcd->print(suf);
 
   // Ждем до конца секунды, проверяем клавиатуру
   unsigned long prevtime = now.unixtime();
