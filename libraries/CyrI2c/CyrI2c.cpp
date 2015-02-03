@@ -254,7 +254,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
     // Если сдвиг влево
     if (i < 0) {
       // Если край экрана - переносим курсор
-      go(i + scr_pos >= 0 ? i + scr_pos : i + scr_pos + 32);
+      go(i + scr_pos >= 0 ? i + scr_pos : i % 32 + scr_pos);
     }else{
       // Если сдвиг вправо - сдвигаем курсор пробелами
       for (cur_pos = 0; cur_pos < (space - cur_chr) / 2; cur_pos++){

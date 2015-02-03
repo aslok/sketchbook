@@ -14,28 +14,28 @@ with Arduino 1.5.8 (tested on Arduino Nano)
 class CyrI2c {
   public:
     CyrI2c(byte address, byte width, byte height);
-    void print(const __FlashStringHelper* str, int8_t position = 127, byte go_ln = 255, byte space = 255);
+    void print(const __FlashStringHelper*, int8_t = 127, byte = 255, byte = 255);
     void print(int chr, int8_t position = 127, byte go_ln = 255, byte space = 255);
-    void print(double chr, int8_t position = 127, byte go_ln = 255, byte width = 5, byte prec = 2);
-    void print(char chr, int8_t position = 127, byte go_ln = 255, byte space = 255);
-    void print(char* str, int8_t position = 127, byte go_ln = 255, byte space = 255);
-    void print_enc(char* str, int8_t position = 127, byte go_ln = 255, byte space = 255);
+    void print(double, int8_t = 127, byte = 255, byte width = 5, byte prec = 2);
+    void print(char, int8_t = 127, byte = 255, byte = 255);
+    void print(char*, int8_t = 127, byte = 255, byte = 255);
+    void print_enc(char*, int8_t = 127, byte = 255, byte = 255);
 
     void backlight();
-    void backlight(boolean state);
+    void backlight(boolean);
     void power();
-    void power(boolean state);
+    void power(boolean);
     void cursor();
-    void cursor(boolean state);
+    void cursor(boolean);
     void blink();
-    void blink(boolean state);
+    void blink(boolean);
     void clear();
     void go(byte col, byte row);
-    void go(byte col = 32);
+    void go(byte = 32);
 
-    void init(const char* str);
-    void init(const __FlashStringHelper* str);
-    void printn(byte num, int8_t position = 127, byte go_ln = 255, byte space = 255);
+    void init(const char*);
+    void init(const __FlashStringHelper*);
+    void printn(byte num, int8_t = 127, byte = 255, byte = 255);
 
     boolean bl = false;
     boolean pwr = true;
@@ -48,8 +48,8 @@ class CyrI2c {
     void write_str_enc(char* str, char* lcd);
     void get_str_enc(char* str, char* result);
 
-    void printn_str(byte num, int8_t position, byte go_ln, byte space = 255);
-    void printn_flash(byte num, int8_t position, byte go_ln, byte space = 255);
+    void printn_str(byte num, int8_t, byte, byte);
+    void printn_flash(byte num, int8_t, byte, byte);
 
     LiquidCrystal_I2C* lcd;
     char* abc;
