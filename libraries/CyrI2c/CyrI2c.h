@@ -52,19 +52,17 @@ class CyrI2c {
     void printn_flash(byte num, int8_t, byte, byte);
 
     LiquidCrystal_I2C* lcd;
-    char* abc;
+    char*  abc;
+    char*  en;
+    byte*  en_num;
+    byte*  ru_num;
     byte** ru;
-    byte* ru_num;
-    byte ru_cnt;
-    byte* en;
-    byte* en_num;
-    byte en_cnt;
 
-    void* s;
-    byte f;
-    char scr[33];
-    byte scr_pos;
-    byte char_map[8];
+    void*  s;
+    byte   f;
+    char   scr[33];
+    byte   scr_pos;
+    byte   char_map[8];
 };
 
 #endif

@@ -52,131 +52,43 @@ with Arduino 1.5.8 (tested on Arduino Nano)
 
 // Конструктор
 CyrI2c::CyrI2c(byte address, byte width, byte height) {
-  // Кол-во самодельных символов для замены
-  const byte ru_chars_count = 25;
-  // Кол-во символов, которые можно использовать
-  const byte en_chars_count = 28;
-
   // Строка для поиска символов для замены
   abc    = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяҐЄІЇґєії");
-  ru     = new byte*[ru_chars_count];
-  ru_num = new byte[ru_chars_count];
-  ru_cnt = ru_chars_count;
-  en     = new byte[en_chars_count];
-  en_num = new byte[en_chars_count];
-  en_cnt = en_chars_count;
-
-  ru_num[0]  = 129; // Б
+  en     = (char*) F("ABEE3UUKMHOPCTXWWbb\312\277\354\321\371\326\323II");
+  en_num = (byte*) F("\200\202\205\206\210\211\212\213\215\216\217\221\222\223\226\231\232\235\233\214\224\225\230\227\236\242\243\244");
+  ru_num = (byte*) F("\201\203\204\234\237\240\207\220\241\230\242\214\224\225\227\236\233\232\244\231\212\211\206\210\235");
+  byte ru_cnt;
+  // Выясняем длину строки
+  for (ru_cnt = 0; (char) pgm_read_byte_near(ru_num + ru_cnt); ru_cnt++);
+  ru     = new byte*[ru_cnt];
   ru[0]  = new byte[8]{ 0x1e,0x10,0x10,0x1e,0x11,0x11,0x1e,0x0 };
-  ru_num[1]  = 131; // Г
   ru[1]  = new byte[8]{ 0x1f,0x10,0x10,0x10,0x10,0x10,0x10,0x0 };
-  ru_num[2]  = 132; // Д
   ru[2]  = new byte[8]{ 0xe, 0xa, 0xa, 0xa, 0xa, 0x1f,0x11,0x0 };
-  ru_num[3]  = 156; // Ы
   ru[3]  = new byte[8]{ 0x11,0x11,0x11,0x1d,0x13,0x13,0x1d,0x0 };
-  ru_num[4]  = 159; // Ю
   ru[4]  = new byte[8]{ 0x17,0x15,0x15,0x1d,0x15,0x15,0x17,0x0 };
-  ru_num[5]  = 160; // Я
   ru[5]  = new byte[8]{ 0xf, 0x11,0x11,0xf, 0x5, 0x9, 0x11,0x0 };
-  ru_num[6]  = 135; // Ж
   ru[6]  = new byte[8]{ 0x15,0x15,0xe, 0xe, 0xe, 0x15,0x15,0x0 };
-  ru_num[7]  = 144; // П
   ru[7]  = new byte[8]{ 0x1f,0x11,0x11,0x11,0x11,0x11,0x11,0x0 };
-  ru_num[8]  = 161; // Ґ
   ru[8]  = new byte[8]{ 0x1, 0x1f,0x10,0x10,0x10,0x10,0x10,0x0 };
-  ru_num[9]  = 152; // Ч
   ru[9]  = new byte[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0x1, 0x0 };
-  ru_num[10] = 162; // Є
   ru[10] = new byte[8]{ 0xf, 0x10,0x10,0x1e,0x10,0x10,0xf, 0x0 };
-  ru_num[11] = 140; // Л
   ru[11] = new byte[8]{ 0x3, 0x5, 0x9, 0x9, 0x9, 0x9, 0x19,0x0 };
-  ru_num[12] = 148; // У
   ru[12] = new byte[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0xe, 0x0 };
-  ru_num[13] = 149; // Ф
   ru[13] = new byte[8]{ 0xe, 0x15,0x15,0x15,0xe, 0x4, 0x4, 0x0 };
-  ru_num[14] = 151; // Ц
   ru[14] = new byte[8]{ 0x12,0x12,0x12,0x12,0x12,0x12,0x1f,0x1 };
-  ru_num[15] = 158; // Э
   ru[15] = new byte[8]{ 0x1e,0x1, 0x1, 0xf, 0x1, 0x1, 0x1e,0x0 };
-  ru_num[16] = 155; // Ъ
   ru[16] = new byte[8]{ 0x18,0x8, 0x8, 0xe, 0x9, 0x9, 0xe, 0x0 };
-  ru_num[17] = 154; // Щ
   ru[17] = new byte[8]{ 0x15,0x15,0x15,0x15,0x15,0x15,0x1e,0x1 };
-  ru_num[18] = 164; // Ї
   ru[18] = new byte[8]{ 0xa, 0x4, 0x4, 0x4, 0x4, 0x4, 0xe, 0x0 };
-  ru_num[19] = 153; // Ш
   ru[19] = new byte[8]{ 0x15,0x15,0x15,0x15,0x15,0x15,0x1f,0x0 };
-  ru_num[20] = 138; // Й
   ru[20] = new byte[8]{ 0x15,0x11,0x11,0x13,0x15,0x19,0x11,0x0 };
-  ru_num[21] = 137; // И
   ru[21] = new byte[8]{ 0x11,0x11,0x11,0x13,0x15,0x19,0x11,0x0 };
-  ru_num[22] = 134; // Ё
   ru[22] = new byte[8]{ 0xa, 0x1f,0x10,0x1e,0x10,0x10,0x1f,0x0 };
-  ru_num[23] = 136; // З
   ru[23] = new byte[8]{ 0xe, 0x11,0x1, 0xe, 0x1, 0x11,0xe, 0x0 };
-  ru_num[24] = 157; // Ь
   ru[24] = new byte[8]{ 0x10,0x10,0x10,0x1c,0x12,0x12,0x1c,0x0 };
-
-  en_num[0]  = 128; // А
-  en[0]  = 'A';
-  en_num[1]  = 130; // В
-  en[1]  = 'B';
-  en_num[2]  = 133; // Е
-  en[2]  = 'E';
-  en_num[3]  = 134; // Ё
-  en[3]  = 'E';
-  en_num[4]  = 136; // З
-  en[4]  = '3';
-  en_num[5]  = 137; // И
-  en[5]  = 'U';
-  en_num[6]  = 138; // Й
-  en[6]  = 'U';
-  en_num[7]  = 139; // К
-  en[7]  = 'K';
-  en_num[8]  = 141; // М
-  en[8]  = 'M';
-  en_num[9]  = 142; // Н
-  en[9]  = 'H';
-  en_num[10] = 143; // О
-  en[10] = 'O';
-  en_num[11] = 145; // Р
-  en[11] = 'P';
-  en_num[12] = 146; // С
-  en[12] = 'C';
-  en_num[13] = 147; // Т
-  en[13] = 'T';
-  en_num[14] = 150; // Х
-  en[14] = 'X';
-  en_num[15] = 153; // Ш
-  en[15] = 'W';
-  en_num[16] = 154; // Щ
-  en[16] = 'W';
-  en_num[17] = 157; // Ь
-  en[17] = 'b';
-  en_num[18] = 155; // Ъ
-  en[18] = 'b';
-  en_num[19] = 140; // Л
-  en[19] = 202;
-  en_num[20] = 148; // У
-  en[20] = 191;
-  en_num[21] = 149; // Ф
-  en[21] = 236;
-  en_num[22] = 152; // Ч
-  en[22] = 209;
-  en_num[23] = 151; // Ц
-  en[23] = 249;
-  en_num[24] = 158; // Э
-  en[24] = 214;
-  en_num[25] = 162; // Є
-  en[25] = 211;
-  en_num[26] = 163; // І
-  en[26] = 'I';
-  en_num[27] = 164; // Ї
-  en[27] = 'I';
 
   s      = NULL;
   f      = 0;
-  bl     = false;
   for (byte i = 0; i < 8; i++){
     char_map[i] = 0;
   }
@@ -279,13 +191,14 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
   char lcd_replace[32];
   // Обходим next_scr
   boolean found;
+  byte tmp;
   for (cur_chr = 0; cur_chr < 32; cur_chr++){
     found = false;
     // Обходим основной набор символов для замены
-    for (cur = 0; cur < en_cnt; cur++){
-      if (en_num[cur] == (byte) next_scr[cur_chr]){
+    for (cur = 0; (char) (tmp = (byte) pgm_read_byte_near(en_num + cur)); cur++){
+      if (tmp == (byte) next_scr[cur_chr]){
         // Символ для замены найден, запоминаем по позиции в next_scr
-        lcd_replace[cur_chr] = en[cur];
+        lcd_replace[cur_chr] = (char) pgm_read_byte_near(en + cur);
         found = true;
         break;
       }
@@ -334,7 +247,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
     // Обходим набор самодельных символов для замены
     for (cur = 0; cur < 9; cur++){
       // Если мы можем заменить его одним из восьми первых
-      if (ru_num[cur] == (byte) lcd_replace[cur_chr]){
+      if ((byte) pgm_read_byte_near(ru_num + cur) == (byte) lcd_replace[cur_chr]){
         found = true;
         // Переменная cur хранит номер самодельного символа
         break;
@@ -355,7 +268,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
       }
       found = true;
       // Сохраняем в ячейку номер символа который заменяем
-      char_map[i] = ru_num[cur];
+      char_map[i] = (byte) pgm_read_byte_near(ru_num + cur);
       /*Serial.println("lcd->createChar(i, ru[cur]);");
       Serial.println(i);
       Serial.println(cur);
@@ -365,7 +278,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
       go();
       // Будем заменять его при выводе на номер ячейки
       for (cur_pos = cur_chr; cur_pos < 32; cur_pos++){
-        if ((byte) lcd_replace[cur_pos] == ru_num[cur]){
+        if ((byte) lcd_replace[cur_pos] == (byte) pgm_read_byte_near(ru_num + cur)){
           /*Serial.println("lcd_replace[cur_chr] = i");
           Serial.println(cur_chr);
           Serial.println(i);
@@ -386,16 +299,17 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
     // Ищем что заменить
     // Обходим набор самодельных символов для замены с конца
     // Никогда не выселяем символы 0-8 потому что заменить нечем :(
-    for (cur_pos = ru_cnt; cur_pos-- > 8; ){
+    for (i = 0; (char) pgm_read_byte_near(ru_num + i); i++);
+    for (cur_pos = i; cur_pos-- > 8; ){
       // Ищем ячейку занятую этим символом
       for (i = 0; i < 8; i++){
         // Если есть кандидат на выселение
-        if (ru_num[cur_pos] == char_map[i]){
+        if ((byte) pgm_read_byte_near(ru_num + cur_pos) == char_map[i]){
           found = false;
           // Обходим основной набор символов для замены
           // После выселения будет отображаться оттуда
-          for (pos = 0; pos < en_cnt; pos++){
-            if (en_num[pos] == char_map[i]){
+          for (pos = 0; (char) (tmp = (byte) pgm_read_byte_near(en_num + pos)); pos++){
+            if (tmp == char_map[i]){
               found = true;
               old_cur = pos;
               break;
@@ -413,10 +327,10 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
             continue;
           }
           // Сохраняем в ячейку номер символа который заменяем
-          char_map[i] = ru_num[cur];
+          char_map[i] = (byte) pgm_read_byte_near(ru_num + cur);
           // Будем заменять его при выводе на номер ячейки
           for (pos = 0; pos < 32; pos++){
-            if ((byte) lcd_replace[pos] == ru_num[cur]){
+            if ((byte) lcd_replace[pos] == (byte) pgm_read_byte_near(ru_num + cur)){
               /*Serial.println("lcd_replace[pos] = i");
               Serial.println(pos);
               Serial.println(i);
@@ -425,10 +339,10 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
             }
             // Динамическое обновление символов
             // Перетираем отображающееся предыдущее содержимое ячейки
-            if ((byte) next_scr[pos] == ru_num[cur_pos]){
+            if ((byte) next_scr[pos] == (byte) pgm_read_byte_near(ru_num + cur_pos)){
               lcd->setCursor(pos - pos / 16 * 16, pos / 16);
-              lcd_replace[pos] = en[old_cur];
-              lcd->write(en[old_cur]);
+              lcd_replace[pos] = (char) pgm_read_byte_near(en + old_cur);
+              lcd->write((char) pgm_read_byte_near(en + old_cur));
             }
           }
           // Отображающееся предыдущее содержимое перетерто, можем подменять
@@ -473,11 +387,11 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
     }
 
     // Обходим дополнительные символы самодельного набора, ищем что бы ещё заменить
-    for (byte ru_cur = 9; ru_cur < ru_cnt; ru_cur++){
+    for (byte ru_cur = 9; (char) (tmp = (byte) pgm_read_byte_near(ru_num + ru_cur)); ru_cur++){
       found = false;
       // Обходим уже использованные дополнительные символы
       for (i = 0; i < 8; i++){
-        if (char_map[i] && char_map[i] == ru_num[ru_cur]){
+        if (char_map[i] && char_map[i] == tmp){
           // Уже заменили раньше
           found = true;
           break;
@@ -490,12 +404,12 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
       // Обходим массив символов, которые будут отображаться после вывода
       for (cur_chr = 0; cur_chr < 32; cur_chr++){
         // Ищем текущий дополнительный самодельный символ
-        if ((byte) next_scr[cur_chr] != ru_num[ru_cur]){
+        if ((byte) next_scr[cur_chr] != tmp){
           continue;
         }
         // Найден текущий дополнительный самодельный символ
         // Сохраняем в ячейку номер символа
-        char_map[cur] = ru_num[ru_cur];
+        char_map[cur] = tmp;
         /*Serial.println("lcd->createChar(cur, ru[ru_cur]);");
         Serial.println(cur);
         Serial.println(ru_cur);
@@ -504,7 +418,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
         // Будем заменять его при выводе на номер ячейки
         // Обходим начиная с текущего, предыдущие заменили бы раньше
         for (cur_pos = cur_chr; cur_pos < 32; cur_pos++){
-          if ((byte) next_scr[cur_pos] == ru_num[ru_cur]){
+          if ((byte) next_scr[cur_pos] == tmp){
             /*Serial.println("lcd_replace[cur_chr] = cur");
             Serial.println(cur_chr);
             Serial.println(cur);
