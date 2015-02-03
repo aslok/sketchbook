@@ -175,7 +175,6 @@ CyrI2c::CyrI2c(byte address, byte width, byte height) {
   en[27] = 'I';
 
   s      = NULL;
-  p_s    = NULL;
   f      = 0;
   bl     = false;
   for (byte i = 0; i < 8; i++){
@@ -748,13 +747,13 @@ void CyrI2c::go(byte col){
 
 // Инициализация массива строк разделенных символом \r переданного через F()
 void CyrI2c::init(const __FlashStringHelper* str){
-  p_s = (char*) str;
+  s = (char*) str;
   f = 1;
 }
 
 // Инициализация массива строк разделенных символом \r переданного через указатель
 void CyrI2c::init(const char* str){
-  s = str;
+  s = (char*) str;
   f = 2;
 }
 
@@ -775,8 +774,8 @@ void CyrI2c::printn_str(byte num, int8_t position, byte go_ln, byte space){
   char str[255];
   byte count = 0, str_pos;
   word pos = 0;
-  while (count < num && pos < 65000 && s[pos]){
-    if (s[pos++] == '\r'){
+  while (count < num && pos < 65000 && ((char*) s)[pos]){
+    if (((char*) s)[pos++] == '\r'){
       count++;
       continue;
     }
@@ -784,11 +783,11 @@ void CyrI2c::printn_str(byte num, int8_t position, byte go_ln, byte space){
   if (count != num){
     return;
   }
-  for (str_pos = 0; pos < 255 && str_pos < 255 && pos < 65000 && s[pos]; pos++){
-    if (s[pos] == '\r'){
+  for (str_pos = 0; pos < 255 && str_pos < 255 && pos < 65000 && ((char*) s)[pos]; pos++){
+    if (((char*) s)[pos] == '\r'){
       break;
     }
-    str[str_pos++] = s[pos];
+    str[str_pos++] = ((char*) s)[pos];
   }
   str[str_pos] = 0;
   print(str, position, go_ln, space);
@@ -800,7 +799,7 @@ void CyrI2c::printn_flash(byte num, int8_t position, byte go_ln, byte space){
   byte count = 0, str_pos;
   word pos = 0;
   char chr;
-  while (count < num && pos < 65000 && (chr = (char) pgm_read_byte_near(p_s + pos++))){
+  while (count < num && pos < 65000 && (chr = (char) pgm_read_byte_near(s + pos++))){
     if (chr == '\r'){
       count++;
     }
@@ -808,7 +807,7 @@ void CyrI2c::printn_flash(byte num, int8_t position, byte go_ln, byte space){
   if (count != num){
     return;
   }
-  for (str_pos = 0; (chr = (char) pgm_read_byte_near(p_s + pos)) && pos < 65000; pos++){
+  for (str_pos = 0; (chr = (char) pgm_read_byte_near(s + pos)) && pos < 65000; pos++){
     if (chr == '\r'){
       break;
     }

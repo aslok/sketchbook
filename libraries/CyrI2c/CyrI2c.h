@@ -60,8 +60,7 @@ class CyrI2c {
     byte* en_num;
     byte en_cnt;
 
-    const char* s;
-    char* p_s;
+    void* s;
     byte f;
     char scr[33];
     byte scr_pos;
