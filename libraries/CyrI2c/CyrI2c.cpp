@@ -1,6 +1,6 @@
 /*
 created 19.01.2015
-modified 03.02.2015
+modified 04.02.2015
 by Fust Vitaliy
 with Arduino 1.5.8 (tested on Arduino Nano)
 */
@@ -56,37 +56,8 @@ CyrI2c::CyrI2c(byte address, byte width, byte height) {
   abc    = (char*) F("АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯабвгдеёжзийклмнопрстуфхцчшщъыьэюяҐЄІЇґєії");
   en     = (char*) F("ABEE3UUKMHOPCTXWWbb\312\277\354\321\371\326\323II");
   en_num = (byte*) F("\200\202\205\206\210\211\212\213\215\216\217\221\222\223\226\231\232\235\233\214\224\225\230\227\236\242\243\244");
+  ru     = (byte*) F("\037\021\021\037\022\022\037\001\040\021\021\021\021\021\021\001\017\013\013\013\013\040\022\001\022\022\022\036\024\024\036\001\030\026\026\036\026\026\030\001\020\022\022\020\006\012\022\001\026\026\017\017\017\026\026\001\040\022\022\022\022\022\022\001\002\040\021\021\021\021\021\001\022\022\022\020\002\002\002\001\020\021\021\037\021\021\020\001\004\006\012\012\012\012\032\001\022\022\022\020\002\002\017\001\017\026\026\026\017\005\005\001\023\023\023\023\023\023\040\002\037\002\002\020\002\002\037\001\031\011\011\017\012\012\017\001\026\026\026\026\026\026\037\002\013\005\005\005\005\005\017\001\026\026\026\026\026\026\040\001\026\022\022\024\026\032\022\001\022\022\022\024\026\032\022\001\013\040\021\037\021\021\040\001\017\022\002\017\002\022\017\001\021\021\021\035\023\023\035\001");
   ru_num = (byte*) F("\201\203\204\234\237\240\207\220\241\230\242\214\224\225\227\236\233\232\244\231\212\211\206\210\235");
-  byte ru_cnt;
-  // Выясняем длину строки
-  for (ru_cnt = 0; (char) pgm_read_byte_near(ru_num + ru_cnt); ru_cnt++);
-  ru     = new byte*[ru_cnt];
-  ru[0]  = new byte[8]{ 0x1e,0x10,0x10,0x1e,0x11,0x11,0x1e,0x0 };
-  ru[1]  = new byte[8]{ 0x1f,0x10,0x10,0x10,0x10,0x10,0x10,0x0 };
-  ru[2]  = new byte[8]{ 0xe, 0xa, 0xa, 0xa, 0xa, 0x1f,0x11,0x0 };
-  ru[3]  = new byte[8]{ 0x11,0x11,0x11,0x1d,0x13,0x13,0x1d,0x0 };
-  ru[4]  = new byte[8]{ 0x17,0x15,0x15,0x1d,0x15,0x15,0x17,0x0 };
-  ru[5]  = new byte[8]{ 0xf, 0x11,0x11,0xf, 0x5, 0x9, 0x11,0x0 };
-  ru[6]  = new byte[8]{ 0x15,0x15,0xe, 0xe, 0xe, 0x15,0x15,0x0 };
-  ru[7]  = new byte[8]{ 0x1f,0x11,0x11,0x11,0x11,0x11,0x11,0x0 };
-  ru[8]  = new byte[8]{ 0x1, 0x1f,0x10,0x10,0x10,0x10,0x10,0x0 };
-  ru[9]  = new byte[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0x1, 0x0 };
-  ru[10] = new byte[8]{ 0xf, 0x10,0x10,0x1e,0x10,0x10,0xf, 0x0 };
-  ru[11] = new byte[8]{ 0x3, 0x5, 0x9, 0x9, 0x9, 0x9, 0x19,0x0 };
-  ru[12] = new byte[8]{ 0x11,0x11,0x11,0xf, 0x1, 0x1, 0xe, 0x0 };
-  ru[13] = new byte[8]{ 0xe, 0x15,0x15,0x15,0xe, 0x4, 0x4, 0x0 };
-  ru[14] = new byte[8]{ 0x12,0x12,0x12,0x12,0x12,0x12,0x1f,0x1 };
-  ru[15] = new byte[8]{ 0x1e,0x1, 0x1, 0xf, 0x1, 0x1, 0x1e,0x0 };
-  ru[16] = new byte[8]{ 0x18,0x8, 0x8, 0xe, 0x9, 0x9, 0xe, 0x0 };
-  ru[17] = new byte[8]{ 0x15,0x15,0x15,0x15,0x15,0x15,0x1e,0x1 };
-  ru[18] = new byte[8]{ 0xa, 0x4, 0x4, 0x4, 0x4, 0x4, 0xe, 0x0 };
-  ru[19] = new byte[8]{ 0x15,0x15,0x15,0x15,0x15,0x15,0x1f,0x0 };
-  ru[20] = new byte[8]{ 0x15,0x11,0x11,0x13,0x15,0x19,0x11,0x0 };
-  ru[21] = new byte[8]{ 0x11,0x11,0x11,0x13,0x15,0x19,0x11,0x0 };
-  ru[22] = new byte[8]{ 0xa, 0x1f,0x10,0x1e,0x10,0x10,0x1f,0x0 };
-  ru[23] = new byte[8]{ 0xe, 0x11,0x1, 0xe, 0x1, 0x11,0xe, 0x0 };
-  ru[24] = new byte[8]{ 0x10,0x10,0x10,0x1c,0x12,0x12,0x1c,0x0 };
-
   s      = NULL;
   f      = 0;
   for (byte i = 0; i < 8; i++){
@@ -131,7 +102,6 @@ void CyrI2c::print(char chr, int8_t position, byte go_ln, byte space){
   print(str, position, go_ln, space);
 }
 
-// Печать отдельного символа
 // Печать массива символов по указателю
 void CyrI2c::print(char* str, int8_t position, byte go_ln, byte space){
   byte cur_chr;
@@ -273,9 +243,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
       Serial.println(i);
       Serial.println(cur);
       Serial.println("----------------------------");*/
-      lcd->createChar(i, ru[cur]);
-      // Бага lcd->createChar - приходится обновлять курсор
-      go();
+      create_char(i, cur);
       // Будем заменять его при выводе на номер ячейки
       for (cur_pos = cur_chr; cur_pos < 32; cur_pos++){
         if ((byte) lcd_replace[cur_pos] == (byte) pgm_read_byte_near(ru_num + cur)){
@@ -346,9 +314,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
             }
           }
           // Отображающееся предыдущее содержимое перетерто, можем подменять
-          lcd->createChar(i, ru[cur]);
-          // Бага lcd->createChar - приходится обновлять курсор
-          go();
+          create_char(i, cur);
           break;
         }
       }
@@ -414,7 +380,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
         Serial.println(cur);
         Serial.println(ru_cur);
         Serial.println("----------------------------");*/
-        lcd->createChar(cur, ru[ru_cur]);
+        create_char(cur, ru_cur);
         // Будем заменять его при выводе на номер ячейки
         // Обходим начиная с текущего, предыдущие заменили бы раньше
         for (cur_pos = cur_chr; cur_pos < 32; cur_pos++){
@@ -429,7 +395,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
             lcd->write(cur);
           }
         }
-        // Бага lcd->createChar - приходится обновлять курсор
+        // После обновления символов возвращаем курсор на место
         go();
       }
       if (found){
@@ -553,6 +519,18 @@ void CyrI2c::get_str_enc(char* str, char* result){
     }
   }
   result[res_pos] = 0;
+}
+
+// Создание кастомного символа по номеру в указанной ячейке
+void CyrI2c::create_char(byte cell, byte num){
+  byte cur[8];
+  for (byte pos = 0; pos < 8; pos++){
+    cur[pos] = (byte) pgm_read_byte_near(ru + num * 8 + pos) - 1;
+  }
+  // Создаем кастомный символ
+  lcd->createChar(cell, cur);
+  // Бага lcd->createChar - приходится обновлять курсор
+  go();
 }
 
 // Подсветка экрана

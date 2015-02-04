@@ -1,6 +1,6 @@
 /*
 created 19.01.2015
-modified 03.02.2015
+modified 04.02.2015
 by Fust Vitaliy
 with Arduino 1.5.8 (tested on Arduino Nano)
 */
@@ -47,6 +47,7 @@ class CyrI2c {
     void get_next_scr(char* str, char* next_scr);
     void write_str_enc(char* str, char* lcd);
     void get_str_enc(char* str, char* result);
+    void create_char(byte cell, byte num);
 
     void printn_str(byte num, int8_t, byte, byte);
     void printn_flash(byte num, int8_t, byte, byte);
@@ -55,8 +56,8 @@ class CyrI2c {
     char*  abc;
     char*  en;
     byte*  en_num;
+    byte*  ru;
     byte*  ru_num;
-    byte** ru;
 
     void*  s;
     byte   f;
