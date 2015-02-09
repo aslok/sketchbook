@@ -49,6 +49,11 @@ class CyrI2c {
     void get_str_enc(char* str, char* result);
     void create_char(byte cell, byte num);
 
+    char read_pgm(char*);
+    byte read_pgm(byte*);
+    void clear_arr(byte*, byte count);
+    void clear_arr(char*, int8_t count = -1);
+
     void printn_str(byte num, int8_t, byte, byte);
     void printn_flash(byte num, int8_t, byte, byte);
 
@@ -59,7 +64,7 @@ class CyrI2c {
     byte*  ru;
     byte*  ru_num;
 
-    void*  s;
+    char*  s;
     byte   f;
     char   scr[33];
     byte   scr_pos;
