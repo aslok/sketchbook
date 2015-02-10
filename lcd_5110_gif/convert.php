@@ -3,9 +3,15 @@
 
 const WIDTH = 84, HEIGHT = 48;
 
+// rm -rf img/ && mkdir img && convert -coalesce IMG_0081.GIF img/%03d.png && convert -crop 210x105+140+85 img/???.png -resize 84x42 img/out%03d.png && convert img/out* -monochrome -splice 0x6 img/%03d.png && rm img/out*
+
 $imgs_cnt = 0;
+$files_cnt = 0;
 $out = "{\n";
 foreach (glob('./img/*') as $img_path) {
+  if ($files_cnt++ % 4){
+	continue;
+  }
   $imgs_cnt++;
   $im = false;
   //echo $img_path, "\n";
@@ -35,7 +41,7 @@ foreach (glob('./img/*') as $img_path) {
     //echo 'Error on open', "\n";
     continue;
   }
-  
+
   $out .= "{\n";
   $count = 0;
   for ($f = 0; $f < HEIGHT; $f++){
@@ -73,8 +79,8 @@ $out = '#include "SPI.h"
 Adafruit_PCD8544 display = Adafruit_PCD8544(3, 4, 5, 6, 7);
 
 const byte ms = 700;
-const byte imgs_cnt = 32;
-const byte PROGMEM imgs[][528] = ' . $out . "};
+const byte imgs_cnt = ' . $imgs_cnt . ';
+const byte PROGMEM imgs[][528] = ' . $out . '};
 
 byte current = 0;
 
@@ -87,10 +93,14 @@ void loop() {
   if (current == imgs_cnt){
     current = 0;
   }
-  display.drawBitmap(0, 0, imgs[current++], 84, 48, WHITE, BLACK);
+  display.setCursor(0,0);
+  if (current > 5 && current < 8){
+    display.println("Zdravstvuyte!");
+  }
+  display.drawBitmap(0, 0, imgs[current++], ' . WIDTH . ', ' . HEIGHT . ', WHITE, BLACK);
   display.display();
   delay(ms);
 }
-\n";
+' . "\n";
 echo $out;
 exit;
