@@ -1974,9 +1974,9 @@ void setup() {
 
 void say(const __FlashStringHelper* str){
   char cp1251[29];
-  display.setCursor(0,0);
   display.fillRect(0, 0, LCDWIDTH, 7, WHITE);
   utf8_to_cp1251(str, cp1251, 29);
+  display.setCursor(0, 0);
   display.println(cp1251);
 }
 
