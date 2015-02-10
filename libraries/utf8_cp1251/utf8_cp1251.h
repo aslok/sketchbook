@@ -9,6 +9,11 @@ with Arduino 1.5.8 (tested on Arduino Nano)
 
 #include <Arduino.h>
 
+typedef struct ConvLetter {
+  char win1251;
+  int  unicode;
+} Letter;
+
 int utf8_to_cp1251(const char* utf8, char* windows1251, int n);
 int utf8_to_cp1251(const __FlashStringHelper* utf8_ptr, char* windows1251, int n);
 

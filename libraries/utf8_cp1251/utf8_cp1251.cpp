@@ -7,11 +7,6 @@ with Arduino 1.5.8 (tested on Arduino Nano)
 #include "utf8_cp1251.h"
 #include <Arduino.h>
 
-typedef struct ConvLetter {
-  char win1251;
-  int  unicode;
-} Letter;
-
 const Letter PROGMEM g_letters[61] = {
   {0x82, 0x201A}, // SINGLE LOW-9 QUOTATION MARK
   {0x83, 0x0453}, // CYRILLIC SMALL LETTER GJE
