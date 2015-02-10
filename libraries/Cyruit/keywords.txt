@@ -1,0 +1,4 @@
+Cyruit	KEYWORD1
+print	KEYWORD2
+clear	KEYWORD2
+go	KEYWORD2
