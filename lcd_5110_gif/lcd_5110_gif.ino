@@ -1972,44 +1972,35 @@ void setup() {
   display.setContrast(51);
 }
 
-void loop() {
+void say(const __FlashStringHelper* str){
   char cp1251[29];
+  display.setCursor(0,0);
+  display.fillRect(0, 0, LCDWIDTH, 7, WHITE);
+  utf8_to_cp1251(str, cp1251, 29);
+  display.println(cp1251);
+}
+
+void loop() {
   if (current == imgs_cnt){
     current = 0;
   }
   display.drawBitmap(0, 0, imgs[current++], 84, 48, WHITE, BLACK);
-  display.setCursor(0,0);
   if (current > 1 && current < 5){
-    utf8_to_cp1251(F(" ЗДРАВСТВУЙТЕ!"), cp1251, 29);
-    display.println(cp1251);
-  }
-  if (current > 5 && current < 9){
-    utf8_to_cp1251(F("     ПАРУ СЛОВ"), cp1251, 29);
-    display.println(cp1251);
-  }
-  if (current > 9 && current < 12){
-    utf8_to_cp1251(F("    О ПОЛИТИКЕ"), cp1251, 29);
-    display.println(cp1251);
-  }
-  if (current > 12 && current < 16){
-    utf8_to_cp1251(F("        БЛЯ   "), cp1251, 29);
-    display.println(cp1251);
-  }
-  if (current > 16 && current < 19){
-    utf8_to_cp1251(F(" ЗАЦЕНИ ПРИКОЛ"), cp1251, 29);
-    display.println(cp1251);
-  }
-  if (current > 20 && current < 23){
-    utf8_to_cp1251(F("      ПОЛИТИКА"), cp1251, 29);
-    display.println(cp1251);
-  }
-  if (current > 25 && current < 28){
-    utf8_to_cp1251(F("     ПОЛИТИКА!"), cp1251, 29);
-    display.println(cp1251);
-  }
-  if (current > 31 && current < 36){
-    utf8_to_cp1251(F(" ПОЙДЕМ ДАЛЬШЕ"), cp1251, 29);
-    display.println(cp1251);
+    say(F(" ЗДРАВСТВУЙТЕ!"));
+  }else if (current > 5  && current < 9){
+    say(F("     ПАРУ СЛОВ"));
+  }else if (current > 9  && current < 12){
+    say(F("    О ПОЛИТИКЕ"));
+  }else if (current > 12 && current < 16){
+    say(F("        БЛЯ   "));
+  }else if (current > 16 && current < 19){
+    say(F(" ЗАЦЕНИ ПРИКОЛ"));
+  }else if (current > 20 && current < 23){
+    say(F("      ПОЛИТИКА"));
+  }else if (current > 25 && current < 28){
+    say(F("     ПОЛИТИКА!"));
+  }else if (current > 31 && current < 36){
+    say(F(" ПОЙДЕМ ДАЛЬШЕ"));
   }
   display.display();
   delay(ms);
