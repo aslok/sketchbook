@@ -1,6 +1,6 @@
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
-#include <CyrI2c.h>
+#include "Wire.h"
+#include "LiquidCrystal_I2C.h>
+#include "CyrI2c.h"
 CyrI2c* lcd;
 
 #include <dht.h>
