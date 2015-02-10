@@ -19,8 +19,8 @@ Sketch uses 5 570 bytes (17%) of program storage space. Maximum is 32 256 bytes.
 Global variables use 295 bytes (14%) of dynamic memory, leaving 1 753 bytes for local variables. Maximum is 2 048 bytes.
 */
 
-#include <Wire.h> 
-#include <LiquidCrystal_I2C.h>
+#include "Wire.h"
+#include "LiquidCrystal_I2C.h"
 LiquidCrystal_I2C lcd(0x27,16,2);
 
 
@@ -77,7 +77,7 @@ void setup() {
   lcd.init();
   lcd.backlight();
   lcd.print("     Hello!     ");
-  
+
   delay(1500);
 }
 

@@ -8,9 +8,9 @@ with Arduino 1.5.8 (tested on Arduino Nano)
 #ifndef Cyruit_h
 #define Cyruit_h
 
-#include <Arduino.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_PCD8544.h>
+#include "Arduino.h"
+#include "Adafruit_GFX.h"
+#include "Adafruit_PCD8544.h"
 
 typedef struct ConvLetter {
   char win1251;

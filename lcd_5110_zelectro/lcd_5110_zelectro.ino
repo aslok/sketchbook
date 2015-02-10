@@ -1,6 +1,6 @@
-#include <SPI.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_PCD8544.h>
+#include "SPI.h"
+#include "Adafruit_GFX.h"
+#include "Adafruit_PCD8544.h"
 
 // D3 - LCD 1 - reset (RST)
 // D4 - LCD 2 - chip select (CS)

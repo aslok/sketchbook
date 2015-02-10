@@ -21,13 +21,13 @@ Sketch uses 14 592 bytes (45%) of program storage space. Maximum is 32 256 bytes
 Global variables use 422 bytes (20%) of dynamic memory, leaving 1 626 bytes for local variables. Maximum is 2 048 bytes.
 */
 
-#include <Wire.h> 
-#include <LiquidCrystal_I2C.h>
-#include <CyrI2c.h>
+#include "Wire.h"
+#include "LiquidCrystal_I2C.h"
+#include "CyrI2c.h"
 CyrI2c* lcd;
 
 
-#include <Keypad.h>
+#include "Keypad.h"
 const byte numRows = 4;
 const byte numCols = 4;
 char keymap[numRows][numCols] =
@@ -43,8 +43,8 @@ byte colPins[numCols] = {9, 8, 7, 6}; //Columns 0 to 3
 Keypad myKeypad = Keypad(makeKeymap(keymap), rowPins, colPins, numRows, numCols);
 
 
-#include <Time.h>
-#include <DS1302RTC.h>
+#include "Time.h"
+#include "DS1302RTC.h"
 // Set pins:  CE, IO,CLK
 DS1302RTC RTC(12, 11, 10);
 
@@ -96,9 +96,9 @@ void loop() {
 
 void hello(uint8_t hour){
   lcd->clear();
-  lcd->init(F("Доброї ночі!\rДоброго ранку!\rДоброго дня!\rДоброго вечора!\rЯ годинник :)"));  
+  lcd->init(F("Доброї ночі!\rДоброго ранку!\rДоброго дня!\rДоброго вечора!\rЯ годинник :)"));
   lcd->printn((hour + 1) / 6, 0, 0);
-  lcd->printn(4, 3, 1);  
+  lcd->printn(4, 3, 1);
   delay(2000);
   lcd->clear();
 }

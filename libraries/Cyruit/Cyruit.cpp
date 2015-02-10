@@ -5,9 +5,6 @@ by Fust Vitaliy
 with Arduino 1.5.8 (tested on Arduino Nano)
 */
 
-#include "Arduino.h"
-#include "Adafruit_GFX.h"
-#include "Adafruit_PCD8544.h"
 #include "Cyruit.h"
 
 /*

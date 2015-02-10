@@ -16,9 +16,9 @@ BSD license, check license.txt for more information
 All text above, and the splash screen must be included in any redistribution
 *********************************************************************/
 
-#include <SPI.h>
-#include <Adafruit_GFX.h>
-#include <Adafruit_PCD8544.h>
+#include "SPI.h"
+#include "Adafruit_GFX.h"
+#include "Adafruit_PCD8544.h"
 
 // Software SPI (slower updates, more flexible pin options):
 // D3 - LCD 1 - reset (RST)

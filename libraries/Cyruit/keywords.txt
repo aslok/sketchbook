@@ -1,4 +1,10 @@
+# Datatypes (KEYWORD1)
+# Methods and Functions (KEYWORD2)
+# Constants (LITERAL1)
+
 Cyruit	KEYWORD1
+Letter	KEYWORD1
 print	KEYWORD2
 clear	KEYWORD2
 go	KEYWORD2
+g_letters	LITERAL1

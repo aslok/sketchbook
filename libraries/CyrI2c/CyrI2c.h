@@ -8,8 +8,8 @@ with Arduino 1.5.8 (tested on Arduino Nano)
 #ifndef CyrI2c_h
 #define CyrI2c_h
 
-#include <Arduino.h>
-#include <LiquidCrystal_I2C.h>
+#include "Arduino.h"
+#include "LiquidCrystal_I2C.h"
 
 class CyrI2c {
   public:

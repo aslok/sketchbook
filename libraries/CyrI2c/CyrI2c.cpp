@@ -5,8 +5,6 @@ by Fust Vitaliy
 with Arduino 1.5.8 (tested on Arduino Nano)
 */
 
-#include "Arduino.h"
-#include "LiquidCrystal_I2C.h"
 #include "CyrI2c.h"
 
 /*

@@ -1,9 +1,9 @@
 // Date and time functions using a DS1302 RTC connected via I2C and Wire lib
 
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
-#include <Time.h>
-#include <DS1302RTC.h>
+#include "Wire.h"
+#include "LiquidCrystal_I2C.h"
+#include "Time.h"
+#include "DS1302RTC.h"
 // Set pins:  CE, IO,CLK
 DS1302RTC RTC(13, 12, 11);
 // set the LCD address to 0x27 for a 16 chars and 2 line display

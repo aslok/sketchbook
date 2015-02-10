@@ -3,7 +3,7 @@
 #include "CyrI2c.h"
 CyrI2c* lcd;
 
-#include <dht.h>
+#include "dht.h"
 dht DHT;
 
 #define DHT11_PIN 2

@@ -1,1 +1,6 @@
+# Datatypes (KEYWORD1)
+# Methods and Functions (KEYWORD2)
+# Constants (LITERAL1)
+
 utf8_to_cp1251	KEYWORD2
+g_letters	LITERAL1
