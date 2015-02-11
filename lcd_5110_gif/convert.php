@@ -1,15 +1,16 @@
 #!/usr/bin/env php
 <?php
 
-const WIDTH = 84, HEIGHT = 48;
+const WIDTH = 84, HEIGHT = 40;
 
-// rm -rf img/ && mkdir img && convert -coalesce IMG_0081.GIF img/%03d.png && convert -crop 210x105+140+85 img/???.png -resize 84x42 img/out%03d.png && convert img/out* -monochrome -splice 0x6 img/%03d.png && rm img/out*
+// rm -rf img/ ; mkdir img && convert -coalesce IMG_0081.GIF img/%03d.png && convert -crop 220x105+135+85 img/???.png -resize 84x40 img/out%03d.png && convert img/out* -monochrome img/%03d.png && rm img/out*
+// rm -rf img/ ; mkdir img && convert -coalesce IMG_0081.GIF img/%03d.png && convert -crop 220x105+135+85 img/???.png -resize 84x40 img/out%03d.png && convert img/out* -monochrome -splice 0x8 img/%03d.png && rm img/out*
 
 $imgs_cnt = 0;
 $files_cnt = 0;
 $out = "{\n";
 foreach (glob('./img/*') as $img_path) {
-  if ($files_cnt++ % 4){
+  if ($files_cnt++ % 3){
 	continue;
   }
   $imgs_cnt++;
@@ -52,7 +53,7 @@ foreach (glob('./img/*') as $img_path) {
         $count++;
       }
       $rgb = imagecolorsforindex($im, imagecolorat($im, $f2, $f));
-      $out .= ($rgb['red'] == 255 && $rgb['green'] == 255 && $rgb['blue'] == 255) ? 1 : 0;
+      $out .= ($rgb['red'] == 255 && $rgb['green'] == 255 && $rgb['blue'] == 255) ? 0 : 1;
       $out_pos++;
       if ($out_pos == 8){
         $out .= ',';
@@ -67,40 +68,15 @@ foreach (glob('./img/*') as $img_path) {
   }
   $out .= "},\n";
 }
-$out = '#include "SPI.h"
-#include "Adafruit_GFX.h"
-#include "Adafruit_PCD8544.h"
+$out = '#ifndef IMGS_H
+#define IMGS_H
 
-// D3 - LCD 1 - reset (RST)
-// D4 - LCD 2 - chip select (CS)
-// D5 - LCD 3 - Data/Command select (D/C)
-// D6 - LCD 4 - Serial data out (DIN)
-// D7 - LCD 5 - Serial clock out (SCLK)
-Adafruit_PCD8544 display = Adafruit_PCD8544(3, 4, 5, 6, 7);
+#include <Arduino.h>
 
-const byte ms = 700;
 const byte imgs_cnt = ' . $imgs_cnt . ';
-const byte PROGMEM imgs[][528] = ' . $out . '};
+const byte PROGMEM imgs[][' . (ceil(WIDTH / 8) * HEIGHT) . '] = ' . $out . '};
 
-byte current = 0;
-
-void setup() {
-  display.begin();
-  display.setContrast(51);
-}
-
-void loop() {
-  if (current == imgs_cnt){
-    current = 0;
-  }
-  display.setCursor(0,0);
-  if (current > 5 && current < 8){
-    display.println("Zdravstvuyte!");
-  }
-  display.drawBitmap(0, 0, imgs[current++], ' . WIDTH . ', ' . HEIGHT . ', WHITE, BLACK);
-  display.display();
-  delay(ms);
-}
+#endif // IMGS_H
 ' . "\n";
-echo $out;
+file_put_contents('imgs.c', $out);
 exit;
