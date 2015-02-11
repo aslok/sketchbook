@@ -92,16 +92,8 @@ Cyruit::Cyruit(int8_t sclk, int8_t din, int8_t dc, int8_t cs, int8_t rst, byte c
 
 // Ф-ия печати строк переданных с помощью F()
 void Cyruit::print(const __FlashStringHelper* str, int8_t position, byte go_ln, byte space){
-  char* ptr = (char*) str;
-  char tmp[98];
-  char chr;
-  byte cur_chr;
-  for (
-    cur_chr = 0;
-    chr = (char) pgm_read_byte_near(ptr + cur_chr);
-    tmp[cur_chr++] = chr
-  );
-  tmp[cur_chr] = 0;
+  char tmp[99];
+  strcpy_P(tmp, (char*) str);
   print(tmp, position, go_ln, space);
 }
 
@@ -125,57 +117,50 @@ void Cyruit::print(char chr, int8_t position, byte go_ln, byte space){
   print(str, position, go_ln, space);
 }
 
+// Печать отдельного символа несколько раз
+void Cyruit::print(char chr, int count){
+  char str[2]{chr};
+  while (count--){
+    print(str);
+  }
+}
+
 // Печать массива символов по указателю
 void Cyruit::print(char* str, int8_t position, byte go_ln, byte space){
-  byte cur, old_cur, cur_chr, i, cur_pos, pos;
+  byte cur, old_cur, i, cur_pos, pos;
   if (go_ln != 255 && go_ln < 7){
     go(0, go_ln);
   }
   // Создаем копию во внутренней кодировке
   char out[98];
   utf8_to_cp1251(str, out);
+  byte out_size = strlen(out);
   if (position != 127 && position < 14 && position > -15){
     if (position < 0){
-      // Выясняем длину строки
-      for (cur_chr = 0; out[cur_chr] && out[cur_chr] != '\n'; cur_chr++);
       if (space != 255){
         go(15 - space + position, scr_pos / 14);
-        for (
-          cur_pos = 0;
-          cur_pos < space - cur_chr;
-          cur_pos++, print(' ')
-        );
+        print(' ', space - out_size);
       }else{
-        go(15 - cur_chr + position, scr_pos / 14);
+        go(15 - out_size + position, scr_pos / 14);
       }
     }else{
       go(position, scr_pos / 14);
     }
   }
   if (space != 255){
-    // Выясняем длину строки
-    for (cur_chr = 0; out[cur_chr] && out[cur_chr] != '\n'; cur_chr++);
     // Сдвиг относительно текущей позиции
-    i = (space - cur_chr) / 2;
+    i = (space - out_size) / 2;
     // Если сдвиг влево
     if (i < 0) {
       // Если край экрана - переносим курсор
       go(i + scr_pos >= 0 ? i + scr_pos : i % 98 + scr_pos);
     }else{
       // Если сдвиг вправо - сдвигаем курсор пробелами
-      for (
-        cur_pos = 0;
-        cur_pos < (space - cur_chr) / 2;
-        cur_pos++, print(' ')
-      );
+      print(' ', (space - out_size) / 2);
       // Печатаем строку
       print(str);
       // Сдвигаем курсор пробелами
-      for (
-        cur_pos = 0;
-        cur_pos + cur_chr < space;
-        cur_pos++, print(' ')
-      );
+      print(' ', space - out_size - ((space - out_size) / 2));
       return;
     }
   }
@@ -205,9 +190,8 @@ void Cyruit::write_bg(){
 }
 
 int Cyruit::utf8_to_cp1251(const char* utf8, char* windows1251, word n){
-  int i = 0;
   int j = 0;
-  for(; i < n && utf8[i] != 0; ++i) {
+  for(int i = 0; i < n && utf8[i] != 0; ++i) {
     char prefix = utf8[i];
     char suffix = utf8[i+1];
     if ((prefix & 0x80) == 0) {
@@ -257,8 +241,7 @@ int Cyruit::letter_utf8(const Letter* ptr){
 // Очистка экрана и установка курсора на ноль
 void Cyruit::clear(){
   lcd->clearDisplay();
-  lcd->setCursor(0, 0);
-  scr_pos = 0;
+  go(0);
 }
 
 // Установка курсора в выбранные столбец-строка
@@ -281,4 +264,14 @@ void Cyruit::go(byte col){
   }else if (col == 98){
     go(scr_pos);
   }
+}
+
+void Cyruit::drawBitmap(int x, int y, const byte *bitmap, int w, int h, word color){
+  lcd->drawBitmap(x, y, bitmap, w, h, color);
+  lcd->display();
+}
+
+void Cyruit::drawBitmap(int x, int y, const byte *bitmap, int w, int h, word color, word bg){
+  lcd->drawBitmap(x, y, bitmap, w, h, color, bg);
+  lcd->display();
 }

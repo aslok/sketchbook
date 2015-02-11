@@ -25,12 +25,17 @@ class Cyruit {
       print(int chr, int8_t position = 127, byte go_ln = 255, byte space = 255),
       print(double, int8_t = 127, byte = 255, byte width = 5, byte prec = 2),
       print(char, int8_t = 127, byte = 255, byte = 255),
+      print(char, int count),
       print(char*, int8_t = 127, byte = 255, byte = 255);
 
     void
       clear(),
       go(byte col, byte row),
       go(byte = 98);
+
+    void
+      drawBitmap(int x, int y, const byte *bitmap, int w, int h, word color),
+      drawBitmap(int x, int y, const byte *bitmap, int w, int h, word color, word bg);
 
 
   private:
