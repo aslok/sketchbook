@@ -115,8 +115,10 @@ size_t Cyruit_PCD8544::write(uint8_t c){
 void Cyruit_PCD8544::write(uint8_t c){
 #endif
   static char prefix = 0;
-  if (!prefix && c & 0x80 && (~c) & 0x20){
-    prefix = c;
+  if (!prefix && c & 0x80){
+    if ((~c) & 0x20){
+      prefix = c;
+    }
     #if ARDUINO >= 100
     return 0;
     #else
@@ -135,11 +137,15 @@ void Cyruit_PCD8544::write(uint8_t c){
     } else if (unicode_char >= 0x402 && unicode_char <= 0x403) {
       c = (char)(unicode_char - 0x382);
     } else {
-      for (int k = 0; k < 61; k++) {
+      int k = 0;
+      for (; k < 61; k++) {
         if (unicode_char == (int) pgm_read_word_near((char*) (g_letters + k) + 1)) {
           c = (char) pgm_read_byte_near(g_letters + k);
           break;
         }
+      }
+      if (k == 61){
+        c = 127;
       }
     }
   }

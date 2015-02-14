@@ -1,5 +1,5 @@
 /*
-Sketch uses 6 936 bytes (22%) of program storage space. Maximum is 30 720 bytes.
+Sketch uses 7 108 bytes (23%) of program storage space. Maximum is 30 720 bytes.
 Global variables use 623 bytes (30%) of dynamic memory, leaving 1 425 bytes for local variables. Maximum is 2 048 bytes.
 */
 
@@ -20,14 +20,16 @@ Cyruit_PCD8544 lcd = Cyruit_PCD8544(3, 4, 5, 6, 7);
 // D3 - LCD 1 - reset (RST)
 // D4 - LCD 2 - chip select (CS)
 // D5 - LCD 3 - Data/Command select (D/C)
-//Cyruit lcd = Cyruit(3, 4, 5);
+//Cyruit_PCD8544 lcd = Cyruit_PCD8544(3, 4, 5);
 // Note with hardware SPI MISO and SS pins aren't used but will still be read
 // and written to during SPI transfer.  Be careful sharing these pins!
 
-const byte start = 33;
-const byte finish = 255;
+const byte start = 32;
+const byte finish = 127;
+const word utf8_start = 0x0400;
+const word utf8_finish = 0x0491;
 const byte scr_size = 84;
-const word ms = 2000;
+const word ms = 3000;
 byte scr;
 
 void setup(){
@@ -47,15 +49,32 @@ void next_page(){
   scr++;
 }
 
+void print_utf8(word* utf8_num){
+  word utf8_chr = (*utf8_num & 0x07C0) << 2 | *utf8_num & 0x003F | 0xC080;
+  char* utf8 = (char*) &utf8_chr;
+  for (byte i = 2; i--; ){
+    lcd.print(*(utf8 + i));
+  }
+}
+
 void loop() {
-  byte chr = start;
   scr = 1;
-  while (chr < finish){
-    lcd.print((char) chr);
-    chr++;
-    if (chr > (scr * scr_size + start)){
+  // Распечатываем стандартную 7-битную таблицу символы 32-127
+  for (char chr_num = start; chr_num > 0; chr_num++){
+    if (chr_num == scr * scr_size + start){
       next_page();
     }
+    lcd.print(chr_num);
+  }
+  next_page();
+  scr = 1;
+  // Распечатываем часть кирилической таблицы юникода 0400-0491
+  // которую возможно перекодировать в cp1251 почти полностью
+  for (word utf8_num = utf8_start; utf8_num <= utf8_finish; utf8_num++){
+    if (utf8_num == scr * scr_size + utf8_start){
+      next_page();
+    }
+    print_utf8(&utf8_num);
   }
   next_page();
 }
