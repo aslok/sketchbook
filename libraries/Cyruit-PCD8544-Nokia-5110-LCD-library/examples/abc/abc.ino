@@ -19,11 +19,11 @@ Adafruit_PCD8544 lcd = Adafruit_PCD8544(3, 4, 5, 6, 7);
 // D3 - LCD 1 - reset (RST)
 // D4 - LCD 2 - chip select (CS)
 // D5 - LCD 3 - Data/Command select (D/C)
-//Cyruit lcd = Cyruit(3, 4, 5);
+//Adafruit_PCD8544 lcd = Adafruit_PCD8544(3, 4, 5);
 // Note with hardware SPI MISO and SS pins aren't used but will still be read
 // and written to during SPI transfer.  Be careful sharing these pins!
 
-const byte start = 33;
+const byte start = 32;
 const byte finish = 255;
 const byte scr_size = 84;
 const word ms = 2000;
@@ -47,14 +47,12 @@ void next_page(){
 }
 
 void loop() {
-  byte chr = start;
   scr = 1;
-  while (chr < finish){
-    lcd.print((char) chr);
-    chr++;
-    if (chr > (scr * scr_size + start)){
+  for (word chr_num = start; chr_num <= finish; chr_num++){
+    if (chr_num == (scr * scr_size + start)){
       next_page();
     }
+    lcd.print((char) chr_num);
   }
   next_page();
 }
