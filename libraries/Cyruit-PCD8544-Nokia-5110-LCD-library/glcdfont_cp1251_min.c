@@ -1,5 +1,5 @@
-#ifndef FONT5X7_H
-#define FONT5X7_H
+#ifndef CYRFONTMIN5X7_H
+#define CYRFONTMIN5X7_H
 
 #include <binary.h>
 
@@ -11,7 +11,7 @@
 #endif
 
 // Standard ASCII 5x7 font
-const uint8_t font[] PROGMEM = {
+const uint8_t cyrfont[] PROGMEM = {
 // 0x80 - 128 - Ђ
 B01111111,
 B00010001,
@@ -909,4 +909,4 @@ B00010100,
 B01111100,
 };
 
-#endif // FONT5X7_H
+#endif // CYRFONTMIN5X7_H
