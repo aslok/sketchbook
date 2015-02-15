@@ -1,112 +1,51 @@
 /*
 created 10.02.2015
-modified 10.02.2015
+modified 16.02.2015
 by Fust Vitaliy
 with Arduino 1.5.8 (tested on Arduino Nano)
 */
 
 #include "Cyruit.h"
 
-/*
-Кодировка CP1251 использует для хранения символа один байт
-Для использования необходимо скопировать glcdfont_cp1251.c в
-в каталог Adafruit-GFX-Library-master
-и заменить в начале файла Adafruit_GFX.cpp название файла
-строку
-#include "glcdfont.c"
-на строку
-#include "glcdfont_cp1251.c"
-*/
-
-const Letter PROGMEM g_letters[61] = {
-  {0x82, 0x201A}, // SINGLE LOW-9 QUOTATION MARK
-  {0x83, 0x0453}, // CYRILLIC SMALL LETTER GJE
-  {0x84, 0x201E}, // DOUBLE LOW-9 QUOTATION MARK
-  {0x85, 0x2026}, // HORIZONTAL ELLIPSIS
-  {0x86, 0x2020}, // DAGGER
-  {0x87, 0x2021}, // DOUBLE DAGGER
-  {0x88, 0x20AC}, // EURO SIGN
-  {0x89, 0x2030}, // PER MILLE SIGN
-  {0x8A, 0x0409}, // CYRILLIC CAPITAL LETTER LJE
-  {0x8B, 0x2039}, // SINGLE LEFT-POINTING ANGLE QUOTATION MARK
-  {0x8C, 0x040A}, // CYRILLIC CAPITAL LETTER NJE
-  {0x8D, 0x040C}, // CYRILLIC CAPITAL LETTER KJE
-  {0x8E, 0x040B}, // CYRILLIC CAPITAL LETTER TSHE
-  {0x8F, 0x040F}, // CYRILLIC CAPITAL LETTER DZHE
-  {0x90, 0x0452}, // CYRILLIC SMALL LETTER DJE
-  {0x91, 0x2018}, // LEFT SINGLE QUOTATION MARK
-  {0x92, 0x2019}, // RIGHT SINGLE QUOTATION MARK
-  {0x93, 0x201C}, // LEFT DOUBLE QUOTATION MARK
-  {0x94, 0x201D}, // RIGHT DOUBLE QUOTATION MARK
-  {0x95, 0x2022}, // BULLET
-  {0x96, 0x2013}, // EN DASH
-  {0x97, 0x2014}, // EM DASH
-  {0x99, 0x2122}, // TRADE MARK SIGN
-  {0x9A, 0x0459}, // CYRILLIC SMALL LETTER LJE
-  {0x9B, 0x203A}, // SINGLE RIGHT-POINTING ANGLE QUOTATION MARK
-  {0x9C, 0x045A}, // CYRILLIC SMALL LETTER NJE
-  {0x9D, 0x045C}, // CYRILLIC SMALL LETTER KJE
-  {0x9E, 0x045B}, // CYRILLIC SMALL LETTER TSHE
-  {0x9F, 0x045F}, // CYRILLIC SMALL LETTER DZHE
-  {0xA0, 0x00A0}, // NO-BREAK SPACE
-  {0xA1, 0x040E}, // CYRILLIC CAPITAL LETTER SHORT U
-  {0xA2, 0x045E}, // CYRILLIC SMALL LETTER SHORT U
-  {0xA3, 0x0408}, // CYRILLIC CAPITAL LETTER JE
-  {0xA4, 0x00A4}, // CURRENCY SIGN
-  {0xA5, 0x0490}, // CYRILLIC CAPITAL LETTER GHE WITH UPTURN
-  {0xA6, 0x00A6}, // BROKEN BAR
-  {0xA7, 0x00A7}, // SECTION SIGN
-  {0xA8, 0x0401}, // CYRILLIC CAPITAL LETTER IO
-  {0xA9, 0x00A9}, // COPYRIGHT SIGN
-  {0xAA, 0x0404}, // CYRILLIC CAPITAL LETTER UKRAINIAN IE
-  {0xAB, 0x00AB}, // LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
-  {0xAC, 0x00AC}, // NOT SIGN
-  {0xAD, 0x00AD}, // SOFT HYPHEN
-  {0xAE, 0x00AE}, // REGISTERED SIGN
-  {0xAF, 0x0407}, // CYRILLIC CAPITAL LETTER YI
-  {0xB0, 0x00B0}, // DEGREE SIGN
-  {0xB1, 0x00B1}, // PLUS-MINUS SIGN
-  {0xB2, 0x0406}, // CYRILLIC CAPITAL LETTER BYELORUSSIAN-UKRAINIAN I
-  {0xB3, 0x0456}, // CYRILLIC SMALL LETTER BYELORUSSIAN-UKRAINIAN I
-  {0xB4, 0x0491}, // CYRILLIC SMALL LETTER GHE WITH UPTURN
-  {0xB5, 0x00B5}, // MICRO SIGN
-  {0xB6, 0x00B6}, // PILCROW SIGN
-  {0xB7, 0x00B7}, // MIDDLE DOT
-  {0xB8, 0x0451}, // CYRILLIC SMALL LETTER IO
-  {0xB9, 0x2116}, // NUMERO SIGN
-  {0xBA, 0x0454}, // CYRILLIC SMALL LETTER UKRAINIAN IE
-  {0xBB, 0x00BB}, // RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
-  {0xBC, 0x0458}, // CYRILLIC SMALL LETTER JE
-  {0xBD, 0x0405}, // CYRILLIC CAPITAL LETTER DZE
-  {0xBE, 0x0455}, // CYRILLIC SMALL LETTER DZE
-  {0xBF, 0x0457}  // CYRILLIC SMALL LETTER YI
-};
-
 // Конструктор
-Cyruit::Cyruit(int8_t sclk, int8_t din, int8_t dc, int8_t cs, int8_t rst, byte contrast){
-  lcd = new Adafruit_PCD8544(sclk, din, dc, cs, rst);
-  lcd->begin();
-  lcd->setContrast(contrast);
+Cyruit::Cyruit(
+  void* ptr, display_type type, byte width, byte height, byte f_width, byte f_height
+){
+  lcd = ptr;
+  lcd_type = type;
+  font_width = f_width,
+  font_height = f_height,
+  scr_width = width / font_width,
+  scr_height = height / font_height,
+  scr_length = scr_width * scr_height;
   clear();
+}
+
+Cyruit::Cyruit(
+  Cyruit_PCD8544* ptr,
+  byte width, byte height, byte f_width, byte f_height
+):Cyruit(ptr, Cyruit_PCD8544_lib, width, height, f_width, f_height){
 }
 
 // Ф-ия печати строк переданных с помощью F()
 void Cyruit::print(const __FlashStringHelper* str, int8_t position, byte go_ln, byte space){
-  char tmp[99];
+  word str_len = strlen_P((char*) str) + 1;
+  char* tmp = new char[str_len];
   strcpy_P(tmp, (char*) str);
   print(tmp, position, go_ln, space);
+  delete[] tmp;
 }
 
 // Ф-ия печати целых чисел
 void Cyruit::print(int chr, int8_t position, byte go_ln, byte space){
-  char str[98];
+  char str[max_num_length];
   sprintf(str, "%d", chr);
   print(str, position, go_ln, space);
 }
 
 // Печать чисел с плавающей точкой
 void Cyruit::print(double chr, int8_t position, byte go_ln, byte width, byte prec){
-  char str[98];
+  char str[max_num_length];
   dtostrf(chr, width, prec, str);
   print(str, position, go_ln);
 }
@@ -117,161 +56,152 @@ void Cyruit::print(char chr, int8_t position, byte go_ln, byte space){
   print(str, position, go_ln, space);
 }
 
+// Печать отдельного utf символа по номеру
+void Cyruit::print(word utf8_num, int8_t position, byte go_ln, byte space){
+  word utf8_chr = (utf8_num & 0x07C0) << 2 | utf8_num & 0x003F | 0xC080;
+  char utf8_str[3]{(utf8_chr & 0xff00) >> 8, utf8_chr & 0xff};
+  print(utf8_str, position, go_ln, space);
+}
+
 // Печать отдельного символа несколько раз
-void Cyruit::print(char chr, int count){
-  char str[2]{chr};
+void Cyruit::print(char chr, word count){
   while (count--){
-    print(str);
+    print(chr);
   }
 }
 
 // Печать массива символов по указателю
 void Cyruit::print(char* str, int8_t position, byte go_ln, byte space){
-  byte cur, old_cur, i, cur_pos, pos;
-  if (go_ln != 255 && go_ln < 7){
+  if (go_ln != def_go_ln && go_ln < scr_height){
     go(0, go_ln);
   }
-  // Создаем копию во внутренней кодировке
-  char out[98];
-  utf8_to_cp1251(str, out);
-  byte out_size = strlen(out);
-  if (position != 127 && position < 14 && position > -15){
+  word str_size = utf8_strlen(str);
+  // Сдвиг относительно текущей позиции
+  word free_size = ((space - str_size) / 2) % scr_length;
+  word free_size_pp = free_size + (space - str_size) % 2;
+  /*Serial.println(str);
+  Serial.println(str_size);
+  Serial.println(scr_pos);
+  Serial.println(scr_pos / scr_width);*/
+  byte scr_width_pp = scr_width + 1;
+  // Если указана новая позиция
+  if (position != def_position && position < scr_width && position > -1 * scr_width_pp){
+    // Если позиция от правого края
     if (position < 0){
-      if (space != 255){
-        go(15 - space + position, scr_pos / 14);
-        print(' ', space - out_size);
+      // Если нужна центровка
+      if (space != def_space){
+        go(scr_width_pp - space + position, scr_pos / scr_width);
+        // Сдвигаем курсор пробелами
+        print(' ', free_size_pp);
+        print_lcd(str);
+        print(' ', free_size);
+        return;
+      // Если равнение на право
       }else{
-        go(15 - out_size + position, scr_pos / 14);
+        // Если край экрана - переносим курсор
+        word new_pos = scr_width_pp - str_size + position + scr_pos;
+        go(new_pos >= 0 ? new_pos : (new_pos % scr_length) + scr_length);
       }
+    // Если позиция от левого края
     }else{
-      go(position, scr_pos / 14);
-    }
-  }
-  if (space != 255){
-    // Сдвиг относительно текущей позиции
-    i = (space - out_size) / 2;
-    // Если сдвиг влево
-    if (i < 0) {
-      // Если край экрана - переносим курсор
-      go(i + scr_pos >= 0 ? i + scr_pos : i % 98 + scr_pos);
-    }else{
-      // Если сдвиг вправо - сдвигаем курсор пробелами
-      print(' ', (space - out_size) / 2);
-      // Печатаем строку
-      print(str);
-      // Сдвигаем курсор пробелами
-      print(' ', space - out_size - ((space - out_size) / 2));
-      return;
+      go(position, scr_pos / scr_width);
+      // Если нужна центровка
+      if (space != def_space){
+        // Если сдвиг влево
+        if (free_size < 0) {
+          // Если край экрана - переносим курсор
+          word new_pos = free_size + scr_pos;
+          go(new_pos >= 0 ? new_pos : (new_pos % scr_length) + scr_length);
+        }else{
+          // Сдвигаем курсор пробелами
+          print(' ', free_size);
+          print_lcd(str);
+          print(' ', free_size_pp);
+          return;
+        }
+      }
     }
   }
   // Печатаем строку во внутренней кодировке
-  write_str_enc(out);
+  print_lcd(str);
+  //Serial.println("--------------");
 }
 
-// Печатаем строку во внутренней кодировке
-void Cyruit::write_str_enc(char* str){
-  for (byte cur_chr = 0; str[cur_chr]; cur_chr++){
-    if (scr_pos >= 98){
-      go(0);
-    }
-    write_bg();
-    lcd->print(str[cur_chr]);
-    scr_pos++;
-  }
-  lcd->display();
-}
-
-void Cyruit::write_bg(){
-  lcd->fillRect(
-    (scr_pos - scr_pos / 14 * 14) * 6, scr_pos / 14 * 8,
-    6, 8,
-    WHITE
-  );
-}
-
-int Cyruit::utf8_to_cp1251(const char* utf8, char* windows1251, word n){
-  int j = 0;
-  for(int i = 0; i < n && utf8[i] != 0; ++i) {
-    char prefix = utf8[i];
-    char suffix = utf8[i+1];
-    if ((prefix & 0x80) == 0) {
-      windows1251[j] = (char)prefix;
-      ++j;
-    } else if ((~prefix) & 0x20) {
-      int first5bit = prefix & 0x1F;
-      first5bit <<= 6;
-      int sec6bit = suffix & 0x3F;
-      int unicode_char = first5bit + sec6bit;
-      if ( unicode_char >= 0x410 && unicode_char <= 0x44F ) {
-        windows1251[j] = (char)(unicode_char - 0x350);
-      } else if (unicode_char >= 0x80 && unicode_char <= 0xFF) {
-        windows1251[j] = (char)(unicode_char);
-      } else if (unicode_char >= 0x402 && unicode_char <= 0x403) {
-        windows1251[j] = (char)(unicode_char - 0x382);
-      } else {
-        for (int k = 0; k < 61; k++) {
-          if (unicode_char == letter_utf8(g_letters + k)) {
-            windows1251[j] = letter_cp1251(g_letters + k);
-            goto NEXT_LETTER;
+void Cyruit::print_lcd(char* str){
+  switch (lcd_type){
+    case Cyruit_PCD8544_lib:
+      for (word i = 0; str[i] && i < 65535; i++){
+        if ((~str[i]) & 0x80 || (byte) str[i] >> 5 == 6){
+          ((Cyruit_PCD8544*) lcd)->fillRect(
+            scr_pos % scr_width * font_width,
+            scr_pos / scr_width * font_height,
+            font_width, font_height,
+            WHITE
+          );
+        }
+        ((Cyruit_PCD8544*) lcd)->write(str[i]);
+        if ((~str[i]) & 0x80 || (byte) str[i] >> 5 != 6){
+          scr_pos++;
+          if (scr_pos >= scr_length){
+            go(0);
           }
         }
-        // can't convert this char
-        return 0;
       }
-NEXT_LETTER:
-      ++i;
-      ++j;
-    } else {
-      // can't convert this chars
-      return 0;
-    }
+      ((Cyruit_PCD8544*) lcd)->display();
+      break;
   }
-  windows1251[j] = 0;
-  return 1;
-}
-
-char Cyruit::letter_cp1251(const Letter* ptr){
-  return (char) pgm_read_byte_near(ptr);
-}
-
-int Cyruit::letter_utf8(const Letter* ptr){
-  return (int) pgm_read_word_near((char*) ptr + 1);
 }
 
 // Очистка экрана и установка курсора на ноль
 void Cyruit::clear(){
-  lcd->clearDisplay();
+  switch (lcd_type){
+    case Cyruit_PCD8544_lib:
+      ((Cyruit_PCD8544*) lcd)->clearDisplay();
+      ((Cyruit_PCD8544*) lcd)->display();
+      break;
+  }
   go(0);
 }
 
 // Установка курсора в выбранные столбец-строка
 void Cyruit::go(byte col, byte row){
-  //Serial.println("go");
-  //Serial.println(col);
-  //Serial.println(row);
-  if (col < 14 && row < 7){
-    lcd->setCursor(col * 6, row * 8);
-    scr_pos = row * 14 + col;
+  /*Serial.print(col);
+  Serial.print(", ");
+  Serial.print(row);
+  Serial.print('\n');*/
+  if (col < scr_width && row < scr_height){
+    switch (lcd_type){
+      case Cyruit_PCD8544_lib:
+        ((Cyruit_PCD8544*) lcd)->setCursor(col * font_width, row * font_height);
+        break;
+    }
+    scr_pos = row * scr_width + col;
   }
 }
 
 // Установка курсора в выбранную позицию справа-налево сверху-вниз
 void Cyruit::go(byte col){
-  //Serial.println("go");
-  //Serial.println(col);
-  if (col < 98){
-    go(col - col / 14 * 14, col / 14);
-  }else if (col == 98){
+  if (col < scr_length){
+    go(col % scr_width, col / scr_width);
+  }else if (col == 255){
     go(scr_pos);
   }
 }
 
-void Cyruit::drawBitmap(int x, int y, const byte *bitmap, int w, int h, word color){
-  lcd->drawBitmap(x, y, bitmap, w, h, color);
-  lcd->display();
-}
-
-void Cyruit::drawBitmap(int x, int y, const byte *bitmap, int w, int h, word color, word bg){
-  lcd->drawBitmap(x, y, bitmap, w, h, color, bg);
-  lcd->display();
+word Cyruit::utf8_strlen(char* str){
+  word str_len = 0;
+  byte chr_len = 1;
+  for (word i = 0; str[i] && i < 65535; i += chr_len){
+    chr_len = 0;
+    for(
+      byte mask = 0x80;
+      mask && mask & str[i];
+      chr_len++, mask >>= 1
+    );
+    if (!chr_len || chr_len > 6){
+      chr_len = 1;
+    }
+    str_len++;
+  }
+  return str_len;
 }
