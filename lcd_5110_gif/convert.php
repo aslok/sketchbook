@@ -2,15 +2,16 @@
 <?php
 
 const WIDTH = 84, HEIGHT = 40;
+const FRAMES_DIVIDER = 3;
 
-// rm -rf img/ ; mkdir img && convert -coalesce IMG_0081.GIF img/%03d.png && convert -crop 220x105+135+85 img/???.png -resize 84x40 img/out%03d.png && convert img/out* -monochrome img/%03d.png && rm img/out*
-// rm -rf img/ ; mkdir img && convert -coalesce IMG_0081.GIF img/%03d.png && convert -crop 220x105+135+85 img/???.png -resize 84x40 img/out%03d.png && convert img/out* -monochrome -splice 0x8 img/%03d.png && rm img/out*
+// rm -rf img/ ; mkdir img && convert -coalesce IMG_0081.GIF img/%03d.png && convert -crop 220x105+135+85 img/???.png -resize 84x40 img/out%03d.png && convert img/out* -monochrome img/%03d.png && rm img/out* && ./convert.php
+// rm -rf img/ ; mkdir img && convert -coalesce IMG_0081.GIF img/%03d.png && convert -crop 220x105+135+85 img/???.png -resize 84x40 img/out%03d.png && convert img/out* -monochrome -splice 0x8 img/%03d.png && rm img/out* && ./convert.php
 
 $imgs_cnt = 0;
 $files_cnt = 0;
 $out = "{\n";
 foreach (glob('./img/*') as $img_path) {
-  if ($files_cnt++ % 3){
+  if ($files_cnt++ % FRAMES_DIVIDER){
 	continue;
   }
   $imgs_cnt++;
