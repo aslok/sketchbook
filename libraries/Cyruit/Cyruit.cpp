@@ -51,7 +51,7 @@ void Cyruit::print(double chr, int8_t position, byte go_ln, byte width, byte pre
 }
 
 // Печать отдельного символа
-void Cyruit::print(char chr, int8_t position, byte go_ln, byte space){
+inline void Cyruit::print(char chr, int8_t position, byte go_ln, byte space){
   char str[2]{chr};
   print(str, position, go_ln, space);
 }
@@ -64,10 +64,14 @@ void Cyruit::print(word utf8_num, int8_t position, byte go_ln, byte space){
 }
 
 // Печать отдельного символа несколько раз
-void Cyruit::print(char chr, word count){
-  while (count--){
+void Cyruit::print(char chr, int count){
+  while (count-- > 0){
     print(chr);
   }
+}
+
+inline void Cyruit::print(char chr, word count){
+  print(chr, (int) count);
 }
 
 // Печать массива символов по указателю
@@ -127,6 +131,7 @@ void Cyruit::print(char* str, int8_t position, byte go_ln, byte space){
   //Serial.println("--------------");
 }
 
+// Ф-ия печати строк без параметров
 void Cyruit::print_lcd(char* str){
   switch (lcd_type){
     case Cyruit_PCD8544_lib:
@@ -188,6 +193,7 @@ void Cyruit::go(byte col){
   }
 }
 
+// Возвращает длину строки закодированной в utf-8
 word Cyruit::utf8_strlen(char* str){
   word str_len = 0;
   byte chr_len = 1;
