@@ -139,8 +139,8 @@ void Cyruit_PCD8544::write(uint8_t c){
     } else {
       int k = 0;
       for (; k < 61; k++) {
-        if (unicode_char == (int) pgm_read_word_near((char*) (g_letters + k) + 1)) {
-          c = (char) pgm_read_byte_near(g_letters + k);
+        if (unicode_char == pgm_read_word_near(&g_letters[k].unicode)) {
+          c = pgm_read_byte_near(&g_letters[k].cp1251);
           break;
         }
       }
