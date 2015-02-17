@@ -1,9 +1,25 @@
 /*
-created 19.01.2015
-modified 04.02.2015
-by Fust Vitaliy
-with Arduino 1.5.8 (tested on Arduino Nano)
-*/
+ * CyrI2c.cpp
+ * Основной файл библиотеки CyrI2c
+ * Класс содержит методы вывода текста на экраны 1602
+ * используется протокол I2C
+ *
+ * created 19.01.2015
+ * modified 04.02.2015
+ * with Arduino 1.5.8 (tested on Arduino Nano)
+ *
+ * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
+ */
 
 #include "CyrI2c.h"
 

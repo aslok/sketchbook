@@ -1,22 +1,32 @@
 /*
-  Телеграфная азбука
- Современная телеграфная азбука (система кодировки символов короткими и
- длинными посылками для передачи их по линиям связи, известная как
- «код Морзе» или «морзянка»)
-
- В среднем 60 знаков в минуту
- В среднем 3 символа в секунду (350ms на символ), 150 ms точка
-
- За единицу времени принимается длительность одной точки. Длительность
- тире равна трём точкам. Пауза между элементами одного знака — одна точка,
- между знаками в слове — 3 точки, между словами — 7 точек
-
- created 15.01.2015
- by Fust Vitaliy
+ * morse2.ino
+ * Телеграфная азбука v2.0
+ * Современная телеграфная азбука (система кодировки символов короткими и
+ * длинными посылками для передачи их по линиям связи, известная как
+ * «код Морзе» или «морзянка»)
+ *
+ * В среднем 60 знаков в минуту
+ * В среднем 3 символа в секунду (350ms на символ), 150 ms точка
+ *
+ * За единицу времени принимается длительность одной точки. Длительность
+ * тире равна трём точкам. Пауза между элементами одного знака — одна точка,
+ * между знаками в слове — 3 точки, между словами — 7 точек
+ *
+ * created 15.01.2015
+ * with Arduino 1.5.8 (tested on Arduino Uno)
+ *
+ * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
  */
-
-// Sketch uses 6 784 bytes (21%) of program storage space. Maximum is 32 256 bytes.
-// Global variables use 1 094 bytes (53%) of dynamic memory, leaving 954 bytes for local variables. Maximum is 2 048 bytes.
 
 // Строка для вывода
 const char str[] = "1 SOS? SOS! 2 SOS? SOS!";
@@ -123,4 +133,3 @@ void setup() {
 
 void loop() {
 }
-

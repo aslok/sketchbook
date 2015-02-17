@@ -1,7 +1,24 @@
 /*
-Sketch uses 29 416 bytes (95%) of program storage space. Maximum is 30 720 bytes.
-Global variables use 602 bytes (29%) of dynamic memory, leaving 1 446 bytes for local variables. Maximum is 2 048 bytes.
-*/
+ * lcd_5110_gif.ino
+ * Демонстрация работы библиотеки utf8_cp1251
+ * Вывод анимации с русскими субтитрами
+ *
+ * created 10.02.2015
+ * modified 16.02.2015
+ * with Arduino 1.5.8 (tested on Arduino Nano)
+ *
+ * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
+ */
 
 #include "SPI.h"
 #include "Adafruit_GFX.h"

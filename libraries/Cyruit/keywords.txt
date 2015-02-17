@@ -3,8 +3,14 @@
 # Constants (LITERAL1)
 
 Cyruit	KEYWORD1
-Letter	KEYWORD1
 print	KEYWORD2
 clear	KEYWORD2
 go	KEYWORD2
-g_letters	LITERAL1
+init	KEYWORD2
+n_count	KEYWORD2
+font_width	KEYWORD2
+font_height	KEYWORD2
+scr_width	KEYWORD2
+scr_height	KEYWORD2
+scr_length	KEYWORD2
+scr_pos	KEYWORD2

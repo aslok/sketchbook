@@ -1,6 +1,6 @@
 /*
-Sketch uses 26 690 bytes (86%) of program storage space. Maximum is 30 720 bytes.
-Global variables use 649 bytes (31%) of dynamic memory, leaving 1 399 bytes for local variables. Maximum is 2 048 bytes.
+Sketch uses 27 148 bytes (88%) of program storage space. Maximum is 30 720 bytes.
+Global variables use 653 bytes (31%) of dynamic memory, leaving 1 395 bytes for local variables. Maximum is 2 048 bytes.
 */
 
 #include "SPI.h"

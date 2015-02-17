@@ -1,9 +1,24 @@
 /*
-created 10.02.2015
-modified 16.02.2015
-by Fust Vitaliy
-with Arduino 1.5.8 (tested on Arduino Nano)
-*/
+ * Cyruit.h
+ * Основной файл библиотеки Cyruit
+ * Класс содержит методы вывода текста на экраны
+ *
+ * created 10.02.2015
+ * modified 17.02.2015
+ * with Arduino 1.5.8 (tested on Arduino Nano)
+ *
+ * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
+ */
 
 #include "Cyruit.h"
 
@@ -11,6 +26,8 @@ with Arduino 1.5.8 (tested on Arduino Nano)
 Cyruit::Cyruit(
   void* ptr, display_type type, byte width, byte height, byte f_width, byte f_height
 ){
+  s = NULL;
+  s_type = NoString;
   lcd = ptr;
   lcd_type = type;
   font_width = f_width,
@@ -135,7 +152,13 @@ void Cyruit::print(char* str, int8_t position, byte go_ln, byte space){
 void Cyruit::print_lcd(char* str){
   switch (lcd_type){
     case Cyruit_PCD8544_lib:
-      for (word i = 0; str[i] && i < 65535; i++){
+      for (word i = 0; str[i] && str[i] != '\r' && i < 65535; i++){
+        if (str[i] == '\n'){
+          byte new_pos = scr_pos + scr_width;
+          new_pos = new_pos < scr_length ? new_pos - new_pos % scr_width : 0;
+          go(new_pos);
+          continue;
+        }
         if ((~str[i]) & 0x80 || (byte) str[i] >> 5 == 6){
           ((Cyruit_PCD8544*) lcd)->fillRect(
             scr_pos % scr_width * font_width,
@@ -210,4 +233,93 @@ word Cyruit::utf8_strlen(char* str){
     str_len++;
   }
   return str_len;
+}
+
+// Инициализация массива строк разделенных символом \r переданного через F()
+void Cyruit::init(const __FlashStringHelper* str){
+  s = (char*) str;
+  s_type = FlashStringHelper;
+}
+
+// Инициализация массива строк разделенных символом \r переданного через указатель
+void Cyruit::init(const char* str){
+  s = (char*) str;
+  s_type = ASCIZString;
+}
+
+// Печать строки из ранее переданного массива по её номеру
+void Cyruit::printn(byte num, int8_t position, byte go_ln, byte space){
+  if (s_type == FlashStringHelper){
+    printn_flash(num, position, go_ln, space);
+  }else if (s_type == ASCIZString){
+    printn_str(num, position, go_ln, space);
+  }
+}
+
+// Печать строки из ранее переданного массива символов по её номеру
+// Максимальная длина строки - 255 символов
+// Максимальный размер массива - 255 строк
+void Cyruit::printn_str(byte num, int8_t position, byte go_ln, byte space){
+  char str[255];
+  byte count = 0, str_pos;
+  word pos = 0;
+  while (count < 255 && pos < 65535 && count < num && s[pos]){
+    if (s[pos++] == '\r'){
+      count++;
+    }
+  }
+  if (count != num){
+    return;
+  }
+  for (
+    str_pos = 0;
+    str_pos < 255 && pos < 65535 && s[pos] && s[pos] != '\r';
+    str[str_pos++] = s[pos++]
+  );
+  str[str_pos] = 0;
+  print(str, position, go_ln, space);
+}
+
+// Печать строки из ранее переданного внутри F() массива по её номеру
+// Максимальная длина строки - 255 символов
+// Максимальный размер массива - 255 строк
+void Cyruit::printn_flash(byte num, int8_t position, byte go_ln, byte space){
+  char str[255];
+  byte count = 0, str_pos;
+  word pos = 0;
+  char chr;
+  while (
+    count < 255 && pos < 65535 && count < num &&
+      (chr = (char) pgm_read_byte_near(s + pos++))
+  ){
+    if (chr == '\r'){
+      count++;
+    }
+  }
+  if (count != num){
+    return;
+  }
+  for (
+    str_pos = 0;
+    str_pos < 255 && pos < 65535 &&
+      (chr = (char) pgm_read_byte_near(s + pos++)) && chr != '\r';
+    str[str_pos++] = chr
+  );
+  str[str_pos] = 0;
+  print(str, position, go_ln, space);
+}
+
+// Возвращает кол-во строк в ранее переданном массиве
+byte Cyruit::n_count(){
+  byte count = 0, pos = 0;
+  char chr;
+  while (
+    count < 255 && pos < 65535 &&
+    (chr = (char) pgm_read_byte_near(s + pos++))
+  ){
+    if (chr == '\r'){
+      count++;
+    }
+  }
+  return ++count;
 }

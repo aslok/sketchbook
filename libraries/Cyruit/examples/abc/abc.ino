@@ -1,5 +1,5 @@
 /*
-Sketch uses 7 150 bytes (23%) of program storage space. Maximum is 30 720 bytes.
+Sketch uses 7 588 bytes (24%) of program storage space. Maximum is 30 720 bytes.
 Global variables use 623 bytes (30%) of dynamic memory, leaving 1 425 bytes for local variables. Maximum is 2 048 bytes.
 */
 
@@ -35,6 +35,7 @@ byte scr;
 void setup(){
   // Инициализация дисплея
   lcd.begin();
+  lcd.clearDisplay();
   // Устанавливаем контраст
   lcd.setContrast(51);
   // Устанавливаем цвет текста

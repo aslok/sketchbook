@@ -1,35 +1,44 @@
 /*
- Time v2
- Time and date on lcd display (used rtc timer) with control by keypad 4x5
+ * time_ds1307v2.ino
+ * Time v2.0
+ * Time and date on lcd display (used rtc timer) with control by keypad 4x5
+ *
+ * Hardware:
+ * LCD I2C PCF8574
+ *   http://habrahabr.ru/post/219137/
+ *   http://arduino-info.wikispaces.com/file/detail/LiquidCrystal_I2C1602V1.zip/341635514
+ * Trickle-Charge Timekeeping Chip DS1307 (RTC Module V1.1 I2C)
+ *   http://codehaus.blogspot.com/2012/02/i2c-rtc-ds1307-at24c32-real-time-clock.html
+ * 4x5 20 Key Matrix Membrane Switch Keypad Keyboard Super Slim
+ *   http://i00.i.aliimg.com/img/pb/237/100/706/706100237_585.jpg
+ * Humidity & Temperature Sensor DHT11
+ *   http://electronics-lab.ru/blog/mcu/46.html
+ *
+ *
+ * created 18.01.2015
+ * modifid 04.02.2015
+ * with Arduino 1.5.8 (tested on Arduino Nano)
+ *
+ * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
+ */
 
- Hardware:
-   LCD I2C PCF8574
-     http://habrahabr.ru/post/219137/
-     http://arduino-info.wikispaces.com/file/detail/LiquidCrystal_I2C1602V1.zip/341635514
-   Trickle-Charge Timekeeping Chip DS1307 (RTC Module V1.1 I2C)
-     http://codehaus.blogspot.com/2012/02/i2c-rtc-ds1307-at24c32-real-time-clock.html
-   4x5 20 Key Matrix Membrane Switch Keypad Keyboard Super Slim
-     http://i00.i.aliimg.com/img/pb/237/100/706/706100237_585.jpg
-   Humidity & Temperature Sensor DHT11
-     http://electronics-lab.ru/blog/mcu/46.html
-
- created 18.01.2015
- modifid 02.02.2015
- by Fust Vitaliy
- with Arduino 1.5.8 (tested on Arduino Nano)
-*/
-/*
-Sketch uses 17 046 bytes (55%) of program storage space. Maximum is 30 720 bytes.
-Global variables use 431 bytes (21%) of dynamic memory, leaving 1 617 bytes for local variables. Maximum is 2 048 bytes.
-*/
-
-#include <Wire.h>
-#include <LiquidCrystal_I2C.h>
-#include <CyrI2c.h>
+#include "Wire.h"
+#include "LiquidCrystal_I2C.h"
+#include "CyrI2c.h"
 CyrI2c* lcd;
 
 
-#include <Keypad.h>
+#include "Keypad.h"
 const byte numRows = 5;
 const byte numCols = 4;
 char keymap[numRows][numCols] = {
@@ -46,12 +55,15 @@ Keypad myKeypad = Keypad(makeKeymap(keymap), rowPins, colPins, numRows, numCols)
 #include "RTClib.h"
 RTC_DS1307 rtc;
 
-#include <dht.h>
+#include "dht.h"
 dht DHT;
 
 #define DHT11_PIN 2
 
 void setup() {
+  pinMode(3, OUTPUT);
+  digitalWrite(3, HIGH);
+
   lcd = new CyrI2c(0x27, 16, 2);
   lcd->backlight();
 
@@ -111,4 +123,3 @@ void hello(uint8_t hour){
   delay(2000);
   lcd->clear();
 }
-

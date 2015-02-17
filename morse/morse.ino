@@ -1,25 +1,33 @@
 /*
-  Телеграфная азбука
- Современная телеграфная азбука (система кодировки символов короткими и
- длинными посылками для передачи их по линиям связи, известная как
- «код Морзе» или «морзянка»)
-
- В среднем 60 знаков в минуту
- В среднем 3 символа в секунду (350ms на символ), 150 ms точка
-
- За единицу времени принимается длительность одной точки. Длительность
- тире равна трём точкам. Пауза между элементами одного знака — одна точка,
- между знаками в слове — 3 точки, между словами — 7 точек
-
- created 15.01.2015
- modifid 02.02.2015
- by Fust Vitaliy
- with Arduino 1.5.8 (tested on Arduino Uno)
+ * morse.ino
+ * Телеграфная азбука
+ * Современная телеграфная азбука (система кодировки символов короткими и
+ * длинными посылками для передачи их по линиям связи, известная как
+ * «код Морзе» или «морзянка»)
+ *
+ * В среднем 60 знаков в минуту
+ * В среднем 3 символа в секунду (350ms на символ), 150 ms точка
+ *
+ * За единицу времени принимается длительность одной точки. Длительность
+ * тире равна трём точкам. Пауза между элементами одного знака — одна точка,
+ * между знаками в слове — 3 точки, между словами — 7 точек
+ *
+ * created 15.01.2015
+ * modifid 02.02.2015
+ * with Arduino 1.5.8 (tested on Arduino Uno)
+ *
+ * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
  */
-/*
-Sketch uses 4 806 bytes (15%) of program storage space. Maximum is 30 720 bytes.
-Global variables use 553 bytes (27%) of dynamic memory, leaving 1 495 bytes for local variables. Maximum is 2 048 bytes.
-*/
 
 // Строка для ввода
 const String str = "Jah Rastafari!";
@@ -247,4 +255,3 @@ void loop() {
   // Ничего не делаем ew секунды
   delay(ew);
 }
-

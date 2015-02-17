@@ -1,9 +1,24 @@
 /*
-created 10.02.2015
-modified 16.02.2015
-by Fust Vitaliy
-with Arduino 1.5.8 (tested on Arduino Nano)
-*/
+ * Cyruit.h
+ * Заголовочный файл библиотеки Cyruit
+ * Класс содержит методы вывода текста на экраны
+ *
+ * created 10.02.2015
+ * modified 17.02.2015
+ * with Arduino 1.5.8 (tested on Arduino Nano)
+ *
+ * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
+ */
 
 #ifndef Cyruit_h
 #define Cyruit_h
@@ -14,6 +29,13 @@ with Arduino 1.5.8 (tested on Arduino Nano)
 // Поддерживаемые типы экранов
 enum display_type{
   Cyruit_PCD8544_lib
+};
+
+// Типы массивов строк
+enum string_type{
+  NoString,
+  FlashStringHelper,
+  ASCIZString
 };
 
 // Магические числа
@@ -70,10 +92,14 @@ class Cyruit {
     // Возвращает длину строки закодированной в utf-8
     word utf8_strlen(char*);
 
-
-  private:
-    // Ф-ия печати строк без параметров
-    void print_lcd(char*);
+    void
+    // Инициализация массива строк разделенных символом \r
+      init(const char*),
+      init(const __FlashStringHelper*),
+    // Печать строки из ранее переданного массива по её номеру
+      printn(byte num, int8_t = 127, byte = 255, byte = 255);
+    // Возвращает кол-во строк в ранее переданном массиве
+    byte n_count();
     byte
     // Ширина символа
       font_width,
@@ -87,10 +113,23 @@ class Cyruit {
       scr_length,
     // Позиция курсора от нуля слева направо сверху вниз
       scr_pos;
+
+
+  private:
+    // Ф-ия печати строк без параметров
+    void print_lcd(char*);
+    void
+    // Печать строки из ранее переданного массива по её номеру
+      printn_str(byte num, int8_t, byte, byte),
+      printn_flash(byte num, int8_t, byte, byte);
     // Указатель на объект управления экраном
     void* lcd;
     // Тип экрана
     display_type lcd_type;
+    // Указатель на строку-массив
+    char* s;
+    // Тип массива, FlashStringHelper или ASCIZString (char[])
+    string_type s_type;
 };
 
 #endif
