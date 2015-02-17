@@ -1,15 +1,31 @@
 /*
-created 19.01.2015
-modified 04.02.2015
-by Fust Vitaliy
-with Arduino 1.5.8 (tested on Arduino Nano)
-*/
+ * CyrI2c.h
+ * Заголовочный файл библиотеки CyrI2c
+ * Класс содержит методы вывода текста на экраны 1602
+ * используется протокол I2C
+ *
+ * created 19.01.2015
+ * modified 04.02.2015
+ * with Arduino 1.5.8 (tested on Arduino Nano)
+ *
+ * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
+ */
 
 #ifndef CyrI2c_h
 #define CyrI2c_h
 
-#include <Arduino.h>
-#include <LiquidCrystal_I2C.h>
+#include "Arduino.h"
+#include "LiquidCrystal_I2C.h"
 
 class CyrI2c {
   public:
@@ -49,6 +65,11 @@ class CyrI2c {
     void get_str_enc(char* str, char* result);
     void create_char(byte cell, byte num);
 
+    char read_pgm(char*);
+    byte read_pgm(byte*);
+    void clear_arr(byte*, byte count);
+    void clear_arr(char*, int8_t count = -1);
+
     void printn_str(byte num, int8_t, byte, byte);
     void printn_flash(byte num, int8_t, byte, byte);
 
@@ -59,7 +80,7 @@ class CyrI2c {
     byte*  ru;
     byte*  ru_num;
 
-    void*  s;
+    char*  s;
     byte   f;
     char   scr[33];
     byte   scr_pos;

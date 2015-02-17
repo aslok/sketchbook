@@ -1,8 +1,10 @@
-/* This is the implementation of Cyruit-PCD8544 library which adds support
+/*
+ * Cyruit_PCD8544.cpp
+ * This is the implementation of Cyruit-PCD8544 library which adds support
  * for cyrillic characters to Adafruit library for Arduino.
  * It's been originally developed by Vitaliy Fust.
  *
- * (C) 2015 Vitaliy Fust, aslok.zp@gmail.com
+ * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
  *
  * This work is licensed under the MIT License (MIT). To view a copy of this
  * license, visit http://opensource.org/licenses/MIT or send a letter to:
@@ -11,6 +13,8 @@
  * Ste 13A, #270
  * Palo Alto, CA 94301
  * United States.
+ *
+ *
  */
 
 #include "SPI.h"

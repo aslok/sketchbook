@@ -1,3 +1,25 @@
+/*
+ * lcd_5110_pics7.ino
+ * Демонстрация работы библиотеки utf8_cp1251
+ * Вывод анимации с русскими субтитрами
+ *
+ * created 10.02.2015
+ * modified 16.02.2015
+ * with Arduino 1.5.8 (tested on Arduino Nano)
+ *
+ * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
+ */
+
 #include "SPI.h"
 #include "Adafruit_GFX.h"
 #include "Adafruit_PCD8544.h"

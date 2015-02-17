@@ -27,11 +27,11 @@
  * visit http://creativecommons.org/licenses/by-sa/3.0/ or send a       *
  * letter to Creative Commons, 171 Second Street, Suite 300,            *
  * San Francisco, California, 94105, USA.                               *
- *----------------------------------------------------------------------*/ 
- 
-#include <DS1302RTC.h>
-#include <Streaming.h>        //http://arduiniana.org/libraries/streaming/
-#include <Time.h>             //http://playground.arduino.cc/Code/Time
+ *----------------------------------------------------------------------*/
+
+#include "DS1302RTC.h"
+#include "Streaming.h"        //http://arduiniana.org/libraries/streaming/
+#include "Time.h"             //http://playground.arduino.cc/Code/Time
 
 // Set pins:  CE, IO,CLK
 DS1302RTC RTC(13, 12, 11);
@@ -43,18 +43,18 @@ DS1302RTC RTC(13, 12, 11);
 void setup(void)
 {
   Serial.begin(115200);
-    
+
   // Activate RTC module
   digitalWrite(DS1302_GND_PIN, LOW);
   pinMode(DS1302_GND_PIN, OUTPUT);
 
   digitalWrite(DS1302_VCC_PIN, HIGH);
   pinMode(DS1302_VCC_PIN, OUTPUT);
-  
+
   Serial << F("RTC module activated");
   Serial << endl;
   delay(500);
-  
+
   if (RTC.haltRTC()) {
     Serial << F("The DS1302 is stopped.  Please set time");
     Serial << F("to initialize the time and begin running.");
@@ -64,9 +64,9 @@ void setup(void)
     Serial << F("The DS1302 is write protected. This normal.");
     Serial << endl;
   }
-  
+
   delay(5000);
-    
+
   //setSyncProvider() causes the Time library to synchronize with the
   //external RTC by calling RTC.get() every five minutes by default.
   setSyncProvider(RTC.get);
@@ -117,7 +117,7 @@ void loop(void)
             while (Serial.available() > 0) Serial.read();
         }
     }
-    
+
     t = now();
     if (t != tLast) {
         tLast = t;

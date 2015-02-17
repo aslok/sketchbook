@@ -1,3 +1,7 @@
+# Datatypes (KEYWORD1)
+# Methods and Functions (KEYWORD2)
+# Constants (LITERAL1)
+
 CyrI2c	KEYWORD1
 print	KEYWORD2
 backlight	KEYWORD2
@@ -8,8 +12,3 @@ clear	KEYWORD2
 go	KEYWORD2
 init	KEYWORD2
 printn	KEYWORD2
-bl	KEYWORD2
-pwr	KEYWORD2
-crsr	KEYWORD2
-blnk	KEYWORD2
-s	KEYWORD2

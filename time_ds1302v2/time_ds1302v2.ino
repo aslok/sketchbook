@@ -1,33 +1,42 @@
 /*
- Time v2
- Time and date on lcd display (used rtc timer) with control by keypad 4x4
+ * time_ds1302v2.ino
+ * Time v2.0
+ * Time and date on lcd display (used rtc timer) with control by keypad 4x4
+ *
+ * Hardware:
+ * Trickle-Charge Timekeeping Chip DS1302
+ * http://www.maximintegrated.com/en/products/digital/real-time-clocks/DS1302.html
+ * http://playground.arduino.cc/Main/DS1302RTC
+ * LCD I2C PCF8574
+ * http://habrahabr.ru/post/219137/
+ * http://arduino-info.wikispaces.com/file/detail/LiquidCrystal_I2C1602V1.zip/341635514
+ * Keypad 4x4
+ *
+ *
+ * created 18.01.2015
+ * modifid 24.01.2015
+ * with Arduino 1.5.8 (tested on Arduino Uno)
+ *
+ * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
+ */
 
- Hardware:
- Trickle-Charge Timekeeping Chip DS1302
- http://www.maximintegrated.com/en/products/digital/real-time-clocks/DS1302.html
- http://playground.arduino.cc/Main/DS1302RTC
- LCD I2C PCF8574
- http://habrahabr.ru/post/219137/
- http://arduino-info.wikispaces.com/file/detail/LiquidCrystal_I2C1602V1.zip/341635514
- Keypad 4x4
-
- created 18.01.2015
- modifid 24.01.2015
- by Fust Vitaliy
- with Arduino 1.5.8 (tested on Arduino Uno)
-*/
-/*
-Sketch uses 14 592 bytes (45%) of program storage space. Maximum is 32 256 bytes.
-Global variables use 422 bytes (20%) of dynamic memory, leaving 1 626 bytes for local variables. Maximum is 2 048 bytes.
-*/
-
-#include <Wire.h> 
-#include <LiquidCrystal_I2C.h>
-#include <CyrI2c.h>
+#include "Wire.h"
+#include "LiquidCrystal_I2C.h"
+#include "CyrI2c.h"
 CyrI2c* lcd;
 
 
-#include <Keypad.h>
+#include "Keypad.h"
 const byte numRows = 4;
 const byte numCols = 4;
 char keymap[numRows][numCols] =
@@ -43,8 +52,8 @@ byte colPins[numCols] = {9, 8, 7, 6}; //Columns 0 to 3
 Keypad myKeypad = Keypad(makeKeymap(keymap), rowPins, colPins, numRows, numCols);
 
 
-#include <Time.h>
-#include <DS1302RTC.h>
+#include "Time.h"
+#include "DS1302RTC.h"
 // Set pins:  CE, IO,CLK
 DS1302RTC RTC(12, 11, 10);
 
@@ -96,10 +105,9 @@ void loop() {
 
 void hello(uint8_t hour){
   lcd->clear();
-  lcd->init(F("Доброї ночі!\rДоброго ранку!\rДоброго дня!\rДоброго вечора!\rЯ годинник :)"));  
+  lcd->init(F("Доброї ночі!\rДоброго ранку!\rДоброго дня!\rДоброго вечора!\rЯ годинник :)"));
   lcd->printn((hour + 1) / 6, 0, 0);
-  lcd->printn(4, 3, 1);  
+  lcd->printn(4, 3, 1);
   delay(2000);
   lcd->clear();
 }
-

@@ -1,12 +1,26 @@
 /*
-created 19.01.2015
-modified 04.02.2015
-by Fust Vitaliy
-with Arduino 1.5.8 (tested on Arduino Nano)
-*/
+ * CyrI2c.cpp
+ * Основной файл библиотеки CyrI2c
+ * Класс содержит методы вывода текста на экраны 1602
+ * используется протокол I2C
+ *
+ * created 19.01.2015
+ * modified 04.02.2015
+ * with Arduino 1.5.8 (tested on Arduino Nano)
+ *
+ * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
+ */
 
-#include "Arduino.h"
-#include "LiquidCrystal_I2C.h"
 #include "CyrI2c.h"
 
 /*
@@ -60,9 +74,7 @@ CyrI2c::CyrI2c(byte address, byte width, byte height) {
   ru_num = (byte*) F("\201\203\204\234\237\240\207\220\241\230\242\214\224\225\227\236\233\232\244\231\212\211\206\210\235");
   s      = NULL;
   f      = 0;
-  for (byte i = 0; i < 8; i++){
-    char_map[i] = 0;
-  }
+  clear_arr(char_map, 8);
 
   lcd = new LiquidCrystal_I2C(address, width, height);
   lcd->init();
@@ -75,9 +87,11 @@ void CyrI2c::print(const __FlashStringHelper* str, int8_t position, byte go_ln, 
   char tmp[256];
   char chr;
   byte cur_chr;
-  for (cur_chr = 0; cur_chr < 255 && (chr = (char) pgm_read_byte_near(ptr + cur_chr)); cur_chr++){
-    tmp[cur_chr] = chr;
-  }
+  for (
+    cur_chr = 0;
+    chr = read_pgm(ptr + cur_chr);
+    tmp[cur_chr++] = chr
+  );
   tmp[cur_chr] = 0;
   print(tmp, position, go_ln, space);
 }
@@ -138,15 +152,19 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
       go(i + scr_pos >= 0 ? i + scr_pos : i % 32 + scr_pos);
     }else{
       // Если сдвиг вправо - сдвигаем курсор пробелами
-      for (cur_pos = 0; cur_pos < (space - cur_chr) / 2; cur_pos++){
-        print(' ');
-      }
+      for (
+        cur_pos = 0;
+        cur_pos < (space - cur_chr) / 2;
+        cur_pos++, print(' ')
+      );
       // Печатаем строку
       print_enc(str);
       // Сдвигаем курсор пробелами
-      for (cur_pos = 0; cur_pos < (space - cur_chr) / 2; cur_pos++){
-        print(' ');
-      }
+      for (
+        cur_pos = 0;
+        cur_pos < (space - cur_chr) / 2;
+        cur_pos++, print(' ')
+      );
       return;
     }
   }
@@ -165,10 +183,10 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
   for (cur_chr = 0; cur_chr < 32; cur_chr++){
     found = false;
     // Обходим основной набор символов для замены
-    for (cur = 0; (char) (tmp = (byte) pgm_read_byte_near(en_num + cur)); cur++){
+    for (cur = 0; (char) (tmp = read_pgm(en_num + cur)); cur++){
       if (tmp == (byte) next_scr[cur_chr]){
         // Символ для замены найден, запоминаем по позиции в next_scr
-        lcd_replace[cur_chr] = (char) pgm_read_byte_near(en + cur);
+        lcd_replace[cur_chr] = read_pgm(en + cur);
         found = true;
         break;
       }
@@ -217,7 +235,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
     // Обходим набор самодельных символов для замены
     for (cur = 0; cur < 9; cur++){
       // Если мы можем заменить его одним из восьми первых
-      if ((byte) pgm_read_byte_near(ru_num + cur) == (byte) lcd_replace[cur_chr]){
+      if (read_pgm(ru_num + cur) == (byte) lcd_replace[cur_chr]){
         found = true;
         // Переменная cur хранит номер самодельного символа
         break;
@@ -238,7 +256,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
       }
       found = true;
       // Сохраняем в ячейку номер символа который заменяем
-      char_map[i] = (byte) pgm_read_byte_near(ru_num + cur);
+      char_map[i] = read_pgm(ru_num + cur);
       /*Serial.println("lcd->createChar(i, ru[cur]);");
       Serial.println(i);
       Serial.println(cur);
@@ -246,7 +264,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
       create_char(i, cur);
       // Будем заменять его при выводе на номер ячейки
       for (cur_pos = cur_chr; cur_pos < 32; cur_pos++){
-        if ((byte) lcd_replace[cur_pos] == (byte) pgm_read_byte_near(ru_num + cur)){
+        if ((byte) lcd_replace[cur_pos] == read_pgm(ru_num + cur)){
           /*Serial.println("lcd_replace[cur_chr] = i");
           Serial.println(cur_chr);
           Serial.println(i);
@@ -267,16 +285,16 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
     // Ищем что заменить
     // Обходим набор самодельных символов для замены с конца
     // Никогда не выселяем символы 0-8 потому что заменить нечем :(
-    for (i = 0; (char) pgm_read_byte_near(ru_num + i); i++);
+    for (i = 0; read_pgm(ru_num + i); i++);
     for (cur_pos = i; cur_pos-- > 8; ){
       // Ищем ячейку занятую этим символом
       for (i = 0; i < 8; i++){
         // Если есть кандидат на выселение
-        if ((byte) pgm_read_byte_near(ru_num + cur_pos) == char_map[i]){
+        if (read_pgm(ru_num + cur_pos) == char_map[i]){
           found = false;
           // Обходим основной набор символов для замены
           // После выселения будет отображаться оттуда
-          for (pos = 0; (char) (tmp = (byte) pgm_read_byte_near(en_num + pos)); pos++){
+          for (pos = 0; (char) (tmp = read_pgm(en_num + pos)); pos++){
             if (tmp == char_map[i]){
               found = true;
               old_cur = pos;
@@ -295,10 +313,10 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
             continue;
           }
           // Сохраняем в ячейку номер символа который заменяем
-          char_map[i] = (byte) pgm_read_byte_near(ru_num + cur);
+          char_map[i] = read_pgm(ru_num + cur);
           // Будем заменять его при выводе на номер ячейки
           for (pos = 0; pos < 32; pos++){
-            if ((byte) lcd_replace[pos] == (byte) pgm_read_byte_near(ru_num + cur)){
+            if ((byte) lcd_replace[pos] == read_pgm(ru_num + cur)){
               /*Serial.println("lcd_replace[pos] = i");
               Serial.println(pos);
               Serial.println(i);
@@ -307,10 +325,10 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
             }
             // Динамическое обновление символов
             // Перетираем отображающееся предыдущее содержимое ячейки
-            if ((byte) next_scr[pos] == (byte) pgm_read_byte_near(ru_num + cur_pos)){
+            if ((byte) next_scr[pos] == read_pgm(ru_num + cur_pos)){
               lcd->setCursor(pos - pos / 16 * 16, pos / 16);
-              lcd_replace[pos] = (char) pgm_read_byte_near(en + old_cur);
-              lcd->write((char) pgm_read_byte_near(en + old_cur));
+              lcd_replace[pos] = read_pgm(en + old_cur);
+              lcd->write(read_pgm(en + old_cur));
             }
           }
           // Отображающееся предыдущее содержимое перетерто, можем подменять
@@ -353,7 +371,7 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
     }
 
     // Обходим дополнительные символы самодельного набора, ищем что бы ещё заменить
-    for (byte ru_cur = 9; (char) (tmp = (byte) pgm_read_byte_near(ru_num + ru_cur)); ru_cur++){
+    for (byte ru_cur = 9; (char) (tmp = read_pgm(ru_num + ru_cur)); ru_cur++){
       found = false;
       // Обходим уже использованные дополнительные символы
       for (i = 0; i < 8; i++){
@@ -412,17 +430,12 @@ void CyrI2c::print_enc(char* str, int8_t position, byte go_ln, byte space){
 void CyrI2c::get_next_scr(char* str, char* next_scr){
   byte next_scr_pos = scr_pos;
   // Копируем текущий экран
-  for (byte i = 0; i < 33; i++){
-    next_scr[i] = scr[i];
-  }
+  for (byte i = 0; i < 33; next_scr[i] = scr[i++]);
   // Обходим строку и эмулируем вывод
   for (byte cur_chr = 0; str[cur_chr] && cur_chr < 255; cur_chr++){
     if (str[cur_chr] == '\n'){
-      if (next_scr_pos < 16){
-        next_scr_pos = 16;
-      }else{
-        next_scr_pos = 0;
-      }
+      next_scr_pos = next_scr_pos < 16 ? 16 : 0;
+      continue;
     }
     if (next_scr_pos > 31){
       next_scr_pos = 0;
@@ -442,11 +455,7 @@ void CyrI2c::write_str_enc(char* str, char* lcd_chars){
   for (byte cur_chr = 0; str[cur_chr] && cur_chr < 255; cur_chr++){
     out = str[cur_chr];
     if (out == '\n'){
-      if (scr_pos < 16){
-        scr_pos = 16;
-      }else{
-        scr_pos = 0;
-      }
+      scr_pos = scr_pos < 16 ? 16 : 0;
       go();
       continue;
     }
@@ -483,7 +492,7 @@ void CyrI2c::get_str_enc(char* str, char* result){
       // Обходим символы подстрок для поиска
       for (byte abc_chr_pos = 0, cur_pos = str_pos; abc_chr_pos < 2; abc_chr_pos++, cur_pos++){
         // Если текущий символ подстроки не равен текущему символу строки
-        if (str[cur_pos] != (char) pgm_read_byte_near(abc + abc_num + abc_chr_pos)){
+        if (str[cur_pos] != read_pgm(abc + abc_num + abc_chr_pos)){
           // Прерываем обход символов подстроки
           found = false;
           // Переходим к следующей подстроке
@@ -493,25 +502,26 @@ void CyrI2c::get_str_enc(char* str, char* result){
         found = true;
       }
       // Проверяем результаты сравнения строк
-      if (found){
-        // Русский алфавит верхний регистр
-        if (abc_num < 66){
-          // Пишем в результат символ для замены найденной строки
-          result[res_pos++] = (abc_num / 2) + 128;
-        // Русский алфавит нижний регистр
-        // И символы из украинского алфавита верхний регистр
-        }else if (abc_num < 140){
-          // Пишем в результат символ для замены найденной строки
-          result[res_pos++] = (abc_num / 2) + 95;
-        // Символы из украинского алфавита нижний регистр
-        }else{
-          result[res_pos++] = (abc_num / 2) + 91;
-        }
-        // Сдвигаем текущую позицию строки на один символ (потому что всего надо на два)
-        str_pos++;
-        // Заканчиваем цикл обхода подстрок - подстрока найдена
-        break;
+      if (!found){
+        continue;
       }
+      // Русский алфавит верхний регистр
+      if (abc_num < 66){
+        // Пишем в результат символ для замены найденной строки
+        result[res_pos++] = (abc_num / 2) + 128;
+      // Русский алфавит нижний регистр
+      // И символы из украинского алфавита верхний регистр
+      }else if (abc_num < 140){
+        // Пишем в результат символ для замены найденной строки
+        result[res_pos++] = (abc_num / 2) + 95;
+      // Символы из украинского алфавита нижний регистр
+      }else{
+        result[res_pos++] = (abc_num / 2) + 91;
+      }
+      // Сдвигаем текущую позицию строки на один символ (потому что всего надо на два)
+      str_pos++;
+      // Заканчиваем цикл обхода подстрок - подстрока найдена
+      break;
     }
     if (!found){
       // Подстрока не была найдена - копируем текущий символ как он есть
@@ -524,94 +534,82 @@ void CyrI2c::get_str_enc(char* str, char* result){
 // Создание кастомного символа по номеру в указанной ячейке
 void CyrI2c::create_char(byte cell, byte num){
   byte cur[8];
-  for (byte pos = 0; pos < 8; pos++){
-    cur[pos] = (byte) pgm_read_byte_near(ru + num * 8 + pos) - 1;
-  }
+  for (
+    byte pos = 0;
+    pos < 8;
+    cur[pos] = read_pgm(ru + num * 8 + pos++) - 1
+  );
   // Создаем кастомный символ
   lcd->createChar(cell, cur);
   // Бага lcd->createChar - приходится обновлять курсор
   go();
 }
 
+char CyrI2c::read_pgm(char* ptr){
+  return (char) pgm_read_byte_near(ptr);
+}
+
+byte CyrI2c::read_pgm(byte* ptr){
+  return (byte) pgm_read_byte_near(ptr);
+}
+
+void CyrI2c::clear_arr(byte* arr, byte count){
+  for (byte i = 0; i < count; char_map[i++] = 0);
+}
+
+void CyrI2c::clear_arr(char* arr, int8_t count){
+  for (
+    byte i = 0;
+    (count < 0) ? char_map[i] : (count && i < count);
+    char_map[i++] = 0
+  );
+}
+
 // Подсветка экрана
 void CyrI2c::backlight(boolean state){
-  if (bl = state){
-    lcd->backlight();
-  }else{
-    lcd->noBacklight();
-  }
+  (bl = state) ? lcd->backlight() : lcd->noBacklight();
 }
 
 // Подсветка экрана
 void CyrI2c::backlight(){
-  if (bl = !bl){
-    lcd->backlight();
-  }else{
-    lcd->noBacklight();
-  }
+  (bl = !bl) ? lcd->backlight() : lcd->noBacklight();
 }
 
 // Символы
 void CyrI2c::power(boolean state){
-  if (pwr = state){
-    lcd->display();
-  }else{
-    lcd->noDisplay();
-  }
+  (pwr = state) ? lcd->display() :lcd->noDisplay();
 }
 
 // Символы
 void CyrI2c::power(){
-  if (pwr = !pwr){
-    lcd->display();
-  }else{
-    lcd->noDisplay();
-  }
+  (pwr = !pwr) ? lcd->display() : lcd->noDisplay();
 }
 
 // Курсор _
 void CyrI2c::cursor(boolean state){
-  if (crsr = state){
-    lcd->cursor();
-  }else{
-    lcd->noCursor();
-  }
+  (crsr = state) ? lcd->cursor() : lcd->noCursor();
 }
 
 // Курсор _
 void CyrI2c::cursor(){
-  if (crsr = !crsr){
-    lcd->cursor();
-  }else{
-    lcd->noCursor();
-  }
+  (crsr = !crsr) ? lcd->cursor() : lcd->noCursor();
 }
 
 // Курсор []
 void CyrI2c::blink(boolean state){
-  if (blnk = state){
-    lcd->blink();
-  }else{
-    lcd->noBlink();
-  }
+  (blnk = state) ? lcd->blink() : lcd->noBlink();
 }
 
 // Курсор []
 void CyrI2c::blink(){
-  if (blnk = !blnk){
-    lcd->blink();
-  }else{
-    lcd->noBlink();
-  }
+  (blnk = !blnk) ? lcd->blink() : lcd->noBlink();
 }
 
 // Очистка экрана и установка курсора на ноль
 void CyrI2c::clear(){
   byte i;
-  for (i = 0; i < 32; i++){
-    scr[i] = ' ';
-  }
-  scr[32] = 0;
+  for (i = 0; i < 32; scr[i++] = ' ');
+  scr[i] = 0;
   scr_pos = 0;
   lcd->clear();
 }
@@ -631,8 +629,7 @@ void CyrI2c::go(byte col, byte row){
 void CyrI2c::go(byte col){
   if (col < 32){
     go(col - col / 16 * 16, col / 16);
-  }
-  if (col == 32){
+  }else if (col == 32){
     go(scr_pos);
   }
 }
@@ -653,45 +650,47 @@ void CyrI2c::init(const char* str){
 void CyrI2c::printn(byte num, int8_t position, byte go_ln, byte space){
   if (f == 1){
     printn_flash(num, position, go_ln, space);
-    return;
-  }
-  if (f == 2){
+  }else if (f == 2){
     printn_str(num, position, go_ln, space);
-    return;
   }
 }
 
 // Печать строки из ранее переданного массива символов по её номеру
+// Максимальная длина строки - 255 символов
+// Максимальный размер массива - 255 строк
 void CyrI2c::printn_str(byte num, int8_t position, byte go_ln, byte space){
   char str[255];
   byte count = 0, str_pos;
   word pos = 0;
-  while (count < num && pos < 65000 && ((char*) s)[pos]){
-    if (((char*) s)[pos++] == '\r'){
+  while (count < 255 && pos < 65535 && count < num && s[pos]){
+    if (s[pos++] == '\r'){
       count++;
-      continue;
     }
   }
   if (count != num){
     return;
   }
-  for (str_pos = 0; pos < 255 && str_pos < 255 && pos < 65000 && ((char*) s)[pos]; pos++){
-    if (((char*) s)[pos] == '\r'){
-      break;
-    }
-    str[str_pos++] = ((char*) s)[pos];
-  }
+  for (
+    str_pos = 0;
+    str_pos < 255 && pos < 65535 && s[pos] && s[pos] != '\r';
+    str[str_pos++] = s[pos++]
+  );
   str[str_pos] = 0;
   print(str, position, go_ln, space);
 }
 
 // Печать строки из ранее переданного внутри F() массива по её номеру
+// Максимальная длина строки - 255 символов
+// Максимальный размер массива - 255 строк
 void CyrI2c::printn_flash(byte num, int8_t position, byte go_ln, byte space){
   char str[255];
   byte count = 0, str_pos;
   word pos = 0;
   char chr;
-  while (count < num && pos < 65000 && (chr = (char) pgm_read_byte_near(s + pos++))){
+  while (
+    count < 255 && pos < 65535 && count < num &&
+      (chr = read_pgm(s + pos++))
+  ){
     if (chr == '\r'){
       count++;
     }
@@ -699,12 +698,11 @@ void CyrI2c::printn_flash(byte num, int8_t position, byte go_ln, byte space){
   if (count != num){
     return;
   }
-  for (str_pos = 0; (chr = (char) pgm_read_byte_near(s + pos)) && pos < 65000; pos++){
-    if (chr == '\r'){
-      break;
-    }
-    str[str_pos++] = chr;
-  }
+  for (
+    str_pos = 0;
+    str_pos < 255 && pos < 65535 && (chr = read_pgm(s + pos++)) && chr != '\r';
+    str[str_pos++] = chr
+  );
   str[str_pos] = 0;
   print(str, position, go_ln, space);
 }
