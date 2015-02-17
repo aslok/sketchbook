@@ -46,7 +46,7 @@ const byte
   def_go_ln = 255,
   def_space = 255,
   def_go = 255,
-// Стандартные размеры дробей - общая длина и длина дробной части, 00.00
+  // Стандартные размеры дробей - общая длина и длина дробной части, 00.00
   def_float_width = 5,
   def_float_prec = 2;
 
@@ -69,22 +69,22 @@ class Cyruit {
     // Печать отдельного utf символа по номеру
       print(word utf8_num,
         int8_t = def_position, byte = def_go_ln,byte = def_space),
-    // Печать отдельного символа несколько раз
-      print(char,
-        int count),
     // Печать массива символов по указателю
       print(char*,
-        int8_t = def_position, byte = def_go_ln, byte = def_space);
-    inline void
+        int8_t = def_position, byte = def_go_ln, byte = def_space),
     // Печать отдельного символа
       print(char,
         int8_t = def_position, byte = def_go_ln,byte = def_space),
     // Печать отдельного символа несколько раз
-      print(char,
-        word count);
+      print(char, int count, boolean upd = true),
+      print(char, word count, boolean upd = true);
     void
     // Очистка экрана и установка курсора на ноль
       clear(),
+    // Обновление экрана после изменения буфера
+      update_set(boolean),
+      update(boolean),
+      update(),
     // Установка курсора в выбранные столбец-строка
       go(byte col, byte row),
     // Установка курсора в выбранную позицию справа-налево сверху-вниз
@@ -98,8 +98,7 @@ class Cyruit {
       init(const __FlashStringHelper*),
     // Печать строки из ранее переданного массива по её номеру
       printn(byte num, int8_t = 127, byte = 255, byte = 255);
-    // Возвращает кол-во строк в ранее переданном массиве
-    byte n_count();
+
     byte
     // Ширина символа
       font_width,
@@ -113,15 +112,23 @@ class Cyruit {
       scr_length,
     // Позиция курсора от нуля слева направо сверху вниз
       scr_pos;
+    boolean
+    // Состояние автоматического обновления экрана
+      scr_upd;
+
+    // Кол-во строк в массиве
+    byte s_length;
 
 
   private:
     // Ф-ия печати строк без параметров
-    void print_lcd(char*);
+    void print_lcd(char*, boolean upd = true);
     void
     // Печать строки из ранее переданного массива по её номеру
       printn_str(byte num, int8_t, byte, byte),
       printn_flash(byte num, int8_t, byte, byte);
+    // Возвращает кол-во строк в ранее переданном массиве
+    inline byte n_count();
     // Указатель на объект управления экраном
     void* lcd;
     // Тип экрана

@@ -1,6 +1,7 @@
 /*
- * printn.ino
- * Демонстрация работы метода вывода printn()
+ * blink.ino
+ * Пример анимации, первая и вторая строки выводятся в одной позиции по очереди
+ * Третья строка выводится один раз в начале программы
  *
  * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
  *
@@ -32,19 +33,17 @@ Cyruit display = Cyruit(&lcd, 84, 48, 6, 8);
 void setup(){
   lcd.begin();
   lcd.setContrast(51);
+  display.init(F("Arduino \rFunduino\r UNO\n   Ардуино Уно"));
+  display.printn(0);
+  display.printn(2);
 }
 void loop(){
-  display.clear();
-  // Использование символа "начало новой строки"
-  display.init(F("Привет мир!\rЯ Ардуино Уно =)"));
-  display.printn(0);
-  display.go(0, 1);
-  display.printn(1);
-  delay(2000);
-
-  display.clear();
-  // Использование символа "перенос строки"
-  display.init(F("Arduino UNO\n   Ардуино Уно"));
-  display.printn(0);
-  delay(2000);
+  for (byte num = 0; num < 2; num++){
+    display.go(0);
+    display.printn(num);
+    if (!num){
+      delay(2500);
+    }
+  }
+  delay(700);
 }

@@ -28,6 +28,7 @@ Cyruit::Cyruit(
 ){
   s = NULL;
   s_type = NoString;
+  s_length = 0;
   lcd = ptr;
   lcd_type = type;
   font_width = f_width,
@@ -35,6 +36,7 @@ Cyruit::Cyruit(
   scr_width = width / font_width,
   scr_height = height / font_height,
   scr_length = scr_width * scr_height;
+  scr_upd = true;
   clear();
 }
 
@@ -68,7 +70,7 @@ void Cyruit::print(double chr, int8_t position, byte go_ln, byte width, byte pre
 }
 
 // Печать отдельного символа
-inline void Cyruit::print(char chr, int8_t position, byte go_ln, byte space){
+void Cyruit::print(char chr, int8_t position, byte go_ln, byte space){
   char str[2]{chr};
   print(str, position, go_ln, space);
 }
@@ -81,14 +83,18 @@ void Cyruit::print(word utf8_num, int8_t position, byte go_ln, byte space){
 }
 
 // Печать отдельного символа несколько раз
-void Cyruit::print(char chr, int count){
+void Cyruit::print(char chr, int count, boolean upd){
+  char str[2]{chr};
   while (count-- > 0){
-    print(chr);
+    print_lcd(str, false);
+  }
+  if (upd){
+    update();
   }
 }
 
-inline void Cyruit::print(char chr, word count){
-  print(chr, (int) count);
+void Cyruit::print(char chr, word count, boolean upd){
+  print(chr, (int) count, upd);
 }
 
 // Печать массива символов по указателю
@@ -113,8 +119,8 @@ void Cyruit::print(char* str, int8_t position, byte go_ln, byte space){
       if (space != def_space){
         go(scr_width_pp - space + position, scr_pos / scr_width);
         // Сдвигаем курсор пробелами
-        print(' ', free_size_pp);
-        print_lcd(str);
+        print(' ', free_size_pp, false);
+        print_lcd(str, false);
         print(' ', free_size);
         return;
       // Если равнение на право
@@ -135,8 +141,8 @@ void Cyruit::print(char* str, int8_t position, byte go_ln, byte space){
           go(new_pos >= 0 ? new_pos : (new_pos % scr_length) + scr_length);
         }else{
           // Сдвигаем курсор пробелами
-          print(' ', free_size);
-          print_lcd(str);
+          print(' ', free_size, false);
+          print_lcd(str, false);
           print(' ', free_size_pp);
           return;
         }
@@ -149,7 +155,7 @@ void Cyruit::print(char* str, int8_t position, byte go_ln, byte space){
 }
 
 // Ф-ия печати строк без параметров
-void Cyruit::print_lcd(char* str){
+void Cyruit::print_lcd(char* str, boolean upd){
   switch (lcd_type){
     case Cyruit_PCD8544_lib:
       for (word i = 0; str[i] && str[i] != '\r' && i < 65535; i++){
@@ -175,7 +181,9 @@ void Cyruit::print_lcd(char* str){
           }
         }
       }
-      ((Cyruit_PCD8544*) lcd)->display();
+      if (upd) {
+        update();
+      }
       break;
   }
 }
@@ -185,10 +193,30 @@ void Cyruit::clear(){
   switch (lcd_type){
     case Cyruit_PCD8544_lib:
       ((Cyruit_PCD8544*) lcd)->clearDisplay();
+      break;
+  }
+  update();
+  go(0);
+}
+
+// Обновление экрана после изменения буфера
+void Cyruit::update_set(boolean toggle){
+  scr_upd = toggle;
+}
+
+void Cyruit::update(boolean){
+  switch (lcd_type){
+    case Cyruit_PCD8544_lib:
       ((Cyruit_PCD8544*) lcd)->display();
       break;
   }
-  go(0);
+}
+
+void Cyruit::update(){
+  if (!scr_upd) {
+    return;
+  }
+  update(true);
 }
 
 // Установка курсора в выбранные столбец-строка
@@ -239,12 +267,14 @@ word Cyruit::utf8_strlen(char* str){
 void Cyruit::init(const __FlashStringHelper* str){
   s = (char*) str;
   s_type = FlashStringHelper;
+  s_length = n_count();
 }
 
 // Инициализация массива строк разделенных символом \r переданного через указатель
 void Cyruit::init(const char* str){
   s = (char*) str;
   s_type = ASCIZString;
+  s_length = n_count();
 }
 
 // Печать строки из ранее переданного массива по её номеру
@@ -310,7 +340,7 @@ void Cyruit::printn_flash(byte num, int8_t position, byte go_ln, byte space){
 }
 
 // Возвращает кол-во строк в ранее переданном массиве
-byte Cyruit::n_count(){
+inline byte Cyruit::n_count(){
   byte count = 0, pos = 0;
   char chr;
   while (

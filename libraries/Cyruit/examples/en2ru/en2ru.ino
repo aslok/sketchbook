@@ -1,6 +1,6 @@
 /*
- * printn.ino
- * Демонстрация работы метода вывода printn()
+ * en2ru.ino
+ * Пример анимации, первая и вторая строки выводятся в разных позициях
  *
  * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
  *
@@ -32,19 +32,29 @@ Cyruit display = Cyruit(&lcd, 84, 48, 6, 8);
 void setup(){
   lcd.begin();
   lcd.setContrast(51);
+  display.init(F("Arduino Nano\rАрдуино Нано"));
 }
 void loop(){
-  display.clear();
-  // Использование символа "начало новой строки"
-  display.init(F("Привет мир!\rЯ Ардуино Уно =)"));
-  display.printn(0);
-  display.go(0, 1);
-  display.printn(1);
-  delay(2000);
-
-  display.clear();
-  // Использование символа "перенос строки"
-  display.init(F("Arduino UNO\n   Ардуино Уно"));
-  display.printn(0);
-  delay(2000);
+  for (byte num = 0; num < 4; num++){
+    display.clear();
+    switch (num){
+      case (0):
+        display.printn(0,  0, 0);
+        display.printn(1, -1, 1);
+        break;
+      case (1):
+        display.printn(0, -1, 1);
+        display.printn(1,  0, 0);
+        break;
+      case (2):
+        display.printn(0,  0, 1);
+        display.printn(1, -1, 0);
+        break;
+      case (3):
+        display.printn(0, -1, 0);
+        display.printn(1,  0, 1);
+        break;
+    }
+    delay(1700);
+  }
 }

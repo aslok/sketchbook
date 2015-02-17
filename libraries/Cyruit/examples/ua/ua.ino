@@ -1,6 +1,6 @@
 /*
- * printn.ino
- * Демонстрация работы метода вывода printn()
+ * ua.ino
+ * Проверка отображения символов украинского алфавита
  *
  * Copyright 2015 Vitaliy Fust <aslok.zp@gmail.com>
  *
@@ -29,22 +29,29 @@
 Cyruit_PCD8544 lcd = Cyruit_PCD8544(3, 4, 5, 6, 7);
 Cyruit display = Cyruit(&lcd, 84, 48, 6, 8);
 
+// Проверка отображения символов украинского алфавита
 void setup(){
   lcd.begin();
   lcd.setContrast(51);
+  display.init(F("АБВГҐДЕЄЖЗИІЇЙКЛМНОПРСУФХЦЧШЩЬЮЯ\r "));
 }
 void loop(){
-  display.clear();
-  // Использование символа "начало новой строки"
-  display.init(F("Привет мир!\rЯ Ардуино Уно =)"));
+  display.go(0);
   display.printn(0);
-  display.go(0, 1);
-  display.printn(1);
+  delay(1000);
+  for (byte num = 0; num < 24; num++){
+    delay(2000);
+    display.go(num);
+    display.printn(1);
+  }
   delay(2000);
-
-  display.clear();
-  // Использование символа "перенос строки"
-  display.init(F("Arduino UNO\n   Ардуино Уно"));
+  display.go(0);
   display.printn(0);
+  delay(1000);
+  for (byte num = 32; num-- > 10; ){
+    delay(2000);
+    display.go(num);
+    display.printn(1);
+  }
   delay(2000);
 }
