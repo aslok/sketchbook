@@ -36,13 +36,14 @@
 // Set pins:  CE, IO,CLK
 DS1302RTC RTC(13, 12, 11);
 
-// Optional connection for RTC module
-#define DS1302_GND_PIN 33
-#define DS1302_VCC_PIN 10
+// Optional (?!! NO, FUCK YOU AUTHOR!!!) connection for RTC module
+#define DS1302_GND_PIN 10
+#define DS1302_VCC_PIN 9
+/* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
 
 void setup(void)
 {
-  Serial.begin(115200);
+  Serial.begin(9600);
 
   // Activate RTC module
   digitalWrite(DS1302_GND_PIN, LOW);
@@ -85,7 +86,7 @@ void loop(void)
     time_t t;
     tmElements_t tm;
 
-    //check for input to set the RTC, minimum length is 12, i.e. yy,m,d,h,m,s
+    //check for input to set the RTC, minimum length is 12, i.e. yy,m,d,h,m,s 15,2,18,21,42,20
     if (Serial.available() >= 12) {
         //note that the tmElements_t Year member is an offset from 1970,
         //but the RTC wants the last two digits of the calendar year.
