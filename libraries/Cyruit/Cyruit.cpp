@@ -83,7 +83,7 @@ void Cyruit::print(word utf8_num, int8_t position, byte go_ln, byte space){
 }
 
 // Печать отдельного символа несколько раз
-void Cyruit::print(char chr, int count, boolean upd){
+void Cyruit::printm(char chr, byte count, boolean upd){
   char str[2]{chr};
   while (count-- > 0){
     print_lcd(str, false);
@@ -91,10 +91,6 @@ void Cyruit::print(char chr, int count, boolean upd){
   if (upd){
     update();
   }
-}
-
-void Cyruit::print(char chr, word count, boolean upd){
-  print(chr, (int) count, upd);
 }
 
 // Печать массива символов по указателю
@@ -119,9 +115,9 @@ void Cyruit::print(char* str, int8_t position, byte go_ln, byte space){
       if (space != def_space){
         go(scr_width_pp - space + position, scr_pos / scr_width);
         // Сдвигаем курсор пробелами
-        print(' ', free_size_pp, false);
+        printm(' ', free_size_pp, false);
         print_lcd(str, false);
-        print(' ', free_size);
+        printm(' ', free_size);
         return;
       // Если равнение на право
       }else{
@@ -141,9 +137,9 @@ void Cyruit::print(char* str, int8_t position, byte go_ln, byte space){
           go(new_pos >= 0 ? new_pos : (new_pos % scr_length) + scr_length);
         }else{
           // Сдвигаем курсор пробелами
-          print(' ', free_size, false);
+          printm(' ', free_size, false);
           print_lcd(str, false);
-          print(' ', free_size_pp);
+          printm(' ', free_size_pp);
           return;
         }
       }
