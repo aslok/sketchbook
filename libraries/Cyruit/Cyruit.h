@@ -76,8 +76,7 @@ class Cyruit {
       print(char,
         int8_t = def_position, byte = def_go_ln,byte = def_space),
     // Печать отдельного символа несколько раз
-      print(char, int count, boolean upd = true),
-      print(char, word count, boolean upd = true);
+      printm(char, byte count, boolean upd = true);
     void
     // Очистка экрана и установка курсора на ноль
       clear(),
