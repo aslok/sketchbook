@@ -51,6 +51,7 @@ void setup(){
   lcd.setContrast(51);
   // Устанавливаем цвет текста
   lcd.setTextColor(BLACK);
+  lcd.clearDisplay();
 }
 
 void next_page(){
