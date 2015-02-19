@@ -44,16 +44,12 @@ const String str = "Jah Rastafari!";
 // --.- .-- . .-. - -.-- ..- .. --- .--. .- ... -.. ..-. --. .... .--- -.- .-.. --.. -..- -.
 
 // Флаг для отладки через порт
-const boolean debug = false;
+const boolean debug = true;
 
 // Продолжительность "точки"
 const int ms = 100;
-// Задержка при уменьшении яркости
-const int msd = 300;
-// Тире в три раза длиннее точки
-const int dashx = 3;
-// Пин для вспышек (ШИМ)
-const int pin = 9;
+// Служебный пин
+const int pin = 13;
 
 // Размер алфавита (Chars Lines)
 const int CL = 26;
@@ -123,28 +119,22 @@ void dump(const char * chr) {
 
 // Короткая вспышка
 void dot() {
-  for (int fadeValue = 0 ; fadeValue <= 255; fadeValue++) {
-    analogWrite(pin, fadeValue);
-    delayMicroseconds(msd);
+  if (debug) {
+    Serial.print('.');
   }
+  digitalWrite(pin, HIGH);
   delay(ms);
-  for (int fadeValue = 255 ; fadeValue--; ) {
-    analogWrite(pin, fadeValue);
-    delayMicroseconds(msd);
-  }
+  digitalWrite(pin, LOW);
 }
 
 // Длиная (х3) вспышка
 void dash() {
-  for (int fadeValue = 0 ; fadeValue <= 255; fadeValue++) {
-    analogWrite(pin, fadeValue);
-    delayMicroseconds(msd * dashx);
+  if (debug) {
+    Serial.print('-');
   }
-  delay(ms * dashx);
-  for (int fadeValue = 255 ; fadeValue--; ) {
-    analogWrite(pin, fadeValue);
-    delayMicroseconds(msd * dashx);
-  }
+  digitalWrite(pin, HIGH);
+  delay(ms * 3);
+  digitalWrite(pin, LOW);
 }
 
 // Отображения символа морзянки вспышками
