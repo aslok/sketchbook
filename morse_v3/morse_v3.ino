@@ -30,10 +30,10 @@
  *
  */
 
-const char str[] PROGMEM = "Jah Rastafari!";
+const char str[] PROGMEM = "Jah Rastafari! King of Kings and Lord of Lords!";
 
 // Флаг для отладки через порт
-const boolean debug = false;
+const boolean debug = true;
 
 // Продолжительность "точки"
 const int ms = 100;
@@ -124,6 +124,9 @@ const morse_chr PROGMEM abc[] = {
 
 // Короткая вспышка
 void dot() {
+  if (debug) {
+    Serial.print('.');
+  }
   for (int fadeValue = 0 ; fadeValue <= 255; fadeValue++) {
     analogWrite(pin, fadeValue);
     delayMicroseconds(msd);
@@ -137,6 +140,9 @@ void dot() {
 
 // Длиная (х3) вспышка
 void dash() {
+  if (debug) {
+    Serial.print('-');
+  }
   for (int fadeValue = 0 ; fadeValue <= 255; fadeValue++) {
     analogWrite(pin, fadeValue);
     delayMicroseconds(msd * dashx);
