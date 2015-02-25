@@ -21,20 +21,20 @@ All text above, and the splash screen must be included in any redistribution
 #include "Adafruit_PCD8544.h"
 
 // Software SPI (slower updates, more flexible pin options):
-// D3 - LCD 1 - reset (RST)
-// D4 - LCD 2 - chip select (CS)
+// D7 - LCD 1 - reset (RST)
+// D6 - LCD 2 - chip select (CS)
 // D5 - LCD 3 - Data/Command select (D/C)
-// D6 - LCD 4 - Serial data out (DIN)
-// D7 - LCD 5 - Serial clock out (SCLK)
+// D4 - LCD 4 - Serial data out (DIN)
+// D3 - LCD 5 - Serial clock out (SCLK)
 Adafruit_PCD8544 display = Adafruit_PCD8544(3, 4, 5, 6, 7);
 
 // Hardware SPI (faster, but must use certain hardware pins):
 // SCK is LCD serial clock (SCLK) - this is pin 13 on Arduino Uno
 // MOSI is LCD DIN - this is pin 11 on an Arduino Uno
-// D3 - LCD 1 - reset (RST)
-// D4 - LCD 2 - chip select (CS)
+// D7 - LCD 1 - reset (RST)
+// D6 - LCD 2 - chip select (CS)
 // D5 - LCD 3 - Data/Command select (D/C)
-// Adafruit_PCD8544 display = Adafruit_PCD8544(5, 4, 3);
+// Adafruit_PCD8544 display = Adafruit_PCD8544(5, 6, 7);
 // Note with hardware SPI MISO and SS pins aren't used but will still be read
 // and written to during SPI transfer.  Be careful sharing these pins!
 
@@ -217,9 +217,9 @@ void testdrawbitmap(const uint8_t *bitmap, uint8_t w, uint8_t h) {
       icons[f][YPOS] += icons[f][DELTAY];
       // if its gone, reinit
       if (icons[f][YPOS] > display.height()) {
-	icons[f][XPOS] = random() % display.width();
-	icons[f][YPOS] = 0;
-	icons[f][DELTAY] = random() % 5 + 1;
+        icons[f][XPOS] = random() % display.width();
+        icons[f][YPOS] = 0;
+        icons[f][DELTAY] = random() % 5 + 1;
       }
     }
    }
