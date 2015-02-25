@@ -21,18 +21,20 @@
 #include "Cyruit_PCD8544.h"
 
 // Software SPI (slower updates, more flexible pin options):
-// D3 - LCD 1 - reset (RST)
-// D4 - LCD 2 - chip select (CS)
+// D7 - LCD 1 - reset (RST)
+// D6 - LCD 2 - chip select (CS)
 // D5 - LCD 3 - Data/Command select (D/C)
-// D6 - LCD 4 - Serial data out (DIN)
-// D7 - LCD 5 - Serial clock out (SCLK)
+// D4 - LCD 4 - Serial data out (DIN)
+// D3 - LCD 5 - Serial clock out (SCLK)
 Cyruit_PCD8544 lcd = Cyruit_PCD8544(3, 4, 5, 6, 7);
 
 // Hardware SPI (faster, but must use certain hardware pins):
-// D3 - LCD 1 - reset (RST)
-// D4 - LCD 2 - chip select (CS)
+// SCK is LCD serial clock (SCLK) - this is pin 13 on Arduino Uno
+// MOSI is LCD DIN - this is pin 11 on an Arduino Uno
+// D7 - LCD 1 - reset (RST)
+// D6 - LCD 2 - chip select (CS)
 // D5 - LCD 3 - Data/Command select (D/C)
-//Cyruit_PCD8544 lcd = Cyruit_PCD8544(3, 4, 5);
+// Cyruit_PCD8544 lcd = Cyruit_PCD8544(5, 6, 7);
 // Note with hardware SPI MISO and SS pins aren't used but will still be read
 // and written to during SPI transfer.  Be careful sharing these pins!
 
@@ -51,6 +53,7 @@ void setup(){
   lcd.setContrast(51);
   // Устанавливаем цвет текста
   lcd.setTextColor(BLACK);
+  lcd.clearDisplay();
 }
 
 void next_page(){

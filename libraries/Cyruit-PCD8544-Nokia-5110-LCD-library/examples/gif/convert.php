@@ -2,7 +2,7 @@
 <?php
 
 const WIDTH = 84, HEIGHT = 40;
-const FRAMES_DIVIDER = 3;
+const FRAMES_DIVIDER = 4;
 
 // rm -rf img/ ; mkdir img && convert -coalesce IMG_0081.GIF img/%03d.png && convert -crop 220x105+135+85 img/???.png -resize 84x40 img/out%03d.png && convert img/out* -monochrome img/%03d.png && rm img/out* && ./convert.php
 // rm -rf img/ ; mkdir img && convert -coalesce IMG_0081.GIF img/%03d.png && convert -crop 220x105+135+85 img/???.png -resize 84x40 img/out%03d.png && convert img/out* -monochrome -splice 0x8 img/%03d.png && rm img/out* && ./convert.php
