@@ -79,7 +79,7 @@ void loop() {
   tmElements_t tm;
   RTC.read(tm);
 
-  display.print(tm.Day, 0, 0);
+  display.print(tm.Day, 0, 0, 2);
   display.init(F("січня\rлютого\rберезня\rквітня\rтравня\rчервня\rлипня\rсерпня\rвересня\rжовтня\rлистопада\rгрудня"));
   display.printn(tm.Month - 1, 3, 0, 9);
 
