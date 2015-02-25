@@ -34,16 +34,16 @@
 #include "Time.h"             //http://playground.arduino.cc/Code/Time
 
 // Set pins:  CE, IO,CLK
-DS1302RTC RTC(13, 12, 11);
+DS1302RTC RTC(12, 11, 10);
 
 // Optional (?!! NO, FUCK YOU AUTHOR!!!) connection for RTC module
-#define DS1302_GND_PIN 10
-#define DS1302_VCC_PIN 9
+#define DS1302_GND_PIN 9
+#define DS1302_VCC_PIN 8
 /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
 
 void setup(void)
 {
-  Serial.begin(9600);
+  Serial.begin(57600);
 
   // Activate RTC module
   digitalWrite(DS1302_GND_PIN, LOW);
@@ -86,7 +86,7 @@ void loop(void)
     time_t t;
     tmElements_t tm;
 
-    //check for input to set the RTC, minimum length is 12, i.e. yy,m,d,h,m,s 15,2,18,21,42,20
+    //check for input to set the RTC, minimum length is 12, i.e. yy,m,d,h,m,s 15,2,24,23,59,20
     if (Serial.available() >= 12) {
         //note that the tmElements_t Year member is an offset from 1970,
         //but the RTC wants the last two digits of the calendar year.
@@ -105,15 +105,15 @@ void loop(void)
             tm.Minute = Serial.parseInt();
             tm.Second = Serial.parseInt();
             t = makeTime(tm);
-	    //use the time_t value to ensure correct weekday is set
+            //use the time_t value to ensure correct weekday is set
             if(RTC.set(t) == 0) { // Success
-              setTime(t);
-              Serial << F("RTC set to: ");
-              printDateTime(t);
-              Serial << endl;
-	    }
-	    else
-	      Serial << F("RTC set failed!") << endl;
+                setTime(t);
+                Serial << F("RTC set to: ");
+                printDateTime(t);
+                Serial << endl;
+            }
+            else
+                Serial << F("RTC set failed!") << endl;
             //dump any extraneous input
             while (Serial.available() > 0) Serial.read();
         }
