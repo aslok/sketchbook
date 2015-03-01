@@ -1,5 +1,5 @@
 /*
- * time_ds1307v2.ino
+ * time_ds1307_lcd_1602_v2.ino
  * Time v2.0
  * Time and date on lcd display (used rtc timer) with control by keypad 4x5
  *
