@@ -1,5 +1,5 @@
 /*
- * time_ds1302.ino
+ * time_ds1302_lcd_1602_i2c.ino
  * Time
  * Time and date on lcd display (used rtc timer)
  *
