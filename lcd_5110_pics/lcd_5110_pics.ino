@@ -595,7 +595,7 @@ B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,B11111111,
 
 void setup() {
   display.begin();
-  display.setContrast(51);
+  display.setContrast(61);
   //display.setTextSize(2);
 }
 
