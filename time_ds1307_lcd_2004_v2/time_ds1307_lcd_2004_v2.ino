@@ -34,9 +34,9 @@
 
 LiquidCrystal display(12, 11, 5, 4, 3, 2);
 
-#define BUTTON_OK_PIN 8
-#define BUTTON_NEXT_PIN 7
-#define BUTTON_PREV_PIN 6
+#define BUTTON_OK_PIN 10
+#define BUTTON_NEXT_PIN 9
+#define BUTTON_PREV_PIN 8
 
 #include "Wire.h"
 #include "RTClib.h"
@@ -45,23 +45,27 @@ RTC_DS1307 rtc;
 #include "dht.h"
 dht DHT;
 
-#define DHT11_PIN 9
+#define DHT11_VCC_PIN 7
+#define DHT11_PIN 6
 
+#include <SFE_BMP180.h>
+SFE_BMP180 pressure;
+#define ALTITUDE 100.0
 
 const char hello_str[] PROGMEM = "доброї ночі\rдоброго ранку\rдоброго дня\rдоброго вечора";
 
-const char month[][4] = {
+const char month[][4] PROGMEM = {
   "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
-const char days[][4] = {
-  "Sun", "Mon", "Tue", "Wed", "Wed", "Thu", "Fri", "Sat"
+const char days[][4] PROGMEM = {
+  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
 enum scr { TIME, MENU, SETTINGS, CONTRAST, RESET };
 
 scr cur_scr = TIME;
-boolean scr_upd = false;
+boolean scr_upd = true;
 
 boolean ok_upd = false;
 boolean next_upd = false;
@@ -150,6 +154,11 @@ const menu contrast_items[] PROGMEM = {
 
 
 void setup() {
+  digitalWrite(DHT11_VCC_PIN, HIGH);
+  pinMode(DHT11_VCC_PIN, OUTPUT);
+
+  pressure.begin();
+
   // Инициализация дисплея
   display.begin(20, 4);
   display.clear();
@@ -180,33 +189,69 @@ void show_time(boolean full_scr = true) {
     display.clear();
   }
 
-  char suf[3]{223, 'C'};
   char buffer[12];
-  buffer[11] = 0;
 
-  sprintf(buffer, "%s", days[now.dayOfWeek()]);
   display.setCursor(0, 0);
+  display.print((__FlashStringHelper*) days[now.dayOfWeek()]);
+
+  char mon[12];
+  strcpy_P(mon, month[now.month() - 1]);
+  sprintf(buffer, ", %d %s", now.day(), mon);
   display.print(buffer);
 
-  sprintf(buffer, "%02d %s %04d", now.day(), month[now.month() - 1], now.year());
-  display.setCursor(9, 0);
+  dtostrf(readVcc(), 4, 2, buffer);
+  sprintf(buffer, "%sV", buffer);
+  display.setCursor(15, 0);
   display.print(buffer);
 
   sprintf(buffer, " %02d:%02d:%02d", now.hour(), now.minute(), now.second());
   display.setCursor(5, 2);
   display.print(buffer);
 
-  // Температура
-  dtostrf(DHT.temperature, 2, 0, buffer);
-  sprintf(buffer, "% 2s%s", buffer, suf);
-  display.setCursor(0, 3);
-  display.print(buffer);
+  if (scr_upd || !(now.second() % 5)) {
+    // DHT11 - температура
+    DHT.read11(DHT11_PIN);
+    dtostrf(DHT.temperature - 2, 2, 0, buffer);
+    sprintf(buffer, "% 2s\337C", buffer);
+    display.setCursor(0, 1);
+    display.print(buffer);
 
-  // Влажность
-  dtostrf(DHT.humidity, 2, 0, buffer);
-  sprintf(buffer, "% 2s%%", buffer);
-  display.setCursor(17, 3);
-  display.print(buffer);
+    // DHT11 - влажность
+    dtostrf(DHT.humidity - 3, 2, 0, buffer);
+    sprintf(buffer, "% 2s%%", buffer);
+    display.setCursor(17, 1);
+    display.print(buffer);
+  }
+
+  if (scr_upd || !(now.second() % 2)) {
+    // BMP180 - температура
+    byte wait;
+    if((wait = pressure.startTemperature())){
+      delay(wait);
+    }
+
+    double temp;
+    pressure.getTemperature(temp);
+    temp -= 2;
+    dtostrf(temp, 4, 1, buffer);
+    sprintf(buffer, "%s\337C", buffer);
+    display.setCursor(0, 3);
+    display.print(buffer);
+
+    // BMP180 - давление
+    if((wait = pressure.startPressure(3))){
+      delay(wait);
+    }
+
+    double meas;
+    pressure.getPressure(meas, temp);
+    dtostrf(pressure.sealevel(meas, ALTITUDE) / 133.3 * 100, 6, 2, buffer);
+    sprintf(buffer, "%s mm", buffer);
+    display.setCursor(11, 3);
+    display.print(buffer);
+  }
+
+  scr_upd = false;
 }
 /*
 void show_time(boolean full_scr = true) {
@@ -343,9 +388,43 @@ void show_contrast(){
   display.print(buffer, 0, 2);
 }*/
 
-void loop(){
-  DHT.read11(DHT11_PIN);
+double readVcc() {
+  // Read 1.1V reference against AVcc
+  // set the reference to Vcc and the measurement to the internal 1.1V reference
+  #if defined(__AVR_ATmega32U4__) || defined(__AVR_ATmega1280__) || defined(__AVR_ATmega2560__)
+    ADMUX = _BV(REFS0) | _BV(MUX4) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+  #elif defined (__AVR_ATtiny24__) || defined(__AVR_ATtiny44__) || defined(__AVR_ATtiny84__)
+    ADMUX = _BV(MUX5) | _BV(MUX0);
+  #elif defined (__AVR_ATtiny25__) || defined(__AVR_ATtiny45__) || defined(__AVR_ATtiny85__)
+    ADMUX = _BV(MUX3) | _BV(MUX2);
+  #else
+    ADMUX = _BV(REFS0) | _BV(MUX3) | _BV(MUX2) | _BV(MUX1);
+  #endif
 
+  delay(75); // Wait for Vref to settle
+  ADCSRA |= _BV(ADSC); // Start conversion
+  while (bit_is_set(ADCSRA,ADSC)); // measuring
+
+  uint8_t low  = ADCL; // must read ADCL first - it then locks ADCH
+  uint8_t high = ADCH; // unlocks both
+
+  long result = (high<<8) | low;
+
+  /* измерив Vcc с помощью вольтметра и нашей функции readVcc().
+   * Далее заменяем константу 1125300L новой переменной:
+   * scale_constant = internal1.1Ref * 1023 * 1000
+   * где
+   * internal1.1Ref = 1.1 * Vcc1 (показания_вольтметра) / Vcc2 (показания_функции_readVcc())
+   * internal1.1Ref = 1.1 * 4960 / 5138 = 1,06189178669
+   * scale_constant = 1,06189178669 * 1023 * 1000 = 1,08631529778
+   * Это калиброванное значение будет хорошим показателем
+   * для измерений AVR чипом, но может зависеть от изменений
+   * температуры
+   */
+  return 1086.315 / result; // Vcc in volts
+}
+
+void loop(){
   static boolean btn_ok = false;
   static boolean btn_next = false;
   #ifdef BUTTON_PREV_PIN
