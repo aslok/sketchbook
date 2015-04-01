@@ -1,0 +1,7 @@
+#ifndef TRACK_V2_H
+#define TRACK_V2_H
+
+enum states { LOOK_RIGHT, LOOK_LEFT, LOOK_BACK, LOOK_END, SPEED_UP, GO, SPEED_DOWN, STOP, REVERS };
+
+#endif
+
