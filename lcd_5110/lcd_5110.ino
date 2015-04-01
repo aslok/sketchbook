@@ -28,6 +28,17 @@ All text above, and the splash screen must be included in any redistribution
 // D3 - LCD 5 - Serial clock out (SCLK)
 Adafruit_PCD8544 display = Adafruit_PCD8544(3, 4, 5, 6, 7);
 
+
+// you can change the contrast around to adapt the display
+// for the best viewing!
+#define LCD_CONTRAST 41
+// D2 - LCD 6 - Vcc (VCC)
+#define LCD_VCC_PIN 8
+// D9 - LCD 7 - Light (LHT)
+#define LCD_BL_PIN 9
+#define LCD_BL_VAL 50
+
+
 // Hardware SPI (faster, but must use certain hardware pins):
 // SCK is LCD serial clock (SCLK) - this is pin 13 on Arduino Uno
 // MOSI is LCD DIN - this is pin 11 on an Arduino Uno
@@ -68,12 +79,13 @@ const byte PROGMEM logo16_glcd_bmp[] =
 void setup()   {
   Serial.begin(9600);
 
-  display.begin();
-  // init done
+  analogWrite(LCD_BL_PIN, 255 - LCD_BL_VAL);
+  pinMode(LCD_BL_PIN, OUTPUT);
+  digitalWrite(LCD_VCC_PIN, HIGH);
+  pinMode(LCD_VCC_PIN, OUTPUT);  
 
-  // you can change the contrast around to adapt the display
-  // for the best viewing!
-  display.setContrast(51);
+  display.begin();
+  display.setContrast(LCD_CONTRAST);
   display.display(); // show splashscreen
   delay(3000);
 }

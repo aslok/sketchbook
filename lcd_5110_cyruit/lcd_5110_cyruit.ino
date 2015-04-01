@@ -18,10 +18,17 @@ Global variables use 909 bytes (44%) of dynamic memory, leaving 1 139 bytes for 
 Cyruit_PCD8544 lcd = Cyruit_PCD8544(3, 4, 5, 6, 7);
 Cyruit display = Cyruit(&lcd, 84, 48, 6, 8);
 
+
 void setup(){
   //Serial.begin(57200);
+  // Включаем подсветку на 50%
+  // D9 - LCD 7 - VCC
+  analogWrite(9, 255 - 200);
+  pinMode(9, OUTPUT);
   // Инициализация дисплея
   lcd.begin();
+  // Переворачиваем
+  lcd.setRotation(2);
   // Устанавливаем контраст
   lcd.setContrast(51);
   // Устанавливаем цвет текста
