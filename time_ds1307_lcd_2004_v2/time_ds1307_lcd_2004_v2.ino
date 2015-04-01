@@ -196,7 +196,9 @@ void show_time(boolean full_scr = true) {
 
   char mon[12];
   strcpy_P(mon, month[now.month() - 1]);
-  sprintf(buffer, ", %d %s", now.day(), mon);
+  // Пробел в конце для затерания последнего символа
+  // при переходе c последнего на первый день месяца
+  sprintf(buffer, ", %d %s ", now.day(), mon);
   display.print(buffer);
 
   dtostrf(readVcc(), 4, 2, buffer);
