@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+if [ -f '/var/lock/read_ttyUSB4' ]; then
+  exit
+fi
+/bin/echo "$$" > '/var/lock/read_ttyUSB4'
+while [ `/opt/bin/php -r '$stat = stat("/dev/ttyUSB4"); print(time() - $stat["mtime"]);'` -lt 5 ]; do
+  /bin/sleep 2
+done
+sed -i -e '/ftdi_sio.c/d' -e '/user.debug kernel: ftdi_sio/d' '/var/log/syslog'
+/bin/echo -n 1 > '/dev/ttyUSB4'
+/bin/usleep 200000
+COUNT=0
+TRY=0
+CUR_RES=''
+CUR_NULLS=0
+CUR_COUNT=0
+while [ `/bin/grep 'ftdi_write - length = 1, data = 30\|ftdi_process_read' '/var/log/syslog' | /usr/bin/tail -n 15 | /bin/grep 'ftdi_write - length' | /usr/bin/wc -l` -ne 15 ]; do
+#while [ $CUR_NULLS -ne 15 ]; do
+  /bin/echo -n 0 > '/dev/ttyUSB4'
+  #CUR_COUNT=$COUNT
+  #while [ $CUR_COUNT -eq $COUNT ]; do
+    /bin/usleep 200000
+  #  CUR_RES=`/bin/grep 'ftdi_write - length = 1, data = 30\|ftdi_process_read' '/var/log/syslog'`
+  #  CUR_COUNT=`/bin/echo "$CUR_RES" | /usr/bin/wc -l`
+  #  if [ $TRY -lt 0 ]; then
+  #    TRY=$(( $TRY + 1 ))
+  #    break
+  #  fi
+  #done
+  #if [ $CUR_COUNT -ne $COUNT ]; then
+  #  TRY=$(( $TRY - $( /bin/echo "$CUR_RES" | /usr/bin/tail -n $(( $CUR_COUNT - $COUNT )) | /bin/grep 'ftdi_write - length' | /usr/bin/wc -l ) ))
+  #  COUNT=$CUR_COUNT
+  #fi
+  #CUR_NULLS=`/bin/echo "$CUR_RES" | /usr/bin/tail -n 15 | /bin/grep 'ftdi_write - length' | /usr/bin/wc -l`
+done
+#/bin/echo "$CUR_RES" > '/var/log/sys_ttyUSB4'
+/bin/grep 'ftdi_write - length = 1, data = 30\|ftdi_process_read' '/var/log/syslog' > '/var/log/sys_ttyUSB4'
+/bin/sed -i -e '/ftdi_sio.c/d' -e '/user.debug kernel: ftdi_sio/d' '/var/log/syslog'
+####### php -r '$in = "Привет!!"; for ($f = 0; $f < strlen($in); $f++){ print(strrev(decbin(ord($in[$f])))); } print ("\n");'
+/opt/bin/php -r '$in = file_get_contents("/var/log/sys_ttyUSB4"); $lines = explode("\n", $in); $ignore = TRUE; foreach ($lines as $line) {
+ if ($ignore) { $ignore = FALSE; continue; } if (FALSE !== strpos($line, "read")) { print (1); $ignore = TRUE; } else { print (0); } } print ("\n");' > '/var/log/bin_ttyUSB4'
+/opt/bin/php -r 'date_default_timezone_set("Europe/Kiev"); $str = file_get_contents("/var/log/bin_ttyUSB4"); $out = ""; for ($start = 0; $start < strlen($str); $start+=8) { $tmp = strrev(substr($str, $start, 8)); if ($tmp != 0) { $out .= chr(bindec($tmp)); } } if ($out) { print(date("Y.m.d H:i:s") . " - " . $out . "\n"); }' >> '/var/log/ttyUSB4'
+/bin/rm '/var/lock/read_ttyUSB4'

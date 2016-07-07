@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+if [ -f '/var/lock/ch341_read' ]; then
+  exit
+fi
+/bin/echo "$$" > '/var/lock/ch341_read'
+
+read TMP < '/dev/ttyUSB4' &
+READ_PID=$!
+/bin/sleep 1
+/bin/kill -9 "$READ_PID" &> '/dev/null'
+
+LINE=''
+while [ -z "$LINE" ]; do
+  /bin/echo -n '001' > '/dev/ttyUSB4'
+  /bin/sleep 1
+  read LINE < '/dev/ttyUSB4' && echo "$LINE" > '/tmp/ttyUSB4' &
+  READ_PID=$!
+  /bin/sleep 1
+  LINE=`/bin/cat '/tmp/ttyUSB4' 2> '/dev/null'`
+  /bin/kill -9 "$READ_PID" &> '/dev/null'
+  /bin/rm /tmp/ttyUSB4
+done
+/bin/echo "`/bin/date`" - "$LINE" >> '/var/log/ttyUSB4'
+
+/opt/bin/wget 'http://localhost/' -O '/tmp/index.html'
+/bin/sed -i -e '/<form/,/<\/form>/d' '/tmp/index.html'
+/opt/bin/openssh-scp -o ConnectTimeout=10 -i '/root/.ssh/id_rsa' '/tmp/index.html' 'aslok@o.aslok.su:/home/aslok/home.aslok.su/' &
+READ_PID=$!
+/bin/sleep 20
+/bin/kill -9 "$READ_PID" &> '/dev/null'
+/bin/rm '/tmp/index.html'
+
+/bin/rm '/var/lock/ch341_read'
