@@ -50,7 +50,11 @@ dht DHT;
 
 #include <SFE_BMP180.h>
 SFE_BMP180 pressure;
-#define ALTITUDE 100.0
+// Запоріжжя
+//#define ALTITUDE 100.0
+// Подусільна, вул. Зелена 2
+//#define ALTITUDE 308.0
+#define ALTITUDE 0
 
 const char hello_str[] PROGMEM = "доброї ночі\rдоброго ранку\rдоброго дня\rдоброго вечора";
 
@@ -213,13 +217,13 @@ void show_time(boolean full_scr = true) {
   if (scr_upd || !(now.second() % 5)) {
     // DHT11 - температура
     DHT.read11(DHT11_PIN);
-    dtostrf(DHT.temperature - 2, 2, 0, buffer);
+    dtostrf(DHT.temperature - 1, 2, 0, buffer);
     sprintf(buffer, "% 2s\337C", buffer);
     display.setCursor(0, 1);
     display.print(buffer);
 
     // DHT11 - влажность
-    dtostrf(DHT.humidity - 3, 2, 0, buffer);
+    dtostrf(DHT.humidity + 15, 2, 0, buffer);
     sprintf(buffer, "% 2s%%", buffer);
     display.setCursor(17, 1);
     display.print(buffer);
@@ -234,7 +238,6 @@ void show_time(boolean full_scr = true) {
 
     double temp;
     pressure.getTemperature(temp);
-    temp -= 2;
     dtostrf(temp, 4, 1, buffer);
     sprintf(buffer, "%s\337C", buffer);
     display.setCursor(0, 3);
