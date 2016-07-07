@@ -1,14 +1,17 @@
 #include "track_v2.h"
 
-const boolean debug = false;
+const boolean debug = true;
 
-#include "NewPing.h"
-const byte sonar_vcc_pin      = A4;
 const byte sonar_trigger_pin  = 6;
 const byte sonar_echo_pin     = 5;
 const byte sonar_max_distance = 150;
+#include "NewPing.h"
 NewPing sonar(sonar_trigger_pin, sonar_echo_pin, sonar_max_distance);
 byte cm = 0;
+
+#include "Wire.h"
+#include "HMC5883L.h"
+HMC5883L compass;
 
 const byte v_pin = A0;
 
@@ -21,13 +24,13 @@ const byte motors_in_2_n = 4;
 
 
 const byte k_mls = 40;      // 1000 ms / 40 = 25 ms _one_small_loop_
-word prev_k_mls = 0;
-const word inc_mls = 30;    // 30 * 50 ms (one loop) = 1500 ms _one_big_loop_
 word prev_mls = 0;
 
+byte look_cmps = 20;        // 20 degress for search free space
+int prev_cmps = 0;
 
-const byte look_delay = 3;  // 25 ms (k_mls) * 5
-const byte look_space = 60; // 50 cm for search free space
+const byte look_delay = 120;// 25 ms (k_mls) * 120
+const byte look_space = 60; // 60 cm for search free space
 
 
 const byte speed_max = 255;
@@ -41,9 +44,6 @@ states state = STOP;
 word state_mls = 0;
 
 void setup(){  
-  digitalWrite(sonar_vcc_pin, HIGH);
-  pinMode(sonar_vcc_pin, OUTPUT);
-  
   digitalWrite(motors_in_1_p, LOW);
   digitalWrite(motors_in_1_n, LOW);
   digitalWrite(motors_in_2_p, LOW);
@@ -54,44 +54,64 @@ void setup(){
   pinMode(motors_in_2_n, OUTPUT);
   analogWrite(motors_in_1_pwm, speed_start);
   analogWrite(motors_in_2_pwm, speed_start);
-  
-  delay(100);
+
+  /*while (!compass.begin()){
+    delay(100);
+  }
+  compass.setRange(HMC5883L_RANGE_1_3GA);
+  compass.setMeasurementMode(HMC5883L_CONTINOUS);
+  compass.setDataRate(HMC5883L_DATARATE_30HZ);
+  compass.setSamples(HMC5883L_SAMPLES_8);
+  compass.setOffset(-139, -270); */
 
   if (debug){
     Serial.begin(56700);
-    Serial.println("Setup done");
+    Serial.println(F("Setup done"));
   }
 }
 
-void loop_k_mls(){
+void loop(){
   word mls = get_mls();
+  if (prev_mls + 1 > mls){
+    loop_mls(mls);
+  }
+}
+
+void loop_mls(word mls){
+  prev_mls = mls;
   double vcc = readVcc();
+  //int cmps = readCompass();
+  int cmps = 0;
   // Напряжение на источнике питания
   // с поправкой на делитель напряжения
-  double v = (analogRead(v_pin) / 1023.0) * vcc * 1.66;
+  double v = (analogRead(v_pin) / 1023.0) * vcc * 1.45;
   if (debug){
-    Serial.println("loop_k_mls");
-    Serial.print("mls = ");
+    Serial.println(F("loop_mls"));
+    Serial.print(F("mls = "));
     Serial.println(mls);
-    Serial.print("vcc = ");
+    Serial.print(F("vcc = "));
     Serial.println(vcc);
-    Serial.print("v = ");
+    Serial.print(F("v = "));
     Serial.println(v);
+    Serial.print(F("cmps = "));
+    Serial.println(cmps);
+    Serial.print(F("prev_cmps = "));
+    Serial.println(prev_cmps);
   }
-  if (v < 4){
-    Serial.println("v < 5");
+  /*if (v < 3){
+    Serial.println(F("v < 3"));
     if (state != STOP){
-      Serial.println("state != STOP");
-      next_state(STOP, mls);
+      Serial.println(F("state != STOP"));
+      next_state(STOP, mls, cmps);
     }
     return;
-  }
-  cm = get_distance(mls);
+  }*/
+  cm = readDistance();
   //while(1){
   if (debug){
-    Serial.print("cm = ");
+    Serial.print(F("cm = "));
     Serial.println(cm);
-    Serial.print("state_mls = ");
+    Serial.print(F("state_mls = "));
     Serial.println(state_mls);
   }
   //delay(500); }
@@ -100,146 +120,113 @@ void loop_k_mls(){
     // Стоим
     case STOP:
       if (debug){
-        Serial.println("case STOP");
+        Serial.println(F("case STOP"));
       }
-      if (cm >= look_space){
-        next_state(LOOK_RIGHT, mls);
+      if (!cm || cm >= look_space){
+        next_state(LOOK_RIGHT, mls, cmps);
       }else{
-        next_state(LOOK_BACK, mls);
+        next_state(LOOK_BACK, mls, cmps);
       }
       break;
     // Смотрим вправо
     case LOOK_RIGHT:
       if (debug){
-        Serial.println("case LOOK_RIGHT");
+        Serial.println(F("case LOOK_RIGHT"));
       }
-      if (state_mls + look_delay < mls){
-        next_state(LOOK_LEFT, mls);
-      }else if(cm < look_space){
-        next_state(LOOK_BACK, mls - look_delay - (mls - state_mls));
-      }else if(v < v_min){
-        next_state(LOOK_BACK, mls + look_delay);
+      if ((prev_cmps + 360 - look_cmps) % 360 > cmps){
+        next_state(LOOK_LEFT, mls, cmps);
+      }else if (cm && cm < look_space){
+        next_state(LOOK_BACK, mls, cmps);
+      /*}else if (v < v_min){
+        next_state(LOOK_BACK, mls, cmps);*/
       }
       break;
     // Смотрим влево
     case LOOK_LEFT:
       if (debug){
-        Serial.println("case LOOK_LEFT");
+        Serial.println(F("case LOOK_LEFT"));
       }
-      if (state_mls + look_delay < mls){
-        next_state(LOOK_END, mls);
-      }else if(cm < look_space){
-        next_state(LOOK_BACK, mls + look_delay + (mls - state_mls));
-      }else if(v < v_min){
-        next_state(REVERS, mls);
+      if ((prev_cmps + look_cmps * 2) % 360 < cmps){
+        next_state(LOOK_END, mls, cmps);
+      }else if (cm && cm < look_space){
+        next_state(LOOK_BACK, mls, cmps);
+      /*}else if (v < v_min){
+        next_state(REVERS, mls, cmps);*/
       }
       break;
     // Заканчиваем осмотр - возвращаемся на исходную позицию
     case LOOK_END:
       if (debug){
-        Serial.println("case LOOK_END");
+        Serial.println(F("case LOOK_END"));
       }
-      if (state_mls + look_delay < mls){
-        next_state(GO, mls);
+      if ((prev_cmps + 360 - look_cmps) % 360 > cmps){
+        next_state(GO, mls, cmps);
       }
       break;
     // Продолжаем осмотр с новой позиции
     case LOOK_BACK:
       if (debug){
-        Serial.println("case LOOK_BACK");
-      } 
-      if (state_mls + look_delay * 4 < mls){
-        next_state(STOP, mls);
-      }else if(cm >= look_space){
-        next_state(LOOK_LEFT, mls + look_delay);
-      }else if(v < v_min){
-        next_state(REVERS, mls);
+        Serial.println(F("case LOOK_BACK"));
+      }
+      if ((prev_cmps + look_cmps * 3) % 360 < cmps){
+        next_state(STOP, mls, cmps);
+      }else if (cm && cm >= look_space){
+        next_state(LOOK_LEFT, mls, cmps);
+      /*}else if (v < v_min){
+        next_state(REVERS, mls, cmps);*/
       }
       break;
     // Едем
     case GO:
       if (debug){
-        Serial.println("case GO");
+        Serial.println(F("case GO"));
       } 
-      if(cm < look_space){
-        next_state(STOP, mls);
-      }else if(v < v_min){
-        next_state(REVERS, mls);
+      if (cm && cm < look_space){
+        next_state(STOP, mls, cmps);
+      /*}else if (v < v_min){
+        next_state(REVERS, mls, cmps);*/
       }
       break;
     case REVERS:
       if (debug){
-        Serial.println("case REVERS");
-      } 
-      if (state_mls + look_delay * 2 < mls){
-        next_state(STOP, mls);
-      }else if(v < v_min){
-        next_state(REVERS, mls);
+        Serial.println(F("case REVERS"));
+      }
+      if (prev_cmps + 180 % 360 < cmps){
+        next_state(STOP, mls, cmps);
+      /*}else if (v < v_min){
+        next_state(REVERS, mls, cmps);*/
       }
       break;
   }
 }
 
-byte get_distance(word& mls){
-  static byte cm_cnt[30] = { 0 };
-  byte cnt_max;
-  byte cnt_max_pos = 255;
-  do{
-    if (
-      state == STOP || 
-      (state == LOOK_RIGHT && state_mls + look_delay < mls) ||
-      (state == LOOK_LEFT && state_mls + look_delay < mls)
-    ){
-      go_stop();
-      memset(cm_cnt, 0, sizeof(cm_cnt));
-      for (byte cnt = 0; cnt < 10; cnt++){
-        cm_cnt[sonar.ping() / US_ROUNDTRIP_CM / 5]++;
-        delay(50);
-      }
-      cnt_max = 0;
-      cnt_max_pos = 255;
-      for (byte pos = 0; pos < 30; pos++){
-        if (cnt_max < cm_cnt[pos]){
-          cnt_max = cm_cnt[cnt_max_pos = pos];
-        }
-      }
-      mls = get_mls();
-    }else{
-      if (!(cnt_max_pos = sonar.ping() / US_ROUNDTRIP_CM / 5)){
-        cnt_max_pos = 30;
-      }
-    }
-  } while(cnt_max_pos == 255);
-  return cnt_max_pos * 5;
-}
-
 // Переходим в новое состояние
-void next_state(enum states stt, word mls){
+void next_state(enum states stt, word mls, int cmps){
   if (debug){
-    Serial.print("change state to ");
+    Serial.print(F("change state to "));
   }
   switch (stt){
     case LOOK_RIGHT:
       if (debug){
-        Serial.println("right");
+        Serial.println(F("right"));
       }
       go_right();
       break;
     case LOOK_LEFT:
       if (debug){
-        Serial.println("left");
+        Serial.println(F("left"));
       }
       go_left();
       break;
     case LOOK_BACK:
       if (debug){
-        Serial.println("look back");
+        Serial.println(F("look back"));
       }
       go_left();
       break;
     case LOOK_END:
       if (debug){
-        Serial.println("look end");
+        Serial.println(F("look end"));
       }
       if (state == LOOK_RIGHT){
         go_left();
@@ -249,60 +236,36 @@ void next_state(enum states stt, word mls){
       break;
     case SPEED_UP:
       if (debug){
-        Serial.println("speed up");
+        Serial.println(F("speed up"));
       }
       break;
     case GO:
       if (debug){
-        Serial.println("go");
+        Serial.println(F("go"));
       }
       go_forward();
       break;
     case SPEED_DOWN:
       if (debug){
-        Serial.println("speed down");
+        Serial.println(F("speed down"));
       }
       break;
     case STOP:
       go_stop();
       if (debug){
-        Serial.println("stop");
+        Serial.println(F("stop"));
       }
       break;
     case REVERS:
       go_back();
       if (debug){
-        Serial.println("revers");
+        Serial.println(F("revers"));
       }
       break;
   }
   state_mls = mls;
+  prev_cmps = cmps;
   state = stt;
-}
-
-void next_state(enum states stt){
-  next_state(stt, get_mls());
-}
-
-void loop_inc_mls(){
-  if (debug){
-    Serial.println("loop_inc_mls");
-  }
-}
-
-void loop(){
-  word mls = get_mls();
-  if (prev_k_mls + 1 > mls){
-    return;
-  }
-  prev_k_mls = mls;
-  loop_k_mls();
-
-  if ((prev_mls + inc_mls) > mls){
-    return;
-  }
-  prev_mls = mls;
-  loop_inc_mls();
 }
 
 word get_mls(){
@@ -311,7 +274,7 @@ word get_mls(){
 
 void go_forward(){
   if (debug){
-    Serial.println("go forward");
+    Serial.println(F("go forward"));
   }
   digitalWrite(motors_in_1_p, HIGH);
   digitalWrite(motors_in_1_n, LOW);
@@ -321,7 +284,7 @@ void go_forward(){
 
 void go_back(){
   if (debug){
-    Serial.println("go back");
+    Serial.println(F("go back"));
   }
   digitalWrite(motors_in_1_p, LOW);
   digitalWrite(motors_in_1_n, HIGH);
@@ -331,7 +294,7 @@ void go_back(){
 
 void go_right(){
   if (debug){
-    Serial.println("go right");
+    Serial.println(F("go right"));
   }
   digitalWrite(motors_in_1_p, LOW);
   digitalWrite(motors_in_1_n, HIGH);
@@ -341,7 +304,7 @@ void go_right(){
 
 void go_left(){
   if (debug){
-    Serial.println("go left");
+    Serial.println(F("go left"));
   }
   digitalWrite(motors_in_1_p, HIGH);
   digitalWrite(motors_in_1_n, LOW);
@@ -351,7 +314,7 @@ void go_left(){
 
 void go_stop(){
   if (debug){
-    Serial.println("go stop");
+    Serial.println(F("go stop"));
   }
   digitalWrite(motors_in_1_p, LOW);
   digitalWrite(motors_in_1_n, LOW);
@@ -399,5 +362,41 @@ double readVcc() {
    * температуры
    */
   return 1080.37357414 / result; // Vcc in volts
+}
+
+byte readDistance(){
+  /*static byte cm_cnt[30] = { 0 };
+  byte cnt_max;
+  byte cnt_max_pos = 255;
+  do{
+    memset(cm_cnt, 0, sizeof(cm_cnt));
+    for (byte cnt = 0; cnt < 10; cnt++){
+      cm_cnt[sonar.ping() / US_ROUNDTRIP_CM / 5]++;
+      delay(50);
+    }
+    cnt_max = 0;
+    cnt_max_pos = 255;
+    for (byte pos = 0; pos < 30; pos++){
+      if (cnt_max < cm_cnt[pos]){
+        cnt_max = cm_cnt[cnt_max_pos = pos];
+      }
+    }
+  } while(cnt_max_pos == 255);
+  return cnt_max_pos * 5;*/
+  return sonar.ping() / US_ROUNDTRIP_CM;
+}
+
+int readCompass(){
+  Vector norm = compass.readNormalize();
+  float heading = atan2(norm.YAxis, norm.XAxis) + (4.0 + (26.0 / 60.0)) / (180 / M_PI);
+  if (heading < 0){
+    heading += 2 * PI;
+  }
+
+  if (heading > 2 * PI){
+    heading -= 2 * PI;
+  }
+
+  return (int) (heading * 180 / M_PI);
 }
 
