@@ -1,7 +1,7 @@
-const byte RC1 = A2;
-const byte RC2 = A3;
-const byte RC3 = A0;
-const byte RC4 = A1;
+const byte RC1 = A0;
+const byte RC2 = A1;
+const byte RC3 = A2;
+const byte RC4 = A3;
 
 const byte PWM1 = 5;
 const byte PWM2 = 9;
@@ -20,8 +20,8 @@ word speed = 0;
 word prev_millis = 0;
 byte prev_speed = 0;
 
-const word analog_low = 1023 / 2;
-const word analog_high = 1023 / 2;
+const word analog_low = 1;
+const word analog_high = 512;
 boolean prev_analog_1 = false;
 boolean prev_analog_2 = false;
 boolean prev_analog_3 = false;
@@ -73,10 +73,10 @@ void loop(){
   Serial.println(analogRead(RC1));
   Serial.print("analogRead(RC2) =");
   Serial.println(analogRead(RC2));
-  /*Serial.print("analogRead(RC3) =");
+  Serial.print("analogRead(RC3) =");
   Serial.println(analogRead(RC3));
   Serial.print("analogRead(RC4) =");
-  Serial.println(analogRead(RC4));*/
+  Serial.println(analogRead(RC4));
         
   if (analog_1 != prev_analog_1){
     analog_cnt_1++;
