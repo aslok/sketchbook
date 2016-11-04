@@ -32,7 +32,7 @@ const byte steps[][3] = {
   {244, 0, 192}, {0, 0, 255},
   // голубой        зеленый
   {0, 191, 255}, {0, 255, 0},
-  // желтый         оранжевый 
+  // желтый         оранжевый
   {255, 200, 0}, {255, 83, 0},
   // красный
   {255, 0, 0}
@@ -47,13 +47,13 @@ boolean blink = false;
 unsigned long blink_ms = 0;
 boolean blink_prev = false;
 
-char signal;
+byte signal;
 int signal_prev = -1;
 
 void setup(){
   //debug = true;
   if (debug){
-    Serial.begin(9600);
+    Serial.begin(57600);
   }
   pinMode(button_1_pin, INPUT_PULLUP);
   pinMode(button_2_pin, INPUT_PULLUP);
@@ -62,8 +62,8 @@ void setup(){
 
   digitalWrite(signal_pin, LOW);
   pinMode(signal_pin, OUTPUT);
-  //TCCR1B = TCCR1B & B11111000 | B00000001;
-  //TCCR2B = TCCR2B & B11111000 | B00000001;
+  TCCR1B = TCCR1B & B11111000 | B00000001;
+  TCCR2B = TCCR2B & B11111000 | B00000001;
 
   analogWrite(m, 255 - m_val);
   digitalWrite(r, LOW);
@@ -139,14 +139,29 @@ void loop(){
       analogWrite(r, steps[step][0]);
       analogWrite(g, steps[step][1]);
       analogWrite(b, steps[step][2]);
+      if (debug){
+        Serial.print("r = ");
+        Serial.println(steps[step][0]);
+        Serial.print("g = ");
+        Serial.println(steps[step][1]);
+        Serial.print("b = ");
+        Serial.println(steps[step][2]);
+      }
     }else{
       analogWrite(r, 0);
       analogWrite(g, 0);
       analogWrite(b, 0);
     }
-    signal = step > 0 || step_part > 0 ? (2 + ((step - 1) * 3 + step_part) * 11) : 0;
     if (debug){
-      Serial.println(signal);
+      Serial.println((15 / 23.0) * ((step - 1) * 3 + step_part + 1), DEC);
+    }
+    //signal = step > 0 || step_part > 0 ? (2 + ((step - 1) * 3 + step_part) * 11) : 0;
+    signal = step > 0 || step_part > 0 ? (byte) ceil(pow((15 / 23.0) * ((step - 1) * 3 + step_part + 1), 2)) : 0;
+    if (signal == 245){
+      signal = 255;
+    }
+    if (debug){
+      Serial.println(signal, DEC);
     }
     if (signal_prev != signal){
       signal_prev = signal;
@@ -179,7 +194,7 @@ void read_buttons(){
 
   if (cmd_mode_1 && cmd_start_1 && ms - cmd_start_1 <= 50){
     cmd_start_1 = 0;
-  } 
+  }
   if (cmd_mode_2 && cmd_start_2 && ms - cmd_start_2 <= 50){
     cmd_start_2 = 0;
   }
