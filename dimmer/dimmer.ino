@@ -297,11 +297,11 @@ void read_buttons(){
     cmd_start_2 = 0;
   }
 
-  if (!cmd_mode_1 && cmd_start_1 && (int) (us - cmd_start_1) > 50000 && b1){
+  if (!cmd_mode_1 && cmd_start_1 && us - cmd_start_1 > 50000 && b1){
     cmd_start_1 = cmd_start_1 + 250;
     button1 = true;
   }
-  if (!cmd_mode_2 && cmd_start_2 && (int) (us - cmd_start_2) > 50000 && b2){
+  if (!cmd_mode_2 && cmd_start_2 && us - cmd_start_2 > 50000 && b2){
     cmd_start_2 = cmd_start_2 + 250;
     button2 = true;
   }
