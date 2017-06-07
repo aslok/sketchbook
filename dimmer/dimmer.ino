@@ -1,3 +1,27 @@
+/*
+ * dimmer.ino
+ * Диммер на ардуино
+ * Регулятор мощности — электронное устройство, предназначенное для
+ * изменения электрической мощности
+ * 220V, 300W
+ *
+ * created 20.08.2016
+ * modifid 07.06.2017
+ * with Arduino 1.6.5 (tested on Arduino Pro Mini ATmega168)
+ *
+ * Copyright 2017 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
+ */
+
 boolean debug = false;
 boolean debug_blink = false;
 
