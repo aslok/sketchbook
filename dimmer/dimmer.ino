@@ -28,6 +28,8 @@ boolean debug_blink = false;
 #include "EEPROM.h"
 #include "TimerOne.h"
 
+volatile unsigned long us;
+
 const byte button_1_pin = A1;
 const byte button_2_pin = A0;
 const byte buttons_low_pin = 10;
@@ -36,7 +38,7 @@ const byte cros_zero_low_pin = 8;
 const byte cros_zero_high_pin = 7;
 const byte cros_zero_pin = 2;
 volatile unsigned long cros_zero_us = 0;
-volatile boolean interrupt_signal_skip = true;
+volatile boolean interrupt_signal_skip;
 int period = 0;
 
 boolean b1 = false;
@@ -55,8 +57,6 @@ const byte r = 3;
 const byte g = 5;
 const byte b = 6;
 const byte m_val = 15;
-
-unsigned long ms;
 
 const byte steps[][3] = {
   // выкл       пурпурный
@@ -77,7 +77,7 @@ byte step_part = 0;
 byte step_part_prev = 2;
 
 boolean blink = false;
-unsigned long blink_ms = 0;
+unsigned long blink_us = 0;
 boolean blink_prev = false;
 
 byte signal = 0;
@@ -91,6 +91,7 @@ void setup(){
   }
 
   Timer1.initialize();
+  interrupt_signal_skip = true;
   Timer1.attachInterrupt(interrupt_signal_stop);
   Timer1.stop();
 
@@ -108,7 +109,11 @@ void setup(){
 
   digitalWrite(signal_pin, LOW);
   pinMode(signal_pin, OUTPUT);
-  TCCR1B = (TCCR1B & B11111000) | B00000001;
+  // set timer 0 (Pins 5 and 6, millis, micros, delay) divisor to 1 for PWM frequency of 62500.00 Hz
+  //TCCR0B = (TCCR0B & B11111000) | B00000001;
+  // set timer 1 (Pins 9 and 10) divisor to 1 for PWM frequency of 31372.55 Hz
+  //TCCR1B = (TCCR1B & B11111000) | B00000001;
+  // set timer 2 (Pins 11 and 3) divisor to 1 for PWM frequency of 31372.55 Hz
   TCCR2B = (TCCR2B & B11111000) | B00000001;
 
   analogWrite(m, 255 - m_val);
@@ -126,10 +131,10 @@ void setup(){
 }
 
 void loop(){
-  ms = millis();
+  us = micros();
 
-  if (ms < blink_ms){
-    blink_ms = 0;
+  if (us < blink_us || us < cros_zero_us){
+    blink_us = 0;
     cros_zero_us = 0;
   }
 
@@ -143,7 +148,7 @@ void loop(){
       step_part++;
     }
     blink = true;
-    blink_ms = ms;
+    blink_us = us;
   }else if (button2 && step > 0){
     if (step_part == 0){
       step--;
@@ -154,91 +159,92 @@ void loop(){
       step_part--;
     }
     blink = true;
-    blink_ms = ms;
+    blink_us = us;
   }
 
   switch (step_part){
     case 0:
       if (step > 0 && blink != true){
         blink = true;
-        blink_ms = ms;
+        blink_us = us;
       }
       break;
     case 1:
-      if (ms - blink_ms > 500){
+      if (us - blink_us > 500000){
         blink = !blink;
-        blink_ms = ms;
+        blink_us = us;
       }
       break;
     case 2:
-      if (ms - blink_ms > 250){
+      if (us - blink_us > 250000){
         blink = !blink;
-        blink_ms = ms;
+        blink_us = us;
       }
       break;
   }
 
-  if (step_prev != step || step_part != step_part_prev || blink_prev != blink){
-    if (step_prev != step || step_part != step_part_prev){
-      step_prev = step;
-      step_part_prev = step_part;
-      EEPROM.write(0, step);
-      EEPROM.write(1, step_part);
-    }
+  if (step == step_prev && step_part == step_part_prev && blink == blink_prev){
+    return;
+  }
+  if (step_prev != step || step_part != step_part_prev){
+    step_prev = step;
+    step_part_prev = step_part;
+    EEPROM.write(0, step);
+    EEPROM.write(1, step_part);
+  }
+  if (debug && debug_blink){
+    Serial.print("step = ");
+    Serial.println(step, DEC);
+    Serial.print("step_part = ");
+    Serial.println(step_part, DEC);
+  }
+  blink_prev = blink;
+  if (blink){
+    analogWrite(r, steps[step][0]);
+    analogWrite(g, steps[step][1]);
+    analogWrite(b, steps[step][2]);
     if (debug && debug_blink){
-      Serial.print("step = ");
-      Serial.println(step, DEC);
-      Serial.print("step_part = ");
-      Serial.println(step_part, DEC);
+      Serial.print("us = ");
+      Serial.println(us);
+      Serial.print("r = ");
+      Serial.println(steps[step][0]);
+      Serial.print("g = ");
+      Serial.println(steps[step][1]);
+      Serial.print("b = ");
+      Serial.println(steps[step][2]);
     }
-    blink_prev = blink;
-    if (blink){
-      analogWrite(r, steps[step][0]);
-      analogWrite(g, steps[step][1]);
-      analogWrite(b, steps[step][2]);
-      if (debug && debug_blink){
-        Serial.print("ms = ");
-        Serial.println(ms);
-        Serial.print("r = ");
-        Serial.println(steps[step][0]);
-        Serial.print("g = ");
-        Serial.println(steps[step][1]);
-        Serial.print("b = ");
-        Serial.println(steps[step][2]);
-      }
-    }else{
-      analogWrite(r, 0);
-      analogWrite(g, 0);
-      analogWrite(b, 0);
+  }else{
+    analogWrite(r, 0);
+    analogWrite(g, 0);
+    analogWrite(b, 0);
+  }
+  uint16_t signal_val = step > 0 || step_part > 0 ? ceil(pow((6.248 / 24.0) * ((step - 1) * 3 + step_part + 1), 3)) : 0;
+  if (signal_val && step >= 1){
+    if (step == 1 && step_part){
+      signal_val += step_part;
     }
-    uint16_t signal_val = step > 0 || step_part > 0 ? ceil(pow((6.248 / 24.0) * ((step - 1) * 3 + step_part + 1), 3)) : 0;
-    if (signal_val && step >= 1){
-      if (step == 1 && step_part){
-        signal_val += step_part;
-      }
-      if (step > 1){
-        signal_val += 2;
-      }
-      signal_val += 10;
+    if (step > 1){
+      signal_val += 2;
     }
-    signal = signal_val > 255 ? 255 : signal_val;
-    if (signal_prev != signal){
-      signal_prev = signal;
-      period = 9000 - 9000.0 / 255 * signal;
-      if (debug){
-        Serial.print("signal_val = ");
-        Serial.println(signal_val, DEC);
-        Serial.print("signal = ");
-        Serial.println(signal, DEC);
-        Serial.print("period = ");
-        Serial.println(period, DEC);
-      }
+    signal_val += 10;
+  }
+  signal = signal_val > 255 ? 255 : signal_val;
+  if (signal_prev != signal){
+    signal_prev = signal;
+    period = 9000 - 9000 / 255.0 * signal;
+    if (debug){
+      Serial.print("signal_val = ");
+      Serial.println(signal_val, DEC);
+      Serial.print("signal = ");
+      Serial.println(signal, DEC);
+      Serial.print("period = ");
+      Serial.println(period, DEC);
     }
   }
 }
 
 void interrupt_cros_zero(){
-  unsigned long us = micros();
+  us = micros();
   if (us - cros_zero_us < 2500){
     return;
   }
@@ -248,13 +254,14 @@ void interrupt_cros_zero(){
   }
   if (signal){
     Timer1.setPeriod(period + 1000);
+    interrupt_signal_skip = true;
     Timer1.start();
   }
 }
 
 void interrupt_signal_stop(){
-  interrupt_signal_skip = !interrupt_signal_skip;
   if (interrupt_signal_skip){
+    interrupt_signal_skip = false;
     return;
   }
   digitalWrite(signal_pin, HIGH);
@@ -276,25 +283,25 @@ void read_buttons(){
 
   if (cmd_mode_1 && b1){
     cmd_mode_1 = false;
-    cmd_start_1 = ms;
+    cmd_start_1 = us;
   }
   if (cmd_mode_2 && b2){
     cmd_mode_2 = false;
-    cmd_start_2 = ms;
+    cmd_start_2 = us;
   }
 
-  if (cmd_mode_1 && cmd_start_1 && ms - cmd_start_1 <= 50){
+  if (cmd_mode_1 && cmd_start_1 && us - cmd_start_1 <= 50000){
     cmd_start_1 = 0;
   }
-  if (cmd_mode_2 && cmd_start_2 && ms - cmd_start_2 <= 50){
+  if (cmd_mode_2 && cmd_start_2 && us - cmd_start_2 <= 50000){
     cmd_start_2 = 0;
   }
 
-  if (!cmd_mode_1 && cmd_start_1 && (int) (ms - cmd_start_1) > 50 && b1){
+  if (!cmd_mode_1 && cmd_start_1 && (int) (us - cmd_start_1) > 50000 && b1){
     cmd_start_1 = cmd_start_1 + 250;
     button1 = true;
   }
-  if (!cmd_mode_2 && cmd_start_2 && (int) (ms - cmd_start_2) > 50 && b2){
+  if (!cmd_mode_2 && cmd_start_2 && (int) (us - cmd_start_2) > 50000 && b2){
     cmd_start_2 = cmd_start_2 + 250;
     button2 = true;
   }
