@@ -29,6 +29,7 @@ boolean debug_blink = false;
 #include "TimerOne.h"
 
 volatile unsigned long us;
+unsigned long eeprom_us = 0;
 
 const byte button_1_pin = A1;
 const byte button_2_pin = A0;
@@ -183,14 +184,27 @@ void loop(){
       break;
   }
 
+  if (eeprom_us && us - eeprom_us > 5000000){
+    if (debug){
+      Serial.print("EEPROM.write = ");
+      Serial.println(us, DEC);
+    }
+    eeprom_us = 0;
+    EEPROM.write(0, step);
+    EEPROM.write(1, step_part);
+  }
+
   if (step == step_prev && step_part == step_part_prev && blink == blink_prev){
     return;
   }
   if (step_prev != step || step_part != step_part_prev){
     step_prev = step;
     step_part_prev = step_part;
-    EEPROM.write(0, step);
-    EEPROM.write(1, step_part);
+    eeprom_us = us;
+    if (debug){
+      Serial.print("eeprom_us = ");
+      Serial.println(eeprom_us, DEC);
+    }
   }
   if (debug && debug_blink){
     Serial.print("step = ");
