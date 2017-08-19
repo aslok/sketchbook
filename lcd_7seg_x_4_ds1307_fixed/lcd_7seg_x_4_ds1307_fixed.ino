@@ -6,7 +6,7 @@ boolean debug_display = false;
 RTC_DS1307 rtc;
 
 // For sprintf() function
-char buffer[10];
+char buffer[21];
 
 byte brightness = 245;     // 0 - 255
 

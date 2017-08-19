@@ -26,7 +26,6 @@ Sketch uses 12,582 bytes (87.8%) of program storage space. Maximum is 14,336 byt
 Global variables use 558 bytes (54.5%) of dynamic memory, leaving 466 bytes for local variables. Maximum is 1,024 bytes.
  */
 boolean debug = false;
-boolean debug_display = false;
 // Переменная для вывода отладки раз в секунду
 unsigned long us_status = 0;
 
@@ -38,7 +37,7 @@ lcd7x4* lcd;
 RTC_DS1307 rtc;
 
 // For sprintf() function
-char buffer[10];
+char buffer[21];
 
 byte brightness = 245;     // 0 - 255
 
@@ -70,20 +69,17 @@ mode_type mode = normal;
 
 void setup(){
   //debug = true;
-  //debug_display = true;
 
 #ifdef AVR
   Wire.begin();
 #else
-  Wire1.begin(); // Shield I2C pins connect to alt I2C bus on Arduino Due
+  Wire1.begin();
 #endif
   rtc.begin();
 
   lcd = new lcd7x4(pinout, dig_pinout, pinout_anode, dig_pinout_anode, brightness);
 
-  //if (debug || debug_display){
-    Serial.begin(57600);
-  //}
+  Serial.begin(57600);
 
   byte read_arr[4];
   rtc.readnvram(read_arr, 4, 8);
