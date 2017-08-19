@@ -1,0 +1,13 @@
+ds1307	KEYWORD1
+date	KEYWORD2
+update	KEYWORD2
+adjust	KEYWORD2
+set	KEYWORD2
+unixtime_read	KEYWORD2
+adjust_read	KEYWORD2
+last_read	KEYWORD2
+unixtime_write	KEYWORD2
+adjust_write	KEYWORD2
+last_write	KEYWORD2
+rtc	KEYWORD2
+last_adjust	KEYWORD2
