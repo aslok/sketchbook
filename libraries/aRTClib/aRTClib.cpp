@@ -24,8 +24,8 @@
 // Конструктор
 ds1307::ds1307(){
   rtc.begin();
-  date = rtc.now();
   last_adjust = last_read();
+  update();
 }
 
 DateTime ds1307::update(){
@@ -38,22 +38,20 @@ void ds1307::adjust(){
   if (date.hour() != 12 || date.minute() != 30 || date.second() != 30 || date.unixtime() <= last_adjust){
     return;
   }
-  byte read_arr[4];
-  rtc.readnvram(read_arr, 4, 4);
-  float adjust = *((float*) & read_arr);
-  if (adjust){
-    last_adjust = date.unixtime() + 1;
-    adjust_write(last_adjust);
-
-    float adjust_dec = adjust - (long) adjust;
-    delay(1000 / (adjust_dec * -1));
-    if (adjust < 0){
-      adjust++;
-    }
-
-    DateTime new_time = DateTime(date.unixtime() + adjust);
-    set(new_time);
+  float adjust = adjust_read();
+  if (!adjust){
+    return;
   }
+  last_adjust = date.unixtime() + 1;
+  last_write(last_adjust);
+  float adjust_dec = adjust - (long) adjust;
+  delay(1000 * abs(adjust_dec));
+  if (adjust < 0){
+    adjust++;
+  }
+
+  DateTime new_time = DateTime(date.unixtime() + adjust);
+  set(new_time);
 }
 
 void ds1307::set(DateTime new_time){
@@ -113,49 +111,4 @@ void ds1307::last_write(unsigned long value){
     value_arr[3]
   };
   rtc.writenvram(8, write_arr, 4);
-}
-
-void ds1307::printFloat(float value, int places){
-  int digit;
-  float tens = 0.1;
-  int tenscount = 0;
-  int i;
-  float tempfloat = value;
-  float d = 0.5;
-  if (value < 0){
-    d *= -1.0;
-  }
-  for (i = 0; i < places; i++){
-    d /= 10.0;
-  }
-  tempfloat += d;
-  if (value < 0){
-    tempfloat *= -1.0;
-  }
-  while ((tens * 10.0) <= tempfloat){
-    tens *= 10.0;
-    tenscount += 1;
-  }
-  if (value < 0){
-    Serial.print('-');
-  }
-  if (tenscount == 0){
-    Serial.print(0, DEC);
-  }
-  for (i = 0; i < tenscount; i++){
-    digit = (int) (tempfloat / tens);
-    Serial.print(digit, DEC);
-    tempfloat = tempfloat - ((float) digit * tens);
-    tens /= 10.0;
-  }
-  if (places <= 0){
-    return;
-  }
-  Serial.print('.');
-  for (i = 0; i < places; i++){
-    tempfloat *= 10.0;
-    digit = (int) tempfloat;
-    Serial.print(digit, DEC);
-    tempfloat = tempfloat - (float) digit;
-  }
 }

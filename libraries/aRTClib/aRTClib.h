@@ -45,8 +45,6 @@ class ds1307{
     void unixtime_write(unsigned long);
     void adjust_write(float);
     void last_write(unsigned long);
-
-    void printFloat(float value, int places);
   private:
     RTC_DS1307 rtc;
     unsigned long last_adjust;
