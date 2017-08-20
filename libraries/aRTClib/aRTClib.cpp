@@ -63,52 +63,31 @@ void ds1307::set(DateTime new_time){
 unsigned long ds1307::unixtime_read(){
   byte read_arr[4];
   rtc.readnvram(read_arr, 4, 0);
-  return *((unsigned long*) & read_arr);
+  return *(unsigned long*) &read_arr;
 }
 
 // adjust - количество секунд для автоматической коррекции, хранится по адресу #4
 float ds1307::adjust_read(){
   byte read_arr[4];
   rtc.readnvram(read_arr, 4, 4);
-  return *((float*) & read_arr);
+  return *(float*) &read_arr;
 }
 
 // last_adjust - таймстамп последней автоматической коррекции, хранится по адресу #8
 unsigned long ds1307::last_read(){
   byte read_arr[4];
   rtc.readnvram(read_arr, 4, 8);
-  return *((unsigned long*) & read_arr);
+  return *(unsigned long*) &read_arr;
 }
 
 void ds1307::unixtime_write(unsigned long value){
-  byte* value_arr = (byte*) &value;
-  byte write_arr[] = {
-    value_arr[0],
-    value_arr[1],
-    value_arr[2],
-    value_arr[3]
-  };
-  rtc.writenvram(0, write_arr, 4);
+  rtc.writenvram(0, (byte*) &value, 4);
 }
 
 void ds1307::adjust_write(float value){
-  byte* value_arr = (byte*) &value;
-  byte write_arr[] = {
-    value_arr[0],
-    value_arr[1],
-    value_arr[2],
-    value_arr[3]
-  };
-  rtc.writenvram(4, write_arr, 4);
+  rtc.writenvram(4, (byte*) &value, 4);
 }
 
 void ds1307::last_write(unsigned long value){
-  byte* value_arr = (byte*) &value;
-  byte write_arr[] = {
-    value_arr[0],
-    value_arr[1],
-    value_arr[2],
-    value_arr[3]
-  };
-  rtc.writenvram(8, write_arr, 4);
+  rtc.writenvram(8, (byte*) &value, 4);
 }
