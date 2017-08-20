@@ -22,7 +22,7 @@
  * MA 02110-1301, USA.
  *
  *
-Sketch uses 13,134 bytes (91.6%) of program storage space. Maximum is 14,336 bytes.
+Sketch uses 13,218 bytes (92.2%) of program storage space. Maximum is 14,336 bytes.
 Global variables use 556 bytes (54.3%) of dynamic memory, leaving 468 bytes for local variables. Maximum is 1,024 bytes.
  */
 boolean debug = false;
@@ -57,12 +57,13 @@ enum mode_type {
   normal,
   set,
   adjust,
-  unixtime
+  unixtime,
+  time
 };
 mode_type mode = normal;
 
 void setup(){
-  debug = true;
+  //debug = true;
 
   Serial.begin(57600);
 
@@ -91,6 +92,14 @@ void loop(){
     byte hour = rtc->date.hour() % 12;
     sprintf(buffer, "%d%s%02d", hour ? hour : 12, rtc->date.second() % 2 ? "." : "", rtc->date.minute());
     lcd->print(buffer);
+    if (mode == normal){
+      char buffer_tmp[21];
+      sprintf(buffer_tmp,
+              "%02d.%02d.%04d %02d:%02d:%02d",
+              rtc->date.day(), rtc->date.month(), rtc->date.year(),
+              rtc->date.hour(), rtc->date.minute(), rtc->date.second());
+      Serial.println(buffer_tmp);
+    }
   }
 
   while (Serial.available() > 0){
@@ -131,9 +140,12 @@ void loop(){
       }else if (!strcmp(buffer_incom, "last")){
         rtc->last_write(0);
         Serial.println(F("LAST ADJUST: 0"));
+      }else if (!strcmp(buffer_incom, "time")){
+        mode = time;
+        Serial.println(F("TIME: Please enter"));
       }
     }else if (mode == set){
-      mode = 0;
+      mode = normal;
       char delim[] = " :.";
       byte day = atoi(strtok(buffer_incom, delim));
       byte month = atoi(strtok(NULL, delim));
@@ -143,18 +155,15 @@ void loop(){
       byte second = atoi(strtok(NULL, delim));
       // Правильное время:
       DateTime new_time = DateTime(year, month, day, hour, minute, second);
-      // Последний раз устанавливалось правильное время:
-      unsigned long old_unixtime = rtc->unixtime_read();
       // Прошло столько секунд с момента последней коррекции (например 89349):
-      unsigned long time_elapsed = new_time.unixtime() - old_unixtime;
-      // Учитываем существующую поправку (например -12.50)
-      float adjust = rtc->adjust_read();
+      long time_elapsed = new_time.unixtime() - rtc->unixtime_read();
       // Такая разница в секундах с правильным временем (например -2):
       long time_diff = new_time.unixtime() - rtc->date.unixtime();
-      float new_adjust = (time_diff ? (3600.0 * 24 / (time_elapsed / time_diff)) : 0) + adjust;
+      // Новая поправка
+      float new_adjust = (time_diff ? (3600.0 * 24 / (time_elapsed / time_diff)) : 0) + rtc->adjust_read();
       if (debug){
         Serial.print(F("SET: Old adjust value "));
-        printFloat(adjust, 2);
+        printFloat(rtc->adjust_read(), 2);
         Serial.println();
         Serial.print(F("SET: Elapsed time "));
         Serial.println(time_elapsed);
@@ -172,13 +181,25 @@ void loop(){
       rtc->adjust_write(new_adjust);
       rtc->set(new_time);
     }else if (mode == adjust){
-      mode = 0;
+      mode = normal;
       float new_adjust = atof(buffer_incom);
       rtc->adjust_write(new_adjust);
     }else if (mode == unixtime){
-      mode = 0;
+      mode = normal;
       unsigned long new_unixtime = atol(buffer_incom);
       rtc->unixtime_write(new_unixtime);
+    }else if (mode == time){
+      mode = normal;
+      char delim[] = " :.";
+      byte day = atoi(strtok(buffer_incom, delim));
+      byte month = atoi(strtok(NULL, delim));
+      int year = atoi(strtok(NULL, delim));
+      byte hour = atoi(strtok(NULL, delim));
+      byte minute = atoi(strtok(NULL, delim));
+      byte second = atoi(strtok(NULL, delim));
+      // Правильное время:
+      DateTime new_time = DateTime(year, month, day, hour, minute, second);
+      rtc->set(new_time);
     }
     buffer_incom_done = false;
   }
