@@ -22,7 +22,7 @@
  * MA 02110-1301, USA.
  *
  *
-Sketch uses 13,218 bytes (92.2%) of program storage space. Maximum is 14,336 bytes.
+Sketch uses 13,474 bytes (94.0%) of program storage space. Maximum is 14,336 bytes.
 Global variables use 556 bytes (54.3%) of dynamic memory, leaving 468 bytes for local variables. Maximum is 1,024 bytes.
  */
 boolean debug = false;
@@ -63,7 +63,7 @@ enum mode_type {
 mode_type mode = normal;
 
 void setup(){
-  //debug = true;
+  debug = true;
 
   Serial.begin(57600);
 
@@ -135,7 +135,7 @@ void loop(){
         Serial.print(F("READ: Unixtime "));
         Serial.println(rtc->unixtime_read());
         Serial.print(F("READ: Adjust "));
-        printFloat(rtc->adjust_read(), 2);
+        printFloat(rtc->adjust_read(), 4);
         Serial.println();
       }else if (!strcmp(buffer_incom, "last")){
         rtc->last_write(0);
@@ -160,10 +160,11 @@ void loop(){
       // Такая разница в секундах с правильным временем (например -2):
       long time_diff = new_time.unixtime() - rtc->date.unixtime();
       // Новая поправка
-      float new_adjust = (time_diff ? (3600.0 * 24 / (time_elapsed / time_diff)) : 0) + rtc->adjust_read();
+      //     -12.9998                     86400           79755             -12                       0
+      float new_adjust = (time_diff ? (3600.0 * 24 / (time_elapsed / (float) time_diff)) : 0) + rtc->adjust_read();
       if (debug){
         Serial.print(F("SET: Old adjust value "));
-        printFloat(rtc->adjust_read(), 2);
+        printFloat(rtc->adjust_read(), 4);
         Serial.println();
         Serial.print(F("SET: Elapsed time "));
         Serial.println(time_elapsed);
@@ -174,7 +175,7 @@ void loop(){
         Serial.print(F("SET: Time diff "));
         Serial.println(time_diff);
         Serial.print(F("SET: Adjust "));
-        printFloat(new_adjust, 2);
+        printFloat(new_adjust, 4);
         Serial.println();
       }
       rtc->unixtime_write(new_time.unixtime());
