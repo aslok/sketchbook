@@ -1,4 +1,4 @@
-ReadMe file for Arduino Cyr-lcd7x4 Library
+ReadMe file for Arduino lcd7x4 Library
 
 Vitaliy Fust 2016
 
