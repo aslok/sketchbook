@@ -2,7 +2,8 @@
  * artclib.h
  * Header file of library
  *
- * modified 19.08.2017
+ * created 19.08.2017
+ * modified 11.10.2017
  * by Fust Vitaliy Vitaliy Fust <aslok.zp@gmail.com>
  * with Arduino 1.8.3 (tested on Arduino Pro Mini 168 5V)
  *
@@ -33,21 +34,34 @@
 
 class ds1307{
   public:
+    // Текущее значение даты
     DateTime date;
 
+    // Конструктор
     ds1307();
+    // Обновление текущего значения даты
     DateTime update();
-    void adjust();
-    void set(DateTime);
-    unsigned long unixtime_read();
-    float adjust_read();
-    unsigned long last_read();
-    void unixtime_write(unsigned long);
-    void adjust_write(float);
-    void last_write(unsigned long);
+    // Автоматическая коррекция
+    void amendment_apply();
+    // Поправка времени на верное и расчет коррекции
+    void correct(DateTime);
+    // Просто установка верной даты
+    void adjust(DateTime);
+    // Таймстамп последней ручной установки
+    unsigned long corrected_read();
+    // Количество секунд для автоматической коррекции
+    float amendment_read();
+    // Таймстамп последней автоматической коррекции
+    unsigned long applied_read();
+    void corrected_write(unsigned long);
+    void amendment_write(float);
+    void applied_write(unsigned long);
   private:
     RTC_DS1307 rtc;
-    unsigned long last_adjust;
+    // Таймстамп последней автоматической коррекции
+    unsigned long applied;
+    // Количество секунд для автоматической коррекции
+    float amendment;
 };
 
 #endif

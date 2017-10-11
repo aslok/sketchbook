@@ -1,7 +1,8 @@
 ds1307	KEYWORD1
 date	KEYWORD2
 update	KEYWORD2
-adjust	KEYWORD2
+adjust  KEYWORD2
+check_time  KEYWORD2
 set	KEYWORD2
 unixtime_read	KEYWORD2
 adjust_read	KEYWORD2
