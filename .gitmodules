@@ -4,3 +4,6 @@
 [submodule "libraries/Adafruit-GFX-Library"]
 	path = libraries/Adafruit-GFX-Library
 	url = git@github.com:adafruit/Adafruit-GFX-Library.git
+[submodule "libraries/OneWire"]
+	path = libraries/OneWire
+	url = git@github.com:PaulStoffregen/OneWire.git
