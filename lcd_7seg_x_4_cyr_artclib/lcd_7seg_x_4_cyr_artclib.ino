@@ -26,7 +26,6 @@
 Sketch uses 13,460 bytes (93.9%) of program storage space. Maximum is 14,336 bytes.
 Global variables use 586 bytes (57.2%) of dynamic memory, leaving 438 bytes for local variables. Maximum is 1,024 bytes.
  */
-boolean debug = false;
 
 #include "lcd7x4.h"
 lcd7x4* lcd;
@@ -71,8 +70,6 @@ enum mode_type {
 mode_type mode = normal;
 
 void setup(){
-  debug = true;
-
   Serial.begin(57600);
 
 #ifdef AVR
