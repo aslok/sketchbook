@@ -1,0 +1,130 @@
+2017-06-23  <>
+	Version 0.34:
+		ve_avr.h renamed to ve_avr_dumpmon.h.
+
+2017-06-09  <>
+	Version 0.33:
+		Watchdog fixed.
+		USI class started.
+
+2017-05-12  <>
+	Version 0.32:
+		Read/write float types added to DEV_EEPROM.
+		
+2017-05-07  <>
+    Version 0.31:
+		DEV_RCCTRL added.
+		ClockSwitch class changed.
+		signatureRead function changed.
+		doSPM function added to the StoreProgMem class.
+		State functions added.
+		TimerHS fixed.
+
+2016-12-03  <>
+    Version 0.30:
+		Fixed const string watch.
+		
+2016-04-04  <>
+    Version 0.29:
+		Fixed PCMSK definition for ATmega16U4/32U4.
+		USB Endpoint renamed.
+		
+2015-10-19  <>
+    Version 0.28:
+		Fixed PCINT interrupts definition.
+		
+2015-02-24  <>
+    Version 0.27:
+		Fixed prog_char compilation errors with Arduino IDE version 1.5.8.
+		
+2015-02-23  <>
+    Version 0.26:
+		Fixed prog_char compilation errors with new Arduino IDE version.
+
+2014-12-26  <>
+    Version 0.25:
+		Renamed files with 've_' prefix added in order to make VEduino compatible with other Arduino libraries.
+		Fixed external interrupts definition.
+		Patched for prog_uchar deprecation.
+
+2014-12-18  <>
+    Version 0.24:
+		Added include of <externalinterruptflags.h> to <ve_avr.h>
+
+2013-08-12  <>
+    Version 0.23:
+		Added ISR breakpoint functions.
+
+2012-12-21  <>
+    Version 0.22:
+    	Fixed Sanguino PCMSK3 register.
+
+2012-12-20  <>
+    Version 0.21:
+    	Added Sanguino and Daiduino boards support.
+
+2012-12-18  <>
+    Version 0.20:
+    	Added binary representation of numeric watch variables.
+
+2012-12-18  <>
+    Version 0.19:
+    	Fixed dumpmonSetup function for serial port speeds higher than 57600.
+
+2012-12-16  <>
+    Version 0.18:
+    	Added registers and interrupts of ATmega16U4/32U4 Timer2.
+
+2012-12-15  <>
+    Version 0.17:
+    	Added Timer2 to ATmega16U4/32U4.
+
+2012-12-14  <>
+    Version 0.16:
+    	Fixed avrdef.h.
+
+2012-12-13  <>
+    Version 0.15:
+    	Added ATmega48P/88P/168P and ATmega640/1280/1281/2561 support.
+    	Now it uses VE_ATmega* macros.
+
+2012-12-11  <>
+    Version 0.14:
+        Added support for Arduino Leonardo board.
+
+2012-11-25  <>
+    Version 0.13:
+        Atmega16 header fixed.
+
+2012-11-19  <>
+    Version 0.12:
+        Refactored timers dump code.
+
+2012-10-23  <>
+    Version 0.11:
+        Fixed for Arduino 1.5.
+
+2012-07-27  <>
+	Version 0.10:
+		Fixed Arduino MEGA board timers support.
+
+2012-05-19  <>
+	Version 0.9:
+		Added Arduino MEGA board support.
+		
+2012-05-02  <>
+	Version 0.8:
+		Changed for compatibility with Arduino 1.0 software. Now it's incompatible with older Arduino software versions =(
+
+2011-03-01  <>
+	Version 0.7: 
+		Added available RAM function. 
+
+2011-02-11  <>
+	Version 0.6. 
+		Added debugging functions. 
+
+2011-02-10  <>
+	Version 0.5. 
+		Added interrupts dump. 
+

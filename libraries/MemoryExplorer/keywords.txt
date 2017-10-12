@@ -1,0 +1,6 @@
+# Datatypes (KEYWORD1)
+# Methods and Functions (KEYWORD2)
+# Constants (LITERAL1)
+
+memoryReport	KEYWORD1
+FreeList	KEYWORD1

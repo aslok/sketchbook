@@ -7,3 +7,14 @@
 [submodule "libraries/OneWire"]
 	path = libraries/OneWire
 	url = git@github.com:PaulStoffregen/OneWire.git
+[submodule "libraries/Adafruit_ADXL345"]
+	path = libraries/Adafruit_ADXL345
+	url = git@github.com:adafruit/Adafruit_ADXL345.git
+[submodule "libraries/Adafruit_HMC5883_Unified"]
+	path = libraries/Adafruit_HMC5883_Unified
+	url = git@github.com:adafruit/Adafruit_HMC5883_Unified.git
+[submodule "libraries/Adafruit_Sensor"]
+	path = libraries/Adafruit_Sensor
+	url = git@github.com:adafruit/Adafruit_Sensor.git
+
+
