@@ -34,7 +34,7 @@
 #include "CyrI2c.h"
 CyrI2c* lcd;
 
-#include <HMC5883L.h>
+#include "HMC5883L.h"
 HMC5883L compass;
 Vector compass_norm;
 
@@ -43,7 +43,7 @@ RTC_DS1307 rtc;
 DateTime now;
 unsigned long prevtime;
 
-#include <SFE_BMP180.h>
+#include "SFE_BMP180.h"
 SFE_BMP180 pressure;
 #define ALTITUDE 0
 
@@ -51,7 +51,7 @@ SFE_BMP180 pressure;
 #include "dht.h"
 dht DHT22;
 
-#include <SoftwareSerial.h>
+#include "SoftwareSerial.h"
 SoftwareSerial ESPserial(2, 3); // RX | TX
 
 const byte BUTTON1_PIN = 4;

@@ -1,6 +1,6 @@
-#include <OneWire.h>
+#include "OneWire.h"
 
-OneWire  ds(12);
+OneWire ds(12);
 
 void setup(void) {
   Serial.begin(57600);

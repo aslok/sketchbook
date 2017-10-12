@@ -4,8 +4,8 @@ const byte sonar_max_distance = 150;
 #include "NewPing.h"
 NewPing sonar(sonar_trigger_pin, sonar_echo_pin, sonar_max_distance);
 
-#include <Wire.h>
-#include <HMC5883L.h>
+#include "Wire.h"
+#include "HMC5883L.h"
 HMC5883L compass;
 Vector compass_norm;
 

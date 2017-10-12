@@ -1,11 +1,11 @@
 #ifndef CYRFONTMIN5X7_H
 #define CYRFONTMIN5X7_H
 
-#include <binary.h>
+#include "binary.h"
 
 #ifdef __AVR__
- #include <avr/io.h>
- #include <avr/pgmspace.h>
+ #include "avr/io.h"
+ #include "avr/pgmspace.h"
 #else
  #define PROGMEM
 #endif

@@ -1,7 +1,7 @@
 // Date and time functions using a DS1307 RTC connected via I2C and Wire lib
 
 // include the library code:
-#include <LiquidCrystal.h>
+#include "LiquidCrystal.h"
 
 // initialize the library with the numbers of the interface pins
 LiquidCrystal lcd(12, 11, 5, 4, 3, 2);

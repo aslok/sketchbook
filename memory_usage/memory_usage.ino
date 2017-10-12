@@ -14,7 +14,7 @@ Sketch uses 4,038 bytes (28.2%) of program storage space. Maximum is 14,336 byte
 Global variables use 252 bytes (24.6%) of dynamic memory, leaving 772 bytes for local variables. Maximum is 1,024 bytes.
 ***********************************************************************************************************************/
 
-#include <MemoryFree.h>
+#include "MemoryFree.h"
 
 void setup() {
   Serial.begin(57600);

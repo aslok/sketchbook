@@ -72,7 +72,7 @@ foreach (glob('./img/*') as $img_path) {
 $out = '#ifndef IMGS_H
 #define IMGS_H
 
-#include <Arduino.h>
+#include "Arduino.h"
 
 const byte imgs_cnt = ' . $imgs_cnt . ';
 const byte PROGMEM imgs[][' . (ceil(WIDTH / 8) * HEIGHT) . '] = ' . $out . '};

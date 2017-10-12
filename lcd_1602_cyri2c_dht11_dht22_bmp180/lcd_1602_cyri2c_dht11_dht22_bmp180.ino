@@ -3,7 +3,7 @@
 #include "CyrI2c.h"
 CyrI2c* lcd;
 
-#include <SFE_BMP180.h>
+#include "SFE_BMP180.h"
 SFE_BMP180 pressure;
 #define ALTITUDE 100.0
 

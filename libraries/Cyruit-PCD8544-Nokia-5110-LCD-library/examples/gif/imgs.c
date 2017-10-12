@@ -1,7 +1,7 @@
 #ifndef IMGS_H
 #define IMGS_H
 
-#include <Arduino.h>
+#include "Arduino.h"
 
 const byte imgs_cnt = 39;
 const byte PROGMEM imgs[][440] = {

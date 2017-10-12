@@ -14,9 +14,9 @@
 // 0xB8 – скопировать данные из EEPROM В 3й и 4й байты оперативной памяти
 // 0xB4 – вернет тип питания (0 – паразитное, 1 – внешнее)
 
-#include <LiquidCrystal.h>
+#include "LiquidCrystal.h"
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
-#include <OneWire.h>
+#include "OneWire.h"
 // Шина OneWire подключена к 12-му пину
 OneWire ds(12);
 

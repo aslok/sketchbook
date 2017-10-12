@@ -30,7 +30,7 @@
  *
  */
 
-#include <LiquidCrystal.h>
+#include "LiquidCrystal.h"
 
 LiquidCrystal display(12, 11, 5, 4, 3, 2);
 
@@ -48,7 +48,7 @@ dht DHT;
 #define DHT11_VCC_PIN 7
 #define DHT11_PIN 6
 
-#include <SFE_BMP180.h>
+#include "SFE_BMP180.h"
 SFE_BMP180 pressure;
 // Запоріжжя
 //#define ALTITUDE 100.0
