@@ -171,20 +171,20 @@ void loop(){
       }
       break;
     case 1:
-      if (us - blink_us > 500000){
+      if (us - blink_us > 500e3){
         blink = !blink;
         blink_us = us;
       }
       break;
     case 2:
-      if (us - blink_us > 250000){
+      if (us - blink_us > 250e3){
         blink = !blink;
         blink_us = us;
       }
       break;
   }
 
-  if (eeprom_us && us - eeprom_us > 5000000){
+  if (eeprom_us && us - eeprom_us > 5e6){
     if (debug){
       Serial.print("EEPROM.write = ");
       Serial.println(us, DEC);
@@ -304,18 +304,18 @@ void read_buttons(){
     cmd_start_2 = us;
   }
 
-  if (cmd_mode_1 && cmd_start_1 && us - cmd_start_1 <= 50000){
+  if (cmd_mode_1 && cmd_start_1 && us - cmd_start_1 <= 50e3){
     cmd_start_1 = 0;
   }
-  if (cmd_mode_2 && cmd_start_2 && us - cmd_start_2 <= 50000){
+  if (cmd_mode_2 && cmd_start_2 && us - cmd_start_2 <= 50e3){
     cmd_start_2 = 0;
   }
 
-  if (!cmd_mode_1 && cmd_start_1 && us - cmd_start_1 > 50000 && b1){
+  if (!cmd_mode_1 && cmd_start_1 && us - cmd_start_1 > 50e3 && b1){
     cmd_start_1 = cmd_start_1 + 250;
     button1 = true;
   }
-  if (!cmd_mode_2 && cmd_start_2 && us - cmd_start_2 > 50000 && b2){
+  if (!cmd_mode_2 && cmd_start_2 && us - cmd_start_2 > 50e3 && b2){
     cmd_start_2 = cmd_start_2 + 250;
     button2 = true;
   }
