@@ -2,7 +2,7 @@
  * serial_show.ino
  *
  * created 12.10.2017
- * modifid 12.10.2017
+ * modifid 22.10.2017
  * with Arduino 1.8.3 (tested on Arduino Uno)
  *
  * Copyright 2017 Vitaliy Fust <aslok.zp@gmail.com>
@@ -21,25 +21,39 @@
 #include "ButtonsTact.h"
 ButtonsTact* buttons;
 
-unsigned long ms_prev = 0;
+const int RIGHT     = 0;
+const int UP        = 130;
+const int DOWN      = 300;
+const int LEFT      = 475;
+const int SELECT    = 720;
+const int NONE      = 1023;
 
 void setup(){
     Serial.begin(57600);
 
     buttons = new ButtonsTact(0);
-    buttons->addLevels(1023, 0, 130, 300, 475, 720, END);
-    buttons->print();
+    // На первом месте стоит уровень по-умолчанию, когда ничего не нажато
+    buttons->addLevels(NONE, UP, DOWN, LEFT, RIGHT, SELECT, END);
 }
 
 void loop(){
     buttons->touch();
-    /*unsigned long ms = millis();
-    if (ms - ms_prev > 1000){
-        ms_prev = ms;
-    }*/
     int button_0 = buttons->state(0);
-    if (button_0 < 1023){
-        Serial.print(F("Level = "));
-        Serial.println(button_0);
+    switch (button_0){
+        case UP:
+            Serial.println(F("UP"));
+            break;
+        case DOWN:
+            Serial.println(F("DOWN"));
+            break;
+        case LEFT:
+            Serial.println(F("LEFT"));
+            break;
+        case RIGHT:
+            Serial.println(F("RIGHT"));
+            break;
+        case SELECT:
+            Serial.println(F("SELECT"));
+            break;
     }
 }

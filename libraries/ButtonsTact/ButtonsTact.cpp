@@ -3,7 +3,7 @@
  * Основной файл библиотеки ButtonsTact
  *
  * created 12.10.2017
- * modified 12.10.2017
+ * modified 22.10.2017
  * with Arduino 1.8.3 (tested on Arduino Uno)
  *
  * Copyright 2017 Vitaliy Fust <aslok.zp@gmail.com>
