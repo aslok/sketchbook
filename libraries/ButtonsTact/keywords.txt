@@ -1,0 +1,12 @@
+# Datatypes (KEYWORD1)
+# Methods and Functions (KEYWORD2)
+# Constants (LITERAL1)
+
+ButtonsTact KEYWORD1
+addButton KEYWORD2
+addLevels KEYWORD2
+state KEYWORD2
+touch KEYWORD2
+print KEYWORD2
+LITERAL1 END
+LITERAL1 ERROR
