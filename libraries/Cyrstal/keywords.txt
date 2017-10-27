@@ -1,0 +1,21 @@
+# Datatypes (KEYWORD1)
+# Methods and Functions (KEYWORD2)
+# Constants (LITERAL1)
+
+Cyrstal KEYWORD1
+
+print   KEYWORD2
+print_enc   KEYWORD2
+power   KEYWORD2
+cursor  KEYWORD2
+blink   KEYWORD2
+clear   KEYWORD2
+go  KEYWORD2
+init    KEYWORD2
+printn  KEYWORD2
+
+bl  LITERAL1
+pwr LITERAL1
+crsr    LITERAL1
+blnk    LITERAL1
+f   LITERAL1
