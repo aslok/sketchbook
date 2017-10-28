@@ -1,0 +1,14 @@
+# Datatypes (KEYWORD1)
+# Methods and Functions (KEYWORD2)
+# Constants (LITERAL1)
+
+Cyrstal	KEYWORD1
+print	KEYWORD2
+backlight	KEYWORD2
+power	KEYWORD2
+cursor	KEYWORD2
+blink	KEYWORD2
+clear	KEYWORD2
+go	KEYWORD2
+init	KEYWORD2
+printn	KEYWORD2
