@@ -157,7 +157,7 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
       // Сдвигаем курсор пробелами
       for (
         cur_pos = 0;
-        cur_pos < (space - cur_chr) / 2;
+        cur_pos < space - cur_chr - (space - cur_chr) / 2;
         cur_pos++, print(' ')
       );
       return;
