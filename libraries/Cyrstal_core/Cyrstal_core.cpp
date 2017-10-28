@@ -123,7 +123,7 @@ void Cyrstal_core::print(char* str, int8_t position, byte go_ln, byte space){
 
 // Печать массива символов во внутренней кодировке
 void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space){
-  byte cur, old_cur, cur_chr, i, cur_pos, pos;
+  byte cur, cur_chr, i, cur_pos;
   if (go_ln != 255 && go_ln < 2){
     go(0, go_ln);
   }
@@ -165,7 +165,7 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
   }
   // Массив символов которые будут отображаться после вывода
   // Порядок соответствует порядку отображения
-  char next_scr[33];
+  char* next_scr = new char[32];
   //Serial.println(str);
   get_next_scr(str, next_scr);
   /*for (cur_chr = 0; cur_chr < 32; cur_chr++){
@@ -173,293 +173,282 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
   }*/
   // Массив символов, на которые нужно будет заменить соответствующие
   // символы кирилицы при выводе
-  char lcd_replace[32];
-  // Обходим next_scr
+  char* lcd_replace = new char[32];
   boolean found;
   byte tmp;
-  // Заменяем символы из next_scr на те что есть среди
-  // стандартных и самодельных, записываем в lcd_replace
-  for (cur_chr = 0; cur_chr < 32; cur_chr++){
+
+  // Проверяем next_scr, освобождаем ячейки char_map которые не используются
+  // Обходим набор использованных самодельных символов char_map
+  for (i = 0; i < 8; i++){
+    // Если ячейка не используется
+    if (!char_map[i]){
+      // Смотрим следующую ячейку
+      continue;
+    }
     found = false;
-    // Обходим набор использованных самодельных символов для замены
-    for (i = 0; i < 8; i++){
+    for (cur_chr = 0; !found && cur_chr < 32; cur_chr++){
+      // Если будет использован один из самодельных символов
+      if (char_map[i] == (byte) next_scr[cur_chr]){
+        found = true;
+      }
+    }
+    // Мы не можем освободить эту ячейку
+    if (found){
+      // Смотрим следующую ячейку
+      continue;
+    }
+    // Символ не используется - очищаем
+    char_map[i] = 0;
+    /*Serial.print("Can to use char_map[");
+    Serial.print(i);
+    Serial.println("] = 0");*/
+  }
+  //Serial.println("///////////////////////////////////////////////////////////");
+
+  // Если нужны будут ячейки для первых восьми самодельных символов
+  // надо сначала освободить эти ячейки и поместить туда нужные символы
+  for (cur_chr = 0; cur_chr < 32; cur_chr++){
+    lcd_replace[cur_chr] = -1;
+    /*Serial.println();
+    Serial.print("next_scr[");
+    Serial.print(cur_chr);
+    Serial.print("] = ");
+    Serial.println((byte) next_scr[cur_chr]);*/
+    // Если не нужно заменять текущий символ
+    if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180){
+      // Смотрим следующий
+      continue;
+    }
+
+    found = false;
+    // Обходим набор самодельных символов для замены
+    for (cur = 0; cur < 8; cur++){
+      // Если мы можем заменить его одним из восьми первых
+      if (read_pgm(ru_num + cur) == (byte) next_scr[cur_chr]){
+        found = true;
+        break;
+      }
+    }
+    // Если текущий символ не один из первых восьми самодельных
+    if (!found){
+      // Смотрим следующий
+      continue;
+    }
+    /*Serial.print("Char ");
+    Serial.print((byte) next_scr[cur_chr]);
+    Serial.println(" it is primary char");*/
+
+    found = false;
+    // Ищем текущий символ среди использованных самодельных символов для замены
+    for (i = 0; !found && i < 8; i++){
       if (char_map[i] && char_map[i] == (byte) next_scr[cur_chr]){
         // Символ для замены найден, запоминаем по позиции в next_scr
         lcd_replace[cur_chr] = i;
+        /*Serial.print("Char ");
+        Serial.print(cur_chr);
+        Serial.print(" replaced to ");
+        Serial.println(i);*/
         found = true;
-        break;
       }
     }
+    // Если мы нашли текущий символ и заменили его на номер из char_map
     if (found){
+      // Смотрим следующий
       continue;
     }
-    // Обходим основной набор символов для замены
-    for (cur = 0; (char) (tmp = read_pgm(en_num + cur)); cur++){
-      if (tmp == (byte) next_scr[cur_chr]){
-        // Символ для замены найден, запоминаем по позиции в next_scr
-        lcd_replace[cur_chr] = read_pgm(en + cur);
-        found = true;
-        break;
-      }
-    }
-    if (found){
-      continue;
-    }
-    // Ничего не нашли, не заменяем символ - будет тот же
-    lcd_replace[cur_chr] = next_scr[cur_chr];
-  }
 
-  /*Serial.println("lcd_replace");
-  for (cur_chr = 0; cur_chr < 32; cur_chr++){
-    Serial.println((byte) lcd_replace[cur_chr], DEC);
-  }*/
-
-  // Выполнена предварительная замена, lcd_replace почти во внутренней кодировке
-  // Ищем символы которые нужно и можно заменить, их коды в области 128-180
-  for (cur_chr = 0; cur_chr < 32; cur_chr++){
-    if ((byte) lcd_replace[cur_chr] < 128 || (byte) lcd_replace[cur_chr] > 180){
-      continue;
-    }
+    // Надо заменить текущий символ но его нет в char_map, ищем свободную ячейку
+    // Переменная cur хранит номер самодельного символа для замены
     found = false;
-    // Обходим набор самодельных символов для замены
-    for (cur = 0; cur < 9; cur++){
-      // Если мы можем заменить его одним из восьми первых
-      if (read_pgm(ru_num + cur) == (byte) lcd_replace[cur_chr]){
-        found = true;
-        // Переменная cur хранит номер самодельного символа
-        break;
-      }
-    }
-
-    // Нечем заменить, наверно не нужно
-    if (!found){
-      continue;
-    }
-
-    /*Serial.print("Need to replace ");
-    Serial.println(cur);*/
-
-    // Символ найден, ищем свободную ячейку
-    found = false;
-    for (i = 0; i < 8; i++){
+    for (i = 0; !found && i < 8; i++){
       // Ячейка занята
       if (char_map[i]){
+        /*Serial.print("Cant to use char_map[");
+        Serial.print(i);
+        Serial.print("] = ");
+        Serial.println(char_map[i]);*/
         continue;
       }
       found = true;
       // Сохраняем в ячейку номер символа который заменяем
-      char_map[i] = read_pgm(ru_num + cur);
-      /*Serial.println("lcd_createChar(i, ru[cur]);");
-      Serial.println(i);
-      Serial.println(cur);
-      Serial.println("----------------------------");*/
-      /*Serial.print("Cell #");
-      Serial.print(i);
-      Serial.println(" empty");*/
-      create_char(i, cur);
+      create_char(i, cur, next_scr);
       // Будем заменять его при выводе на номер ячейки
-      for (cur_pos = cur_chr; cur_pos < 32; cur_pos++){
-        if ((byte) lcd_replace[cur_pos] == read_pgm(ru_num + cur)){
-          /*Serial.println("lcd_replace[cur_chr] = i");
-          Serial.println(cur_chr);
-          Serial.println(i);
-          Serial.println("----------------------------");*/
-          lcd_replace[cur_chr] = i;
-        }
-      }
-      // Прекращаем поиск свободных ячеек
-      break;
+      lcd_replace[cur_chr] = i;
+      /*Serial.print("char_map[");
+      Serial.print(i);
+      Serial.print("] = ");
+      Serial.println(char_map[i]);*/
     }
-
-    // Переходим к следующему символу
+    // Если мы нашли свободную ячейку, создали, заменили
     if (found){
+      // Смотрим следующий
       continue;
     }
 
     // Закончились ячейки для хранения символов :(
     // Ищем что заменить
+    found = false;
     // Обходим набор самодельных символов для замены с конца
-    // Никогда не выселяем символы 0-8 потому что заменить нечем :(
     for (i = 0; read_pgm(ru_num + i); i++);
-    for (cur_pos = i; cur_pos-- > 8; ){
+    // Никогда не выселяем символы 0-7 потому что заменить нечем :(
+    for (cur_pos = i; !found && cur_pos > 8; --cur_pos){
+      tmp = read_pgm(ru_num + cur_pos);
       // Ищем ячейку занятую этим символом
-      for (i = 0; i < 8; i++){
-        // Если есть кандидат на выселение
-        if (read_pgm(ru_num + cur_pos) == char_map[i]){
-          found = false;
-          // Обходим основной набор символов для замены
-          // После выселения будет отображаться оттуда
-          for (pos = 0; (char) (tmp = read_pgm(en_num + pos)); pos++){
-            if (tmp == char_map[i]){
-              found = true;
-              old_cur = pos;
-              break;
-            }
-          }
-          if (!found){
-            // Если так случится - будет глюк
-            // Выход один - добавить этот символ в en
-            // Второй выход - переместить в начало ru
-            // Этот выход невозможен:
-            // 1. Количество невыселяемых символов ограничено драйвером 8 штук
-            // 2. Набор одновременно отображаемых символов ограничен алфавитом
-            // Одновременный вывод частей украинского и русского алфавитов
-            // может привести к глюкам
-            continue;
-          }
-          // Сохраняем в ячейку номер символа который заменяем
-          char_map[i] = read_pgm(ru_num + cur);
-          // Будем заменять его при выводе на номер ячейки
-          for (pos = 0; pos < 32; pos++){
-            if ((byte) lcd_replace[pos] == read_pgm(ru_num + cur)){
-              /*Serial.println("lcd_replace[pos] = i");
-              Serial.println(pos);
-              Serial.println(i);
-              Serial.println("----------------------------");*/
-              lcd_replace[pos] = i;
-            }
-            // Динамическое обновление символов
-            // Перетираем отображающееся предыдущее содержимое ячейки
-            if ((byte) next_scr[pos] == read_pgm(ru_num + cur_pos)){
-              lcd_setCursor(pos - pos / 16 * 16, pos / 16);
-              lcd_replace[pos] = read_pgm(en + old_cur);
-              lcd_write(read_pgm(en + old_cur));
-            }
-          }
-          // Отображающееся предыдущее содержимое перетерто, можем подменять
-          /*Serial.print("Cell #");
-          Serial.print(i);
-          Serial.println(" replaced and empty now");*/
-          create_char(i, cur);
-          break;
-        }
-      }
-      if (found){
-        break;
-      }
-    }
-  }
-
-  // Обходим набор использованных самодельных символов char_map
-  for (cur = 0; cur < 8; cur++){
-    /*Serial.print("Will check cell #");
-    Serial.print(cur);
-    Serial.print(" it is ");
-    Serial.println(char_map[cur]);*/
-    // Если ячейка используется
-    // Проверяем, если уже не нужна - освобождаем
-    if (char_map[cur]) {
-      found = false;
-      // Обходим массив который получился для замены
-      for (cur_chr = 0; cur_chr < 32; cur_chr++){
-        // Если был использован один из самодельных символов
-        if ((byte) lcd_replace[cur_chr] == cur){
-          found = true;
-          break;
-        }
-      }
-      // Мы используем этот символ
-      if (found){
-        continue;
-      }
-
-      // Символ не используется - очищаем
-      /*Serial.println("char_map[cur]");
-      Serial.println(char_map[cur]);
-      Serial.println("char_map[cur] = 0");
-      Serial.println("----------------------------");*/
-      char_map[cur] = 0;
-    }
-
-    /*Serial.println("lcd_replace:");
-    for (cur_chr = 0; cur_chr < 32; cur_chr++){
-      Serial.println((byte) lcd_replace[cur_chr], DEC);
-    }
-
-    Serial.print("We dont use char #");
-    Serial.println(cur);*/
-
-    // Обходим дополнительные символы самодельного набора, ищем что бы ещё заменить
-    for (byte ru_cur = 9; (byte) (tmp = read_pgm(ru_num + ru_cur)); ru_cur++){
-      // Каждую итерацию tmp хранит код символа самодельного набора
-      found = false;
-      // Обходим уже использованные дополнительные символы
-      // char_map хранит восемь символов дополнительного набора которые используются сейчас
-      for (i = 0; i < 8; i++){
-        if (char_map[i] && char_map[i] == tmp){
-          // Уже заменили раньше
-          found = true;
-          break;
-        }
-      }
-      if (found){
-        // Переходим к следующему самодельному символу
-        continue;
-      }
-      // tmp хранит код символа который сейчас не используется
-      // cur хранит номер ячейки которая сейчас свободна
-
-      found = false;
-
-      // Обходим массив символов, которые будут отображаться после вывода
-      for (cur_chr = 0; cur_chr < 32 && !found; cur_chr++){
-        // Ищем текущий дополнительный самодельный символ
-        if ((byte) next_scr[cur_chr] != tmp){
+      for (i = 0; !found && i < 8; i++){
+        // В ячейке другой символ - пропускаем
+        if (tmp != char_map[i]){
           continue;
         }
-        // Найден текущий дополнительный самодельный символ в позиции cur_chr
+        // Если есть кандидат на выселение
         found = true;
-
-        // Сохраняем в ячейку номер символа
-        char_map[cur] = tmp;
-        /*Serial.print("Cell #");
-        Serial.print(cur);
-        Serial.print(" will have a advanced char ");
-        Serial.println(tmp);*/
-        create_char(cur, ru_cur);
+        // Сохраняем в ячейку номер символа который заменяем
+        create_char(i, cur, next_scr);
         // Будем заменять его при выводе на номер ячейки
-        // Обходим начиная с текущего, предыдущие заменили бы раньше
-        for (cur_pos = cur_chr; cur_pos < 32; cur_pos++){
-          if ((byte) next_scr[cur_pos] == tmp){
-            /*Serial.print("next_scr[");
-            Serial.print(cur_pos);
-            Serial.print("] = ");
-            Serial.println(tmp);
-            Serial.print("lcd_replace[");
-            Serial.print(cur_chr);
-            Serial.print("] = ");
-            Serial.println((byte) lcd_replace[cur_chr], DEC);*/
-
-            lcd_replace[cur_chr] = cur;
-
-            /*Serial.print("lcd_replace[");
-            Serial.print(cur_chr);
-            Serial.print("] = ");
-            Serial.println((byte) lcd_replace[cur_chr], DEC);*/
-            // Динамическое обновление символов
-            lcd_setCursor(cur_chr - cur_chr / 16 * 16, cur_chr / 16);
-            lcd_write(cur);
-          }
-        }
-        // После обновления символов возвращаем курсор на место
-        go();
+        lcd_replace[cur_chr] = i;
       }
-      // Прекращаем поиск самодельных символов в char_map
-      if (found){
-        // Переходим к поиску следующей свободной ячейки
-        break;
+    }
+    //if (!found){
+      // Если так случится - будет глюк
+      // Выход один - добавить этот символ в en
+      // Второй выход - переместить в начало ru
+      // Этот выход невозможен:
+      // 1. Количество невыселяемых символов ограничено драйвером 8 штук
+      // 2. Набор одновременно отображаемых символов ограничен алфавитом
+      // Одновременный вывод частей украинского и русского алфавитов
+      // может привести к глюкам
+      //continue;
+    //}
+  }
+  //Serial.println("///////////////////////////////////////////////////////////");
+
+  // Обходим самодельные символы для замены в ячейках char_map
+  // Заменяем ими символы на экране
+  for (i = 0; i < 8; i++){
+    // Если ячейка свободна
+    if (!char_map[i]){
+      // Смотрим следующую
+      continue;
+    }
+    found = false;
+    // Обходим набор самодельных символов для замены
+    for (cur = 0; !found && cur < 8; cur++){
+      // Если в ячейке один из восьми первых самодельных символов
+      if (read_pgm(ru_num + cur) == char_map[i]){
+        found = true;
+      }
+    }
+    // Замена не требуется
+    if (found){
+      // Смотрим следующую
+      continue;
+    }
+    found = false;
+    // Обходим набор использованных самодельных символов для замены
+    for (cur_chr = 0; cur_chr < 32; cur_chr++){
+      // Если не нужно заменять текущий символ
+      if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180 ||
+          -1 != lcd_replace[cur_chr]){
+        // Смотрим следующий
+        continue;
+      }
+      if (char_map[i] == (byte) next_scr[cur_chr]){
+        // Символ для замены найден, запоминаем по позиции в next_scr
+        lcd_replace[cur_chr] = i;
       }
     }
   }
+  // Ищем свободные ячейки
+  for (i = 0; i < 8; i++){
+    // Ячейка занята
+    if (char_map[i]){
+      // Смотрим следующую
+      continue;
+    }
+    found = false;
+    for (cur = 8; !found && (char) (tmp = read_pgm(ru_num + cur)); cur++){
+      for (cur_chr = 0; !found && cur_chr < 32; cur_chr++){
+        // Если не нужно заменять текущий символ
+        if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180 ||
+            -1 != lcd_replace[cur_chr]){
+          // Смотрим следующий
+          continue;
+        }
+        // Если это не этот символ
+        if (tmp != (byte) next_scr[cur_chr]){
+          // Смотрим следующий символ
+          continue;
+        }
+        // Сохраняем в ячейку номер символа который заменяем
+        create_char(i, cur, next_scr);
+        // Будем заменять его при выводе на номер ячейки
+        lcd_replace[cur_chr] = i;
+        /*Serial.print("char_map[");
+        Serial.print(i);
+        Serial.print("] = read_pgm(ru_num + cur) = ");
+        Serial.println(char_map[i]);*/
+        found = true;
+      }
+    }
+  }
+  //Serial.println("///////////////////////////////////////////////////////////");
 
+  // Заменяем символы из next_scr на те что есть среди стандартных,
+  // записываем в lcd_replace
+  for (cur_chr = 0; cur_chr < 32; cur_chr++){
+    // Если не нужно заменять текущий символ
+    if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180 ||
+        -1 != lcd_replace[cur_chr]){
+      // Смотрим следующий
+      continue;
+    }
+    /*Serial.print("Need to replace standart char ");
+    Serial.print((byte) next_scr[cur_chr]);*/
+    found = false;
+    // Обходим основной набор символов для замены
+    for (cur = 0; !found && (char) (tmp = read_pgm(en_num + cur)); cur++){
+      if (tmp != (byte) next_scr[cur_chr]){
+        continue;
+      }
+      found = true;
+      // Символ для замены найден, запоминаем по позиции в next_scr
+      lcd_replace[cur_chr] = read_pgm(en + cur);
+      //Serial.println(" => Found");
+    }
+  }
+  //Serial.println("///////////////////////////////////////////////////////////");
+
+  // Ничего не нашли, не заменяем символ - будет тот же
+  for (cur_chr = 0; cur_chr < 32; cur_chr++){
+    if (-1 == lcd_replace[cur_chr]){
+      lcd_replace[cur_chr] = next_scr[cur_chr];
+    }
+  }
+
+  /*for (cur_chr = 0; cur_chr < 32; cur_chr++){
+    Serial.print("lcd_replace[");
+    Serial.print(cur_chr);
+    Serial.print("] = ");
+    Serial.println((byte) lcd_replace[cur_chr]);
+  }
+
+  for (cur_chr = 0; cur_chr < 32; cur_chr++){
+    Serial.print("next_scr[");
+    Serial.print(cur_chr);
+    Serial.print("] = ");
+    Serial.println((byte) next_scr[cur_chr]);
+  }
+  Serial.println("///////////////////////////////////////////////////////////");*/
+
+  delete[] next_scr;
   write_str_enc(str, lcd_replace);
+  delete[] lcd_replace;
 }
 
 // Получаем массив символов, которые будут отображаться после вывода строки
 void Cyrstal_core::get_next_scr(char* str, char* next_scr){
   byte next_scr_pos = scr_pos;
   // Копируем текущий экран
-  for (byte i = 0; i < 33; next_scr[i] = scr[i++]);
+  for (byte i = 0; i < 32; next_scr[i] = scr[i++]);
   // Обходим строку и эмулируем вывод
   for (byte cur_chr = 0; str[cur_chr] && cur_chr < 255; cur_chr++){
     if (str[cur_chr] == '\n'){
@@ -480,6 +469,8 @@ void Cyrstal_core::get_next_scr(char* str, char* next_scr){
 
 // Печатаем строку сгенерированную для экрана по строке во внутренней кодировке
 void Cyrstal_core::write_str_enc(char* str, char* lcd_chars){
+  //Serial.println("--------------------------------------------------------");
+  //Serial.println("write_str_enc");
   char out;
   for (byte cur_chr = 0; str[cur_chr] && cur_chr < 255; cur_chr++){
     out = str[cur_chr];
@@ -558,23 +549,52 @@ void Cyrstal_core::get_str_enc(char* str, char* result){
     }
   }
   result[res_pos] = 0;
+  /*for (byte str_pos = 0; result[str_pos]; str_pos++){
+    Serial.println((byte) result[str_pos], DEC);
+  }*/
 }
 
 // Создание кастомного символа по номеру в указанной ячейке
-void Cyrstal_core::create_char(byte cell, byte num){
+void Cyrstal_core::create_char(byte cell, byte num, char* next_scr){
   /*Serial.print("Create char ");
   Serial.print(read_pgm(ru_num + num));
   Serial.print(" on cell #");
   Serial.println(cell);*/
-  byte cur[8];
+  // Динамическое обновление символов
+  // Перетираем отображающееся предыдущее содержимое ячейки
+  // Если в ячейке есть номер символа
+  if (char_map[cell]){
+    // Выясняем порядковый номер данного символа для замены из en_num
+    for (byte cur = 0, tmp; (char) (tmp = read_pgm(en_num + cur)); cur++){
+      if (tmp != char_map[cell]){
+        continue;
+      }
+      tmp = read_pgm(en + cur);
+      for (byte cur_chr = 0; cur_chr < 32; cur_chr++){
+        if (char_map[cell] == (byte) next_scr[cur_chr]){
+          lcd_setCursor(cur_chr - cur_chr / 16 * 16, cur_chr / 16);
+          lcd_write(tmp);
+        }
+      }
+      break;
+    }
+  }
+  char_map[cell] = read_pgm(ru_num + num);
+  byte tmp_arr[8];
   for (
     byte pos = 0;
     pos < 8;
-    cur[pos] = read_pgm(ru + num * 8 + pos++) - 1
+    tmp_arr[pos] = read_pgm(ru + num * 8 + pos++) - 1
   );
   // Создаем кастомный символ
-  lcd_createChar(cell, cur);
   // Бага lcd_createChar - приходится обновлять курсор
+  lcd_createChar(cell, tmp_arr);
+  for (byte cur_chr = 0; cur_chr < 32; cur_chr++){
+    if (char_map[cell] == (byte) next_scr[cur_chr]){
+      lcd_setCursor(cur_chr - cur_chr / 16 * 16, cur_chr / 16);
+      lcd_write(cell);
+    }
+  }
   go();
 }
 
@@ -586,15 +606,15 @@ byte Cyrstal_core::read_pgm(byte* ptr){
   return (byte) pgm_read_byte_near(ptr);
 }
 
-void Cyrstal_core::clear_arr(byte* arr, byte count){
-  for (byte i = 0; i < count; char_map[i++] = 0);
+void Cyrstal_core::clear_arr(byte* arr, byte count, byte value){
+  for (byte i = 0; i < count; arr[i++] = value);
 }
 
-void Cyrstal_core::clear_arr(char* arr, int8_t count){
+void Cyrstal_core::clear_arr(char* arr, int8_t count, char value){
   for (
     byte i = 0;
-    (count < 0) ? char_map[i] : (count && i < count);
-    char_map[i++] = 0
+    (count < 0) ? arr[i] : (count && i < count);
+    arr[i++] = value
   );
 }
 
@@ -630,9 +650,7 @@ void Cyrstal_core::blink(){
 
 // Очистка экрана и установка курсора на ноль
 void Cyrstal_core::clear(){
-  byte i;
-  for (i = 0; i < 32; scr[i++] = ' ');
-  scr[i] = 0;
+  clear_arr(scr, 33, 32);
   scr_pos = 0;
   lcd_clear();
 }
@@ -700,6 +718,17 @@ void Cyrstal_core::printn_str(byte num, int8_t position, byte go_ln, byte space)
   );
   str[str_pos] = 0;
   print(str, position, go_ln, space);
+}
+
+byte Cyrstal_core::count(){
+  byte count = 1;
+  char chr;
+  for (word pos = 0; count < 255 && pos < 65535 && count < 255 && (chr = read_pgm(s + pos)); pos++){
+    if (chr == '\r'){
+      count++;
+    }
+  }
+  return count;
 }
 
 // Печать строки из ранее переданного внутри F() массива по её номеру

@@ -1,4 +1,4 @@
-ReadMe file for Arduino Cyrstal Library
+ReadMe file for Arduino Cyrstal_core Library
 
 Vitaliy Fust 2017
 

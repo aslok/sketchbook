@@ -2,7 +2,7 @@
 # Methods and Functions (KEYWORD2)
 # Constants (LITERAL1)
 
-Cyrstal	KEYWORD1
+Cyrstal_core	KEYWORD1
 
 print   KEYWORD2
 print_enc   KEYWORD2
