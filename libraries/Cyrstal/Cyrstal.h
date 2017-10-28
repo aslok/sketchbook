@@ -23,6 +23,8 @@
 #ifndef Cyrstal_h
 #define Cyrstal_h
 
+//#define debug
+
 #include "LiquidCrystal.h"
 #include "Cyrstal_core.h"
 
@@ -32,16 +34,32 @@ class Cyrstal : public Cyrstal_core {
 
     LiquidCrystal* lcd;
 
-    void lcd_setCursor(byte col, byte row){     lcd->setCursor(col, row);   };
-    void lcd_write(char chr){                   lcd->write(chr);            };
-    void lcd_createChar(byte cell, byte* cur){  lcd->createChar(cell, cur); };
-    void lcd_display(){                         lcd->display();             };
-    void lcd_noDisplay(){                       lcd->noDisplay();           };
-    void lcd_cursor(){                          lcd->cursor();              };
-    void lcd_noCursor(){                        lcd->noCursor();            };
-    void lcd_blink(){                           lcd->blink();               };
-    void lcd_noBlink(){                         lcd->noBlink();             };
-    void lcd_clear(){                           lcd->clear();               };
+    void lcd_setCursor(byte col, byte row){     lcd->setCursor(col, row);
+#ifdef debug
+      delay(200);
+#endif
+    };
+    void lcd_write(char chr){                   lcd->write(chr);
+#ifdef debug
+      delay(200);
+#endif
+    };
+    void lcd_createChar(byte cell, byte* cur){  lcd->createChar(cell, cur);
+#ifdef debug
+      delay(200);
+#endif
+    };
+    void lcd_display(){                         lcd->display();              };
+    void lcd_noDisplay(){                       lcd->noDisplay();            };
+    void lcd_cursor(){                          lcd->cursor();               };
+    void lcd_noCursor(){                        lcd->noCursor();             };
+    void lcd_blink(){                           lcd->blink();                };
+    void lcd_noBlink(){                         lcd->noBlink();              };
+    void lcd_clear(){                           lcd->clear();
+#ifdef debug
+      delay(200);
+#endif
+    };
 };
 
 #endif
