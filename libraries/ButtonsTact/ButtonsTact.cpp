@@ -104,6 +104,7 @@ void ButtonsTact::addLevels(...){
     }
     // Если нет кнопок без уровней, то перезаписываем уровни у последней кнопки
     if (!levels_done){
+        // TODO: Память нельзя освобождать, если ее использует больше чем одна кнопка
         // Освобождаем память занятую прошлой версией массива уровней
         free(buttons[buttons_cnt - 1].levels);
         // Указатель будет указывать на новый массив уровней
@@ -127,7 +128,7 @@ int ButtonsTact::state(byte pin){
 }
 
 // Обновляем состояние
-void ButtonsTact::touch(unsigned long new_ms){
+unsigned long ButtonsTact::touch(unsigned long new_ms){
     ms = new_ms ? new_ms : millis();
     // Обходим каждую кнопку
     for (byte num = 0; num < buttons_cnt; num++){
@@ -176,6 +177,7 @@ void ButtonsTact::touch(unsigned long new_ms){
             buttons[num].state = current;
         }
     }
+    return ms;
 }
 
 // Печать массива кнопок (для отладки)

@@ -58,7 +58,7 @@ class ButtonsTact{
         // Возвращаем значение (текущий уровень) кнопки
         int state(byte pin);
         // Обновляем состояние
-        void touch(unsigned long ms = 0);
+        unsigned long touch(unsigned long ms = 0);
         // Печать массива кнопок (для отладки)
         void print();
     private:
