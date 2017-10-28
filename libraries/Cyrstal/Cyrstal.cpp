@@ -23,9 +23,28 @@
 #include "Cyrstal.h"
 
 // Конструктор
-Cyrstal::Cyrstal(byte rs, byte enable, byte d0, byte d1, byte d2, byte d3, byte width, byte height) :
+Cyrstal::Cyrstal(byte rs, byte enable, byte d0, byte d1, byte d2, byte d3, byte width, byte height, byte blight) :
 Cyrstal_core(width, height){
   lcd = new LiquidCrystal(rs, enable, d0, d1, d2, d3);
   lcd->begin(width, height);
+  bl_pin = blight;
+  pinMode(bl_pin, OUTPUT);
+  backlight(bl);
   clear();
+}
+
+// Подсветка экрана
+void Cyrstal::backlight(boolean state){
+  if (bl_pin == 255){
+    return;
+  }
+  digitalWrite(bl_pin, bl = state);
+}
+
+// Подсветка экрана
+void Cyrstal::backlight(){
+  if (bl_pin == 255){
+    return;
+  }
+  digitalWrite(bl_pin, bl = !bl);
 }

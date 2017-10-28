@@ -30,9 +30,12 @@
 
 class Cyrstal : public Cyrstal_core {
   public:
-    Cyrstal(byte rs, byte enable, byte d0, byte d1, byte d2, byte d3, byte width, byte height);
+    Cyrstal(byte rs, byte enable, byte d0, byte d1, byte d2, byte d3, byte width, byte height, byte blight = 255);
 
     LiquidCrystal* lcd;
+
+    void backlight();
+    void backlight(boolean);
 
     void lcd_setCursor(byte col, byte row){     lcd->setCursor(col, row);
 #ifdef debug
@@ -60,6 +63,8 @@ class Cyrstal : public Cyrstal_core {
       delay(200);
 #endif
     };
+  private:
+    byte bl_pin = 255;
 };
 
 #endif
