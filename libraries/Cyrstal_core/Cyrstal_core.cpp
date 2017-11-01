@@ -73,15 +73,22 @@ Cyrstal_core::Cyrstal_core(byte width, byte height){
   ru_num = (byte*) F("\201\203\204\234\237\240\207\220\241\230\242\214\224\225\227\236\233\232\244\231\212\211\206\210\235");
   s      = NULL;
   f      = 0;
-  clear_arr(char_map, 8);
+  w      = width;
+  h      = height;
+  wh     = w * h;
+  for (byte i = 0; i < 8; i++){
+    char_map[i] = 0;
+  }
+  scr = new char[wh + 1];
 }
 
 // Ф-ия печати строк переданных с помощью F()
 void Cyrstal_core::print(const __FlashStringHelper* str, int8_t position, byte go_ln, byte space){
   char* ptr = (char*) str;
-  char tmp[256];
-  char chr;
   byte cur_chr;
+  for (cur_chr = 0; cur_chr < 255 && read_pgm(ptr + cur_chr); cur_chr++);
+  char* tmp = new char[cur_chr];
+  char chr;
   for (
     cur_chr = 0;
     chr = read_pgm(ptr + cur_chr);
@@ -89,20 +96,23 @@ void Cyrstal_core::print(const __FlashStringHelper* str, int8_t position, byte g
   );
   tmp[cur_chr] = 0;
   print(tmp, position, go_ln, space);
+  delete[] tmp;
 }
 
 // Ф-ия печати целых чисел
 void Cyrstal_core::print(int chr, int8_t position, byte go_ln, byte space){
-  char str[33];
+  char* str = new char[wh + 1];
   sprintf(str, "%d", chr);
   print(str, position, go_ln, space);
+  delete[] str;
 }
 
 // Печать чисел с плавающей точкой
 void Cyrstal_core::print(double chr, int8_t position, byte go_ln, byte width, byte prec){
-  char str[33];
+  char* str = new char[wh + 1];
   dtostrf(chr, width, prec, str);
   print(str, position, go_ln);
+  delete[] str;
 }
 
 // Печать отдельного символа
@@ -124,16 +134,16 @@ void Cyrstal_core::print(char* str, int8_t position, byte go_ln, byte space){
 // Печать массива символов во внутренней кодировке
 void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space){
   byte cur, cur_chr, i, cur_pos;
-  if (go_ln != 255 && go_ln < 2){
+  if (go_ln != 255 && go_ln < h){
     go(0, go_ln);
   }
-  if (position != 127 && position < 16 && position > -17){
+  if (position != 127 && position < w && position > -1 * (w + 1)){
     if (position < 0){
       // Выясняем длину строки
       for (cur_chr = 0; str[cur_chr] && str[cur_chr] != '\n'; cur_chr++);
-      go(17 - cur_chr + position, scr_pos / 16);
+      go(w + 1 - cur_chr + position, scr_pos / w);
     }else{
-      go(position, scr_pos / 16);
+      go(position, scr_pos / w);
     }
   }
   if (space != 255){
@@ -144,7 +154,7 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
     // Если сдвиг влево
     if (i < 0) {
       // Если край экрана - переносим курсор
-      go(i + scr_pos >= 0 ? i + scr_pos : i % 32 + scr_pos);
+      go(i + scr_pos >= 0 ? i + scr_pos : i % wh + scr_pos);
     }else{
       // Если сдвиг вправо - сдвигаем курсор пробелами
       for (
@@ -165,15 +175,15 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
   }
   // Массив символов которые будут отображаться после вывода
   // Порядок соответствует порядку отображения
-  char* next_scr = new char[32];
+  char* next_scr = new char[wh];
   //Serial.println(str);
   get_next_scr(str, next_scr);
-  /*for (cur_chr = 0; cur_chr < 32; cur_chr++){
+  /*for (cur_chr = 0; cur_chr < wh; cur_chr++){
     Serial.println((byte) next_scr[cur_chr], DEC);
   }*/
   // Массив символов, на которые нужно будет заменить соответствующие
   // символы кирилицы при выводе
-  char* lcd_replace = new char[32];
+  char* lcd_replace = new char[wh];
   boolean found;
   byte tmp;
 
@@ -186,7 +196,7 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
       continue;
     }
     found = false;
-    for (cur_chr = 0; !found && cur_chr < 32; cur_chr++){
+    for (cur_chr = 0; !found && cur_chr < wh; cur_chr++){
       // Если будет использован один из самодельных символов
       if (char_map[i] == (byte) next_scr[cur_chr]){
         found = true;
@@ -207,13 +217,14 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
 
   // Если нужны будут ячейки для первых восьми самодельных символов
   // надо сначала освободить эти ячейки и поместить туда нужные символы
-  for (cur_chr = 0; cur_chr < 32; cur_chr++){
+  for (cur_chr = 0; cur_chr < wh; cur_chr++){
     lcd_replace[cur_chr] = -1;
     /*Serial.println();
     Serial.print("next_scr[");
     Serial.print(cur_chr);
     Serial.print("] = ");
-    Serial.println((byte) next_scr[cur_chr]);*/
+    Serial.println((byte) next_scr[cur_chr]);
+    delay(100);*/
     // Если не нужно заменять текущий символ
     if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180){
       // Смотрим следующий
@@ -344,7 +355,7 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
     }
     found = false;
     // Обходим набор использованных самодельных символов для замены
-    for (cur_chr = 0; cur_chr < 32; cur_chr++){
+    for (cur_chr = 0; cur_chr < wh; cur_chr++){
       // Если не нужно заменять текущий символ
       if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180 ||
           -1 != lcd_replace[cur_chr]){
@@ -366,7 +377,7 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
     }
     found = false;
     for (cur = 8; !found && (char) (tmp = read_pgm(ru_num + cur)); cur++){
-      for (cur_chr = 0; !found && cur_chr < 32; cur_chr++){
+      for (cur_chr = 0; !found && cur_chr < wh; cur_chr++){
         // Если не нужно заменять текущий символ
         if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180 ||
             -1 != lcd_replace[cur_chr]){
@@ -394,7 +405,7 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
 
   // Заменяем символы из next_scr на те что есть среди стандартных,
   // записываем в lcd_replace
-  for (cur_chr = 0; cur_chr < 32; cur_chr++){
+  for (cur_chr = 0; cur_chr < wh; cur_chr++){
     // Если не нужно заменять текущий символ
     if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180 ||
         -1 != lcd_replace[cur_chr]){
@@ -418,20 +429,20 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
   //Serial.println("///////////////////////////////////////////////////////////");
 
   // Ничего не нашли, не заменяем символ - будет тот же
-  for (cur_chr = 0; cur_chr < 32; cur_chr++){
+  for (cur_chr = 0; cur_chr < wh; cur_chr++){
     if (-1 == lcd_replace[cur_chr]){
       lcd_replace[cur_chr] = next_scr[cur_chr];
     }
   }
 
-  /*for (cur_chr = 0; cur_chr < 32; cur_chr++){
+  /*for (cur_chr = 0; cur_chr < wh; cur_chr++){
     Serial.print("lcd_replace[");
     Serial.print(cur_chr);
     Serial.print("] = ");
     Serial.println((byte) lcd_replace[cur_chr]);
   }
 
-  for (cur_chr = 0; cur_chr < 32; cur_chr++){
+  for (cur_chr = 0; cur_chr < wh; cur_chr++){
     Serial.print("next_scr[");
     Serial.print(cur_chr);
     Serial.print("] = ");
@@ -439,29 +450,29 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
   }
   Serial.println("///////////////////////////////////////////////////////////");*/
 
-  delete[] next_scr;
   write_str_enc(str, lcd_replace);
   delete[] lcd_replace;
+  delete[] next_scr;
 }
 
 // Получаем массив символов, которые будут отображаться после вывода строки
 void Cyrstal_core::get_next_scr(char* str, char* next_scr){
   byte next_scr_pos = scr_pos;
   // Копируем текущий экран
-  for (byte i = 0; i < 32; next_scr[i] = scr[i++]);
+  for (byte i = 0; i < wh; next_scr[i] = scr[i++]);
   // Обходим строку и эмулируем вывод
   for (byte cur_chr = 0; str[cur_chr] && cur_chr < 255; cur_chr++){
     if (str[cur_chr] == '\n'){
-      next_scr_pos = next_scr_pos < 16 ? 16 : 0;
+      next_scr_pos = next_scr_pos < w ? w : 0;
       continue;
     }
-    if (next_scr_pos > 31){
+    if (next_scr_pos > wh - 1){
       next_scr_pos = 0;
     }
     if (str[cur_chr] != '\n'){
       next_scr[next_scr_pos++] = str[cur_chr];
     }
-    if (next_scr_pos > 31){
+    if (next_scr_pos > wh - 1){
       next_scr_pos = 0;
     }
   }
@@ -470,19 +481,21 @@ void Cyrstal_core::get_next_scr(char* str, char* next_scr){
 // Печатаем строку сгенерированную для экрана по строке во внутренней кодировке
 void Cyrstal_core::write_str_enc(char* str, char* lcd_chars){
   //Serial.println("--------------------------------------------------------");
-  //Serial.println("write_str_enc");
+  //Serial.print("write_str_enc('");
+  //Serial.print(str);
+  //Serial.println("')");
   char out;
   for (byte cur_chr = 0; str[cur_chr] && cur_chr < 255; cur_chr++){
     out = str[cur_chr];
     if (out == '\n'){
-      scr_pos = scr_pos < 16 ? 16 : 0;
+      scr_pos = scr_pos < w ? w : 0;
       go();
       continue;
     }
-    if (scr_pos > 31){
+    if (scr_pos > wh - 1){
       scr_pos = 0;
     }
-    if (scr_pos == 0 || scr_pos == 16){
+    if (scr_pos == 0 || scr_pos == w){
       go();
     }
     if ((byte) out >= 128 && (byte) out <= 180){
@@ -492,7 +505,7 @@ void Cyrstal_core::write_str_enc(char* str, char* lcd_chars){
 
     //Serial.println((byte) out);
     lcd_write(out);
-    if (scr_pos > 31){
+    if (scr_pos > wh - 1){
       scr_pos = 0;
     }
   }
@@ -570,9 +583,9 @@ void Cyrstal_core::create_char(byte cell, byte num, char* next_scr){
         continue;
       }
       tmp = read_pgm(en + cur);
-      for (byte cur_chr = 0; cur_chr < 32; cur_chr++){
+      for (byte cur_chr = 0; cur_chr < wh; cur_chr++){
         if (char_map[cell] == (byte) next_scr[cur_chr]){
-          lcd_setCursor(cur_chr - cur_chr / 16 * 16, cur_chr / 16);
+          lcd_setCursor(cur_chr - cur_chr / w * w, cur_chr / w);
           lcd_write(tmp);
         }
       }
@@ -586,12 +599,20 @@ void Cyrstal_core::create_char(byte cell, byte num, char* next_scr){
     pos < 8;
     tmp_arr[pos] = read_pgm(ru + num * 8 + pos++) - 1
   );
+  /*Serial.print("lcd_createChar(");
+  Serial.print(cell);
+  Serial.print(", [ ");
+  for (byte pos = 0; pos < 8; pos++){
+    Serial.print(tmp_arr[pos]);
+    Serial.print(",");
+  }
+  Serial.println(" ])");*/
   // Создаем кастомный символ
   // Бага lcd_createChar - приходится обновлять курсор
   lcd_createChar(cell, tmp_arr);
-  for (byte cur_chr = 0; cur_chr < 32; cur_chr++){
+  for (byte cur_chr = 0; cur_chr < wh; cur_chr++){
     if (char_map[cell] == (byte) next_scr[cur_chr]){
-      lcd_setCursor(cur_chr - cur_chr / 16 * 16, cur_chr / 16);
+      lcd_setCursor(cur_chr - cur_chr / w * w, cur_chr / w);
       lcd_write(cell);
     }
   }
@@ -604,18 +625,6 @@ char Cyrstal_core::read_pgm(char* ptr){
 
 byte Cyrstal_core::read_pgm(byte* ptr){
   return (byte) pgm_read_byte_near(ptr);
-}
-
-void Cyrstal_core::clear_arr(byte* arr, byte count, byte value){
-  for (byte i = 0; i < count; arr[i++] = value);
-}
-
-void Cyrstal_core::clear_arr(char* arr, int8_t count, char value){
-  for (
-    byte i = 0;
-    (count < 0) ? arr[i] : (count && i < count);
-    arr[i++] = value
-  );
 }
 
 // Символы
@@ -650,7 +659,8 @@ void Cyrstal_core::blink(){
 
 // Очистка экрана и установка курсора на ноль
 void Cyrstal_core::clear(){
-  clear_arr(scr, 33, 32);
+  for (byte cur_chr = 0; cur_chr < wh; scr[cur_chr++] = ' ');
+  scr[wh] = 0;
   scr_pos = 0;
   lcd_clear();
 }
@@ -660,17 +670,17 @@ void Cyrstal_core::go(byte col, byte row){
   //Serial.println("go");
   //Serial.println(col);
   //Serial.println(row);
-  if (col < 16 && row < 2){
+  if (col < w && row < h){
     lcd_setCursor(col, row);
-    scr_pos = row * 16 + col;
+    scr_pos = row * w + col;
   }
 }
 
 // Установка курсора в выбранную позицию справа-налево сверху-вниз
 void Cyrstal_core::go(byte col){
-  if (col < 32){
-    go(col - col / 16 * 16, col / 16);
-  }else if (col == 32){
+  if (col < wh){
+    go(col - col / w * w, col / w);
+  }else if (col == wh){
     go(scr_pos);
   }
 }
@@ -700,17 +710,19 @@ void Cyrstal_core::printn(byte num, int8_t position, byte go_ln, byte space){
 // Максимальная длина строки - 255 символов
 // Максимальный размер массива - 255 строк
 void Cyrstal_core::printn_str(byte num, int8_t position, byte go_ln, byte space){
-  char str[255];
   byte count = 0, str_pos;
   word pos = 0;
-  while (count < 255 && pos < 65535 && count < num && s[pos]){
-    if (s[pos++] == '\r'){
+  for (pos = 0; count < 255 && pos < 65535 && count < num && s[pos]; pos++){
+    if (s[pos] == '\r'){
       count++;
     }
   }
   if (count != num){
     return;
   }
+  word s_pos;
+  for (s_pos = pos; s_pos < 65535 && s[s_pos] &&& s[s_pos] != '\r'; s_pos++);
+  char* str = new char[s_pos - pos + 1];
   for (
     str_pos = 0;
     str_pos < 255 && pos < 65535 && s[pos] && s[pos] != '\r';
@@ -718,6 +730,7 @@ void Cyrstal_core::printn_str(byte num, int8_t position, byte go_ln, byte space)
   );
   str[str_pos] = 0;
   print(str, position, go_ln, space);
+  delete[] str;
 }
 
 byte Cyrstal_core::count(){
@@ -735,14 +748,10 @@ byte Cyrstal_core::count(){
 // Максимальная длина строки - 255 символов
 // Максимальный размер массива - 255 строк
 void Cyrstal_core::printn_flash(byte num, int8_t position, byte go_ln, byte space){
-  char str[255];
   byte count = 0, str_pos;
-  word pos = 0;
+  word pos;
   char chr;
-  while (
-    count < 255 && pos < 65535 && count < num &&
-      (chr = read_pgm(s + pos++))
-  ){
+  for (pos = 0; count < 255 && pos < 65535 && count < num && (chr = read_pgm(s + pos)); pos++){
     if (chr == '\r'){
       count++;
     }
@@ -750,6 +759,9 @@ void Cyrstal_core::printn_flash(byte num, int8_t position, byte go_ln, byte spac
   if (count != num){
     return;
   }
+  word s_pos;
+  for (s_pos = pos; s_pos < 65535 && (chr = read_pgm(s + s_pos)) && chr != '\r'; s_pos++);
+  char* str = new char[s_pos - pos + 1];
   for (
     str_pos = 0;
     str_pos < 255 && pos < 65535 && (chr = read_pgm(s + pos++)) && chr != '\r';
@@ -757,4 +769,5 @@ void Cyrstal_core::printn_flash(byte num, int8_t position, byte go_ln, byte spac
   );
   str[str_pos] = 0;
   print(str, position, go_ln, space);
+  delete[] str;
 }

@@ -78,10 +78,17 @@ class Cyrstal_core {
     // Подсчет количества строк массива разделенных символом \r переданного через F()
     byte count();
 
+    char read_pgm(char*);
+    byte read_pgm(byte*);
+
     boolean bl = false;
     boolean pwr = true;
     boolean crsr = false;
     boolean blnk = false;
+
+    byte w;
+    byte h;
+    byte wh;
 
 
   private:
@@ -93,11 +100,6 @@ class Cyrstal_core {
     void get_str_enc(char* str, char* result);
     // Создание кастомного символа по номеру в указанной ячейке
     void create_char(byte cell, byte num, char* next_scr);
-
-    char read_pgm(char*);
-    byte read_pgm(byte*);
-    void clear_arr(byte*, byte count, byte value = 0);
-    void clear_arr(char*, int8_t count = -1, char value = 0);
 
     // Печать строки из ранее переданного массива символов по её номеру
     void printn_str(byte num, int8_t, byte, byte);
@@ -112,7 +114,7 @@ class Cyrstal_core {
 
     byte   f;
     char*  s;
-    char   scr[33];
+    char*  scr;
     byte   scr_pos;
     byte   char_map[8];
 };
