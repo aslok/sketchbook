@@ -27,9 +27,11 @@ Cyrstal::Cyrstal(byte rs, byte enable, byte d0, byte d1, byte d2, byte d3, byte 
 Cyrstal_core(width, height){
   lcd = new LiquidCrystal(rs, enable, d0, d1, d2, d3);
   lcd->begin(width, height);
-  bl_pin = blight;
-  pinMode(bl_pin, OUTPUT);
-  backlight(bl);
+  if (blight != 255){
+    bl_pin = blight;
+    pinMode(bl_pin, OUTPUT);
+    backlight(bl);
+  }
   clear();
 }
 
