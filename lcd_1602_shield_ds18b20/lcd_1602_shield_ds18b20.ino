@@ -14,6 +14,9 @@
 // 0xB8 – скопировать данные из EEPROM В 3й и 4й байты оперативной памяти
 // 0xB4 – вернет тип питания (0 – паразитное, 1 – внешнее)
 
+// Sketch uses 5,026 bytes (15.6%) of program storage space. Maximum is 32,256 bytes.
+// Global variables use 91 bytes (4.4%) of dynamic memory, leaving 1,957 bytes for local variables. Maximum is 2,048 bytes.
+
 #include "LiquidCrystal.h"
 LiquidCrystal lcd(8, 9, 4, 5, 6, 7);
 #include "OneWire.h"
