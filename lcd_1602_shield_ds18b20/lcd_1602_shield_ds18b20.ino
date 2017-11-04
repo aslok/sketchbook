@@ -41,7 +41,7 @@ void ds_search(){
     boolean search_done = true;
     for (byte ds_num = 0; ds_num < ds_cnt; ds_num++){
         // Если устройство найдено переходим к следующему
-        if (addr_id[ds_cnt]){
+        if (addr_id[ds_num]){
             continue;
         }
         // Устройство номер ds_num не было найдено
