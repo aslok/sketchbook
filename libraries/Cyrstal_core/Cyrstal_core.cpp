@@ -87,7 +87,7 @@ void Cyrstal_core::print(const __FlashStringHelper* str, int8_t position, byte g
   char* ptr = (char*) str;
   byte cur_chr;
   for (cur_chr = 0; cur_chr < 255 && read_pgm(ptr + cur_chr); cur_chr++);
-  char* tmp = new char[cur_chr];
+  char* tmp = new char[cur_chr + 1];
   char chr;
   for (
     cur_chr = 0;
