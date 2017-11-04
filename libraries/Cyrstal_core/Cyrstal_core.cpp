@@ -76,9 +76,7 @@ Cyrstal_core::Cyrstal_core(byte width, byte height){
   w      = width;
   h      = height;
   wh     = w * h;
-  for (byte i = 0; i < 8; i++){
-    char_map[i] = 0;
-  }
+  for (byte i = 0; i < 8; char_map[i++] = 0);
   scr = new char[wh + 1];
 }
 
@@ -335,69 +333,60 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
   // Обходим самодельные символы для замены в ячейках char_map
   // Заменяем ими символы на экране
   for (i = 0; i < 8; i++){
-    // Если ячейка свободна
-    if (!char_map[i]){
-      // Смотрим следующую
-      continue;
-    }
     found = false;
-    // Обходим набор самодельных символов для замены
-    for (cur = 0; !found && cur < 8; cur++){
-      // Если в ячейке один из восьми первых самодельных символов
-      if (read_pgm(ru_num + cur) == char_map[i]){
-        found = true;
-      }
-    }
-    // Замена не требуется
-    if (found){
-      // Смотрим следующую
-      continue;
-    }
-    found = false;
-    // Обходим набор использованных самодельных символов для замены
-    for (cur_chr = 0; cur_chr < wh; cur_chr++){
-      // Если не нужно заменять текущий символ
-      if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180 ||
-          -1 != lcd_replace[cur_chr]){
-        // Смотрим следующий
-        continue;
-      }
-      if (char_map[i] == (byte) next_scr[cur_chr]){
-        // Символ для замены найден, запоминаем по позиции в next_scr
-        lcd_replace[cur_chr] = i;
-      }
-    }
-  }
-  // Ищем свободные ячейки
-  for (i = 0; i < 8; i++){
     // Ячейка занята
     if (char_map[i]){
-      // Смотрим следующую
-      continue;
-    }
-    found = false;
-    for (cur = 8; !found && (char) (tmp = read_pgm(ru_num + cur)); cur++){
-      for (cur_chr = 0; !found && cur_chr < wh; cur_chr++){
+      // Обходим набор самодельных символов для замены
+      for (cur = 0; !found && cur < 8; cur++){
+        // Если в ячейке один из восьми первых самодельных символов
+        if (read_pgm(ru_num + cur) == char_map[i]){
+          found = true;
+        }
+      }
+      // Замена не требуется
+      if (found){
+        // Смотрим следующую
+        continue;
+      }
+      found = false;
+      // Обходим набор использованных самодельных символов для замены
+      for (cur_chr = 0; cur_chr < wh; cur_chr++){
         // Если не нужно заменять текущий символ
         if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180 ||
             -1 != lcd_replace[cur_chr]){
           // Смотрим следующий
           continue;
         }
-        // Если это не этот символ
-        if (tmp != (byte) next_scr[cur_chr]){
-          // Смотрим следующий символ
-          continue;
+        if (char_map[i] == (byte) next_scr[cur_chr]){
+          // Символ для замены найден, запоминаем по позиции в next_scr
+          lcd_replace[cur_chr] = i;
         }
-        // Сохраняем в ячейку номер символа который заменяем
-        create_char(i, cur, next_scr);
-        // Будем заменять его при выводе на номер ячейки
-        lcd_replace[cur_chr] = i;
-        /*Serial.print("char_map[");
-        Serial.print(i);
-        Serial.print("] = read_pgm(ru_num + cur) = ");
-        Serial.println(char_map[i]);*/
-        found = true;
+      }
+    // Ячейка свободна
+    }else{
+      for (cur = 8; !found && (char) (tmp = read_pgm(ru_num + cur)); cur++){
+        for (cur_chr = 0; !found && cur_chr < wh; cur_chr++){
+          // Если не нужно заменять текущий символ
+          if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180 ||
+              -1 != lcd_replace[cur_chr]){
+            // Смотрим следующий
+            continue;
+          }
+          // Если это не этот символ
+          if (tmp != (byte) next_scr[cur_chr]){
+            // Смотрим следующий символ
+            continue;
+          }
+          // Сохраняем в ячейку номер символа который заменяем
+          create_char(i, cur, next_scr);
+          // Будем заменять его при выводе на номер ячейки
+          lcd_replace[cur_chr] = i;
+          /*Serial.print("char_map[");
+          Serial.print(i);
+          Serial.print("] = read_pgm(ru_num + cur) = ");
+          Serial.println(char_map[i]);*/
+          found = true;
+        }
       }
     }
   }
@@ -409,6 +398,10 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
     // Если не нужно заменять текущий символ
     if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180 ||
         -1 != lcd_replace[cur_chr]){
+      if (-1 == lcd_replace[cur_chr]){
+        // Ничего не нашли, не заменяем символ - будет тот же
+        lcd_replace[cur_chr] = next_scr[cur_chr];
+      }
       // Смотрим следующий
       continue;
     }
@@ -427,13 +420,6 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
     }
   }
   //Serial.println("///////////////////////////////////////////////////////////");
-
-  // Ничего не нашли, не заменяем символ - будет тот же
-  for (cur_chr = 0; cur_chr < wh; cur_chr++){
-    if (-1 == lcd_replace[cur_chr]){
-      lcd_replace[cur_chr] = next_scr[cur_chr];
-    }
-  }
 
   /*for (cur_chr = 0; cur_chr < wh; cur_chr++){
     Serial.print("lcd_replace[");
