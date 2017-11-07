@@ -16,5 +16,6 @@
 [submodule "libraries/Adafruit_Sensor"]
 	path = libraries/Adafruit_Sensor
 	url = git@github.com:adafruit/Adafruit_Sensor.git
-
-
+[submodule "libraries/Eeprom24C32_64"]
+	path = libraries/Eeprom24C32_64
+	url = git@github.com:jlesech/Eeprom24C32_64.git
