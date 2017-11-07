@@ -26,7 +26,6 @@
 #define POS 127
 #define LINE 255
 #define SPACE 255
-const char* EMPTY = "";
 
 #include "Arduino.h"
 
