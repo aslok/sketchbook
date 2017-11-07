@@ -23,7 +23,7 @@
  * United States.
  *
  *
-Sketch uses 24,818 bytes (76.9%) of program storage space. Maximum is 32,256 bytes.
+Sketch uses 24,822 bytes (77.0%) of program storage space. Maximum is 32,256 bytes.
 Global variables use 631 bytes (30.8%) of dynamic memory, leaving 1,417 bytes for local variables. Maximum is 2,048 bytes.
  */
 
@@ -242,6 +242,8 @@ unsigned int ds_id = 0;
 #include "Cyrstal_core.h"
 #include "Cyrstal.h"
 Cyrstal* lcd;
+
+const char* EMPTY = "";
 
 // Библиотека для часов
 #include "Wire.h"
