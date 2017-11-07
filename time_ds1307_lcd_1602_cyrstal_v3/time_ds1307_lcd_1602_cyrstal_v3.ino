@@ -9,7 +9,7 @@
  *
  *
  * created 01.11.2017
- * modifid 03.11.2017
+ * modifid 07.11.2017
  * with Arduino 1.8.3 (tested on Arduino Uno)
  *
  * Copyright 2017 Vitaliy Fust <aslok.zp@gmail.com>
@@ -23,16 +23,17 @@
  * United States.
  *
  *
+Sketch uses 24,818 bytes (76.9%) of program storage space. Maximum is 32,256 bytes.
+Global variables use 631 bytes (30.8%) of dynamic memory, leaving 1,417 bytes for local variables. Maximum is 2,048 bytes.
  */
 
-#include "LiquidCrystal.h"
-#include "Cyrstal_core.h"
-#include "Cyrstal.h"
-Cyrstal* lcd;
+const char version[] = "17110700";
 
+// Библиотека для ввода с кнопок шилда
 #include "ButtonsTact.h"
 ButtonsTact* buttons;
 
+// Уровни напряжения на A0 для разных кнопок
 const int RIGHT     = 0;
 const int UP        = 130;
 const int DOWN      = 300;
@@ -40,17 +41,30 @@ const int LEFT      = 475;
 const int SELECT    = 720;
 const int NONE      = 1023;
 
+// Библиотека для термодатчика
 #include "OneWire.h"
 // Шина OneWire подключена к 12-му пину
 OneWire ds(12);
-
 // Количество подключенных датчиков ds_cnt
 const byte ds_cnt = 2;
-
 // Массив из ds_cnt групп по 8 байт
 byte addr[ds_cnt][8];
 // Массив для id найденных устройств
-int addr_id[ds_cnt];
+unsigned int addr_id[ds_cnt];
+// Массив для температур
+float celsius[ds_cnt];
+
+// Время со старта скетча
+unsigned long ms = 0;
+// Время последнего выполнения функции
+unsigned long ms_prev = 0;
+// Флаг - нужно обновить страницу
+boolean scr_upd = true;
+// Флаги - странице нужно обработать нажатия
+boolean down_upd = false;
+boolean up_upd = false;
+boolean left_upd = false;
+boolean right_upd = false;
 
 // Поиск 1-Wire устройств
 // Если устройство найдено, то в 8 байтный массив addr[ds_num]
@@ -81,22 +95,14 @@ void ds_search(){
                 goto search;
             }
             // Присваиваем id новому устройству
-            addr_id[ds_num] = ds_id_get(addr[ds_num]);
-            //Serial.println(addr_id[ds_num]);
+            for (byte byte_num = 0; byte_num < 8; byte_num++){
+                addr_id[ds_num] += addr[ds_num][byte_num];
+            }
         }
         // Все устройства успешно найдены
         search_done = true;
     }
     return;
-}
-
-// Присваиваем id новому устройству
-int ds_id_get(byte* addr){
-    int ds_id = 0;
-    for (byte byte_num = 0; byte_num < 8; byte_num++){
-        ds_id += addr[byte_num];
-    }
-    return ds_id;
 }
 
 // Провести измерение температуры и записать данные в оперативную память
@@ -153,298 +159,14 @@ float ds_raw_to_celsius(byte* addr, byte* data){
     return (float) raw / 16.0;
 }
 
-#include "Wire.h"
-#include "RTClib.h"
-RTC_DS1307 rtc;
-
-// const char hello_str[] PROGMEM = "доброї ночі\rдоброго ранку\rдоброго дня\rдоброго вечора";
-
-/*const char month[][4] PROGMEM = {
-  "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
-};
-
-const char days[][4] PROGMEM = {
-  "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
-};*/
-
-const char month[][7] PROGMEM = {
-  "янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"
-};
-
-const char days[][9] PROGMEM = {
-  "вскр", "пнд", "вт", "ср", "чтв", "птн", "сб"
-};
-
-enum scr { TIME, MENU, SETTINGS, SET_TIME, SET_DATE, SET_TEMP, SET_TEMP_SENSOR, SET_TEMP_INFO };
-
-scr cur_scr = TIME;
-boolean scr_upd = true;
-
-boolean ok_upd = false;
-boolean next_upd = false;
-boolean prev_upd = false;
-
-typedef struct menu_item {
-  char str[64];
-  void(* action)(void);
-};
-
-typedef struct path_item {
-  scr scr_name;
-  byte pos;
-};
-
-path_item path[8];
-byte path_pos = 0;
-byte cur_pos = 0;
-
-void back(){
-  path_pos--;
-  cur_scr = path[path_pos].scr_name;
-  cur_pos = path[path_pos].pos;
-  scr_upd = true;
-}
-
-void back2(){
-  back();
-  back();
-}
-
-void apply(){
-  cur_scr = MENU;
-  scr_upd = true;
-}
-
-void time(){
-  cur_scr = TIME;
-  scr_upd = true;
-}
-
-void menu(){
-  path_pos = 0;
-  cur_pos = 0;
-  cur_scr = MENU;
-  scr_upd = true;
-}
-
-void settings(){
-  cur_scr = SETTINGS;
-  scr_upd = true;
-}
-
-void set_time(){
-  cur_scr = SET_TIME;
-  scr_upd = true;
-}
-
-void set_date(){
-  cur_scr = SET_DATE;
-  scr_upd = true;
-}
-
-void set_temp(){
-  cur_scr = SET_TEMP;
-  scr_upd = true;
-}
-
-void set_temp_sensor(){
-  cur_scr = SET_TEMP_SENSOR;
-  scr_upd = true;
-}
-
-void set_temp_info(){
-  cur_scr = SET_TEMP_INFO;
-  scr_upd = true;
-}
-
-const menu_item menu_items[] PROGMEM = {
-  { "Час", set_time },
-  { "Дата", set_date },
-  { "Температура", set_temp },
-  { "", NULL },
-};
-
-const menu_item set_temp_items[] PROGMEM = {
-  { "Датчік #1", set_temp_sensor },
-  { "Датчік #2", set_temp_sensor },
-  { "Інфо", set_temp_info },
-  { "", NULL },
-};
-
-const menu_item set_temp_sensor_items[] PROGMEM = {
-  { "Увімкнути", back2 },
-  { "Вимкнути", back2 },
-  { "", NULL },
-};
-
-const menu_item submenu_items[] PROGMEM = {
-  { "Підтвердити", apply },
-  { "", NULL },
-};
-
-void show_time(boolean full_scr = true) {
-  static unsigned long prev_time = 0;
-  DateTime now = rtc.now();
-  if (!scr_upd && prev_time == now.secondstime()){
-    return;
-  }
-  prev_time = now.secondstime();
-  if (scr_upd){
-    lcd->clear();
-    lcd->print(F("\337C"), -1, 0);
-  }
-
-  lcd->print((__FlashStringHelper*) days[now.dayOfWeek()], 0, 0);
-
-  char mon[16];
-  strcpy_P(mon, month[now.month() - 1]);
-  char buffer[16];
-  sprintf(buffer, "%d %s", now.day(), mon);
-  lcd->print(buffer, -6, 0, 6);
-
-  /*dtostrf(readVcc(), 4, 2, buffer);
-  sprintf(buffer, "%sV", buffer);
-  lcd->print(buffer, -1, 0);*/
-
-  sprintf(buffer, "%02d:%02d:%02d", now.hour(), now.minute(), now.second());
-  lcd->print(buffer, 0, 1, 16);
-
-  if (scr_upd || !(now.second() % 5)) {
-    for (byte ds_num = 0; ds_num < ds_cnt; ds_num++){
-        if (addr_id[ds_num] != 773){
-          continue;
-        }
-        ds_raw_create(addr[ds_num]);
-
-        delay(250);
-
-        byte data[9];
-        ds_raw_read(addr[ds_num], data);
-
-        // Выводим температуру с устройства
-        lcd->print(ds_raw_to_celsius(addr[ds_num], data), -3, 0, 3, 0);
-    }
-  }
-  scr_upd = false;
-}
-
-void show_menu(const struct menu_item* cur_menu){
-  static byte cur_size = 0;
-  static byte cur_scr_pos = 0;
-
-  if (ok_upd){
-    ok_upd = false;
-    path[path_pos].scr_name = cur_scr;
-    path[path_pos].pos = cur_pos;
-    path_pos++;
-    cur_pos = 0;
-    // Выполняем пункт меню
-    ((void (*)()) pgm_read_ptr_near(&cur_menu[path[path_pos - 1].pos].action))();
-    return;
-  }
-
-  if (scr_upd){
-    for (
-      cur_size = 0;
-      (char) pgm_read_byte_near(&cur_menu[cur_size].str);
-      cur_size++
-    );
-    cur_scr_pos = cur_pos > 0 ? cur_pos - 1 : cur_pos;
-    lcd->clear();
-  }
-
-  if (
-    !scr_upd &&
-    !prev_upd &&
-    !next_upd
-  ){
-    return;
-  }
-
-  // Если нажата кнопка NEXT
-  if (next_upd){
-    cur_pos++;
-    if (cur_pos == cur_size){
-      cur_pos = 0;
-      cur_scr_pos = 0;
-    }
-    if (cur_pos >= cur_scr_pos + lcd->h){
-      cur_scr_pos = cur_pos - lcd->h + 1;
-    }
-    lcd->clear();
-  // Если нажата кнопка PREV
-  }else if (prev_upd){
-    cur_pos--;
-    if (cur_pos == 255){
-      cur_pos = cur_size - 1;
-      cur_scr_pos = cur_size - 2;
-    }
-    if (cur_pos < cur_scr_pos && cur_scr_pos > 0){
-      cur_scr_pos = cur_pos;
-    }
-    lcd->clear();
-  }
-  // Видимые пункты меню
-  for (byte pos = 0; pos < cur_size; pos++){
-    if (pos < cur_scr_pos || pos >= cur_scr_pos + lcd->h){
-      continue;
-    }
-    lcd->print((__FlashStringHelper*) &cur_menu[pos].str, 3, pos - cur_scr_pos);
-  }
-  // Обновляем курсор меню
-  for (byte pos = 0; pos < cur_size; pos++){
-    if (pos < cur_scr_pos || pos >= cur_scr_pos + lcd->h){
-      continue;
-    }
-    lcd->print(pos == cur_pos ? F("=>\n") : F("  \n"), 0, pos - cur_scr_pos);
-  }
-  scr_upd = false;
-  next_upd = false;
-  prev_upd = false;
-}
-
-void show_set_time(unsigned long ms){
-  if (ok_upd){
-    ok_upd = false;
-    return;
-  }
-  if (
-    !scr_upd &&
-    !prev_upd &&
-    !next_upd
-  ){
-    return;
-  }
-
-  if (scr_upd){
-    lcd->clear();
-    DateTime now = rtc.now();
-    lcd->print((__FlashStringHelper*) days[now.dayOfWeek()], 0, 0);
-
-    char mon[16];
-    strcpy_P(mon, month[now.month() - 1]);
-    char buffer[16];
-    sprintf(buffer, "%d %s", now.day(), mon);
-    lcd->print(buffer, -6, 0, 6);
-    sprintf(buffer, "%d", now.year());
-    lcd->print(buffer, -1, 0, 4);
-
-    sprintf(buffer, "%02d:%02d:%02d", now.hour(), now.minute(), now.second());
-    lcd->print(buffer, 0, 1, 16);
-  }
-
-
-  scr_upd = false;
-  next_upd = false;
-  prev_upd = false;
-}
-
-void show_set_temp_info(unsigned long ms){
+void update_temp(){
   static unsigned long ms_prev = 0;
   static byte ds_num = 0;
-  // Массив для температур
-  static float celsius[ds_cnt];
   static byte pass = 0;
+  if (scr_upd){
+    pass = 0;
+    ms_prev = ms;
+  }
   if (ms - ms_prev > 250){
     ms_prev = ms;
     switch (pass){
@@ -464,128 +186,15 @@ void show_set_temp_info(unsigned long ms){
         break;
     }
   }
-  if (!scr_upd && ((ms / 1000) % 2)){
-    return;
-  }
-  //Serial.println(ms);
-  if (scr_upd){
-    // Ищем все устройства
-    ds_search();
-    pass = 0;
-    lcd->clear();
-    for (byte num = 0; num < ds_cnt; num++){
-      celsius[num] = 0;
-      // Выводим id устройства
-      lcd->print(F("ID"), 0, num);
-      lcd->print(addr_id[num], -11, num);
-      lcd->print(F("\337C"), -1, num);
+}
+
+float temp_from(unsigned int id){
+  for (byte ds_num = 0; ds_num < ds_cnt; ds_num++){
+    if (addr_id[ds_num] == id){
+      return celsius[ds_num];
     }
   }
-
-  for (byte num = 0; num < ds_cnt; num++){
-    // Выводим температуру с устройства
-    lcd->print(celsius[num], -3, num, 6, 2);
-  }
-
-  scr_upd = false;
-}
-
-void setup() {
-  Serial.begin(57600);
-  // Инициализация дисплея
-  lcd = new Cyrstal(8, 9, 4, 5, 6, 7, 16, 2, 10);
-  lcd->backlight();
-
-  // Обработка нажатий на пине A0
-  buttons = new ButtonsTact(A0);
-  // На первом месте стоит уровень по-умолчанию, когда ничего не нажато
-  buttons->addLevels(NONE, UP, DOWN, LEFT, RIGHT, SELECT, END);
-
-  // Обнуляем id устройств
-  for (byte ds_num = 0; ds_num < ds_cnt; ds_num++){
-      addr_id[ds_num] = 0;
-  }
-
-  // Ищем все устройства
-  ds_search();
-
-  // Инициализация календаря
-  #ifdef AVR
-    Wire.begin();
-  #else
-    Wire1.begin();
-  #endif
-  rtc.begin();
-}
-
-void loop(){
-  unsigned long ms = buttons->touch();
-  switch (buttons->state(A0)){
-    case UP:
-      switch (cur_scr){
-        case TIME:
-          menu();
-          break;
-        default:
-          prev_upd = true;
-      }
-      break;
-    case DOWN:
-      switch (cur_scr){
-        case TIME:
-          menu();
-          break;
-        default:
-          next_upd = true;
-      }
-      break;
-    case LEFT:
-      switch (cur_scr){
-        case TIME:
-          menu();
-          break;
-        case MENU:
-          time();
-          break;
-        default:
-          back();
-      }
-      break;
-    case RIGHT:
-      switch (cur_scr){
-        case TIME:
-          menu();
-          break;
-        default:
-          ok_upd = true;
-      }
-      break;
-    case SELECT:
-      time();
-      break;
-  }
-
-  // Текущий экран
-  switch (cur_scr){
-    case TIME:
-      show_time();
-      break;
-    case MENU:
-      show_menu(menu_items);
-      break;
-    case SET_TEMP:
-      show_menu(set_temp_items);
-      break;
-    case SET_TIME:
-      show_set_time(ms);
-      break;
-    case SET_TEMP_SENSOR:
-      show_menu(set_temp_sensor_items);
-      break;
-    case SET_TEMP_INFO:
-      show_set_temp_info(ms);
-      break;
-  }
+  return celsius[0];
 }
 
 double readVcc() {
@@ -621,5 +230,730 @@ double readVcc() {
    * для измерений AVR чипом, но может зависеть от изменений
    * температуры
    */
-  return 1061.891 / result; // Vcc in volts
+  return 1125.3 / result; // Vcc in volts
+}
+
+// ПЗУ для хранения id термодатчика
+#include "EEPROM.h"
+unsigned int ds_id = 0;
+
+// Библиотека для вывода на экран шилда
+#include "LiquidCrystal.h"
+#include "Cyrstal_core.h"
+#include "Cyrstal.h"
+Cyrstal* lcd;
+
+// Библиотека для часов
+#include "Wire.h"
+#include "RTClib.h"
+#include "aRTClib.h"
+ds1307* rtc;
+
+const char month[][7] PROGMEM = {
+  "янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"
+};
+const char days[][5] PROGMEM = {
+  "вс", "пн", "вт", "ср", "чт", "пт", "сб"
+};
+
+// Названия разных страниц
+enum scr {
+  TIME,
+  MENU,
+    DATE,
+    TEMP,
+      TEMP_SENSOR,
+      TEMP_INFO,
+    AMENDMENT,
+      AMENDMENT_INFO,
+      AMENDMENT_EDIT,
+      ADJUST,
+    ABOUT,
+};
+// Текущая страница
+scr cur_scr = TIME;
+
+// Массивы пунктов меню для страниц menu
+typedef struct menu_item {
+  // Название пункта меню
+  char str[33];
+  // Действие которое он выполняет
+  void(* action)(void);
+};
+
+// Массив страниц menu для возврата назад
+typedef struct path_item {
+  scr scr_name;
+  byte pos;
+};
+path_item path[8];
+byte path_pos = 0;
+byte cur_pos = 0;
+byte cur_suff = 0;
+
+// Обработка действий пунктов меню
+//    Переход назад по меню
+void back(){
+  path_pos--;
+  cur_scr = path[path_pos].scr_name;
+  cur_pos = path[path_pos].pos;
+  scr_upd = true;
+}
+//    Переход на домашнюю страницу
+void time(){
+  cur_scr = TIME;
+  scr_upd = true;
+}
+//    Переход на начальную страницу меню
+void menu(){
+  path_pos = 0;
+  cur_pos = 0;
+  cur_scr = MENU;
+  scr_upd = true;
+}
+//    Переход на страницу установки даты с расчетом коррекции
+void date(){
+  cur_scr = DATE;
+  scr_upd = true;
+}
+//    Переход на страницу меню Температура
+void temp(){
+  cur_scr = TEMP;
+  scr_upd = true;
+}
+//    Переход на страницу меню Поправка
+void amendment(){
+  cur_scr = AMENDMENT;
+  scr_upd = true;
+}
+//    Переход на страницу Об устройстве
+void about(){
+  cur_scr = ABOUT;
+  scr_upd = true;
+}
+//    Переход на страницу меню Инфо (о поправке)
+void amendment_info(){
+  cur_scr = AMENDMENT_INFO;
+  scr_upd = true;
+}
+//    Переход на страницу меню установки поправки
+void amendment_edit(){
+  cur_scr = AMENDMENT_EDIT;
+  scr_upd = true;
+}
+//    Переход на страницу установки даты без расчета коррекции
+void adjust(){
+  cur_scr = ADJUST;
+  scr_upd = true;
+}
+//    Переход на страницу меню Инфо (о датчиках температуры)
+void temp_info(){
+  cur_scr = TEMP_INFO;
+  scr_upd = true;
+}
+//    Переход на страницу меню выбора датчика температуры
+void temp_sensor(){
+  update_temp();
+  cur_scr = TEMP_SENSOR;
+  scr_upd = true;
+}
+//    Обработка действия пункта меню "Применить" для разных страниц
+void apply(){
+  switch (cur_scr){
+    // На странице меню выбора датчика температуры
+    case TEMP_SENSOR:
+      ds_id = addr_id[cur_suff];
+      EEPROM.put(0, ds_id);
+      back();
+      break;
+  }
+  back();
+}
+
+// Элементы меню для страниц menu
+const menu_item menu_items[] PROGMEM = {
+//  "Ширина   1602"
+  { "Дата", date },
+  { "Температура", temp },
+  { "Поправка", amendment },
+  { "Об устройстве", about },
+  { "", NULL },
+};
+const menu_item amendment_items[] PROGMEM = {
+  { "Инфо", amendment_info },
+  { "Поправка", amendment_edit },
+  { "Дата", adjust },
+  { "", NULL },
+};
+const menu_item temp_items[] PROGMEM = {
+  { "Инфо", temp_info },
+  { "Выбрать", temp_sensor },
+  { "", NULL },
+};
+const menu_item apply_items[] PROGMEM = {
+  { "Применить", apply },
+  { "", NULL },
+};
+
+// Отображение домашней страницы
+void show_time() {
+  if (!scr_upd && ms - ms_prev < 1000){
+    return;
+  }
+  ms_prev = ms;
+  if (scr_upd){
+    lcd->clear();
+    lcd->print(F("\337C"), -1, 0);
+  }
+  rtc->update();
+
+  lcd->print((__FlashStringHelper*) days[rtc->date.dayOfWeek()], 0, 0, 2);
+
+  char mon[32];
+  strcpy_P(mon, month[rtc->date.month() - 1]);
+  char buffer[32];
+  sprintf(buffer, "%d %s", rtc->date.day(), mon);
+  lcd->print(buffer, -6, 0, 6);
+
+  /*dtostrf(readVcc(), 4, 2, buffer);
+  sprintf(buffer, "%sV", buffer);
+  lcd->print(buffer, -1, 0);*/
+
+  sprintf(buffer, "%02d:%02d:%02d", rtc->date.hour(), rtc->date.minute(), rtc->date.second());
+  lcd->print(buffer, 0, 1, 16);
+
+  // Выводим температуру с устройства
+  lcd->print(temp_from(ds_id), -3, 0, 3, 0);
+
+  scr_upd = false;
+}
+
+// Отображение страниц меню, возможно умножение списка на массив суффиксов suff[count]
+void show_menu(const struct menu_item* cur_menu, int* suff = NULL, byte count = 0){
+  static byte cur_size = 0;
+  static byte cur_scr_pos = 0;
+
+  if (right_upd){
+    right_upd = false;
+    path[path_pos].scr_name = cur_scr;
+    path[path_pos].pos = cur_pos;
+    path_pos++;
+    cur_pos = 0;
+    // Выполняем пункт меню
+    if (!count){
+      ((void (*)()) pgm_read_ptr_near(&cur_menu[path[path_pos - 1].pos].action))();
+    }else{
+      cur_suff = path[path_pos - 1].pos / cur_size;
+      ((void (*)()) pgm_read_ptr_near(&cur_menu[(path[path_pos - 1].pos + 1) % cur_size].action))();
+    }
+    return;
+  }
+
+  if (scr_upd){
+    for (
+      cur_size = 0;
+      (char) pgm_read_byte_near(&cur_menu[cur_size].str);
+      cur_size++
+    );
+    cur_scr_pos = cur_pos > 0 ? cur_pos - 1 : cur_pos;
+    lcd->clear();
+  }
+
+  if (
+    !scr_upd &&
+    !up_upd &&
+    !down_upd
+  ){
+    return;
+  }
+
+  // Если нажата кнопка DOWN
+  if (down_upd){
+    cur_pos++;
+    if (cur_pos == cur_size * (count ? count : 1)){
+      cur_pos = 0;
+      cur_scr_pos = 0;
+    }
+    if (cur_pos >= cur_scr_pos + lcd->h){
+      cur_scr_pos = cur_pos - lcd->h + 1;
+    }
+    lcd->clear();
+  // Если нажата кнопка UP
+  }else if (up_upd){
+    cur_pos--;
+    if (cur_pos == 255){
+      cur_pos = cur_size * (count ? count : 1) - 1;
+      cur_scr_pos = cur_size * (count ? count : 1) - 2;
+    }
+    if (cur_pos < cur_scr_pos && cur_scr_pos > 0){
+      cur_scr_pos = cur_pos;
+    }
+    lcd->clear();
+  }
+  // Видимые пункты меню
+  for (byte pos = 0, suff_pos = 0; pos < cur_size * (count ? count : 1); pos++){
+    if (pos >= cur_scr_pos && pos < cur_scr_pos + lcd->h){
+      lcd->print((__FlashStringHelper*) &cur_menu[pos - cur_size * suff_pos].str,
+                  3,
+                  pos - cur_scr_pos);
+      if (suff != NULL){
+        lcd->print(' ');
+        lcd->print(suff[suff_pos]);
+      }
+    }
+    if (suff != NULL && !((pos + 1) % cur_size)){
+      suff_pos++;
+    }
+  }
+  // Обновляем курсор меню
+  for (byte pos = 0; pos < cur_size * (count ? count : 1); pos++){
+    if (pos < cur_scr_pos || pos >= cur_scr_pos + lcd->h){
+      continue;
+    }
+    lcd->print(pos == cur_pos ? F("=>\n") : F("  \n"), 0, pos - cur_scr_pos);
+  }
+  scr_upd = false;
+  down_upd = false;
+  up_upd = false;
+}
+
+// Отображение страницы установки времени на верное (если не adjust - также расчет коррекции)
+enum date_pos_type{
+  date_day, date_month, date_year, date_hour, date_minute, date_end
+};
+void show_date(boolean adjust = false){
+  static date_pos_type date_pos = date_day;
+  static DateTime now;
+  if (
+    ms - ms_prev < 500 &&
+    !scr_upd &&
+    !up_upd &&
+    !down_upd &&
+    !left_upd &&
+    !right_upd
+  ){
+    return;
+  }
+  ms_prev = ms;
+
+  // Если нажата кнопка right
+  if (right_upd){
+    date_pos = date_pos + 1;
+    if (date_end == date_pos){
+      right_upd = false;
+      if (adjust){
+        rtc->adjust(now);
+      }else{
+        rtc->correct(now);
+      }
+      back();
+      return;
+    }
+  // Если нажата кнопка left
+  }else if (left_upd){
+    if (date_day == date_pos){
+      left_upd = false;
+      back();
+      return;
+    }else{
+      date_pos = date_pos - 1;
+    }
+  // Если нажата кнопка up
+  }else if (up_upd){
+    switch (date_pos){
+      case date_day:
+        now = DateTime(DateTime(now.year(), now.month(), now.day() + 1, now.hour(), now.minute()).unixtime());
+        break;
+      case date_month:
+        now = DateTime(DateTime(now.year(), now.month() + 1, now.day(), now.hour(), now.minute()).unixtime());
+        break;
+      case date_year:
+        now = DateTime(DateTime(now.year() + 1, now.month(), now.day(), now.hour(), now.minute()).unixtime());
+        break;
+      case date_hour:
+        now = DateTime(DateTime(now.year(), now.month(), now.day(), now.hour() + 1, now.minute()).unixtime());
+        break;
+      case date_minute:
+        now = DateTime(DateTime(now.year(), now.month(), now.day(), now.hour(), now.minute() + 1).unixtime());
+        break;
+    }
+  // Если нажата кнопка down
+  }else if (down_upd){
+    switch (date_pos){
+      case date_day:
+        now = DateTime(DateTime(now.year(), now.month(), now.day() - 1, now.hour(), now.minute()).unixtime());
+        break;
+      case date_month:
+        now = DateTime(DateTime(now.month() == 1 ? now.year() - 1 : now.year(),
+                                now.month() == 1 ? 12 : (now.month() - 1),
+                                now.day(),
+                                now.hour(), now.minute()).unixtime());
+        break;
+      case date_year:
+        now = DateTime(DateTime(now.year() - 1, now.month(), now.day(), now.hour(), now.minute()).unixtime());
+        break;
+      case date_hour:
+        now = DateTime(DateTime(now.year(),
+                                now.month(),
+                                !now.hour() ? (now.day() - 1) : now.day(),
+                                !now.hour() ? 23 : (now.hour() - 1), now.minute()).unixtime());
+        break;
+      case date_minute:
+        now = DateTime(DateTime(now.year(),
+                                now.month(),
+                                now.day(),
+                                !now.minute() ? (now.hour() - 1) : now.hour(),
+                                !now.minute() ? 59 : (now.minute() - 1)).unixtime());
+        break;
+    }
+  }
+
+  if (scr_upd){
+    lcd->clear();
+    date_pos = date_day;
+    now = rtc->update();
+    now = DateTime(now.year(), now.month(), now.day(), now.hour(), now.minute());
+  }
+
+  lcd->print((__FlashStringHelper*) days[now.dayOfWeek()], 0, 0, 2);
+
+  boolean hide = !up_upd && !down_upd && (ms / 500) % 2;
+  char buffer[5];
+  sprintf(buffer, "%2d", now.day());
+  lcd->print(date_pos == date_day && hide ? EMPTY : buffer, -11, 0, 2);
+  strcpy_P(buffer, month[now.month() - 1]);
+  lcd->print(date_pos == date_month && hide ? EMPTY : buffer, -7, 0, 3);
+  sprintf(buffer, "%04d", now.year());
+  lcd->print(date_pos == date_year && hide ? EMPTY : buffer, -1, 0, 4);
+  sprintf(buffer, "%02d", now.hour());
+  lcd->print(date_pos == date_hour && hide ? EMPTY : buffer, 4, 1, 2);
+  lcd->print(F(":"));
+  sprintf(buffer, "%02d", now.minute());
+  lcd->print(date_pos == date_minute && hide ? EMPTY : buffer, POS, LINE, 2);
+  sprintf(buffer, ":%02d", now.second());
+  lcd->print(buffer, POS, LINE, 2);
+
+  scr_upd = false;
+  down_upd = false;
+  up_upd = false;
+  left_upd = false;
+  right_upd = false;
+}
+// Отображение страницы Об устройстве
+void show_about(){
+  if (!scr_upd && ms - ms_prev < 500){
+    return;
+  }
+  ms_prev = ms;
+  if (scr_upd){
+    lcd->clear();
+    lcd->print(F("Version"));
+    lcd->print(version, -1);
+    lcd->print(F("Vcc"), 0, 1);
+    lcd->print('V', -1);
+  }
+
+  lcd->print(readVcc(), 10, 1, 5, 3);
+
+  scr_upd = false;
+}
+
+// Отображение страницы Инфо (о поправке)
+void show_amendment_info(){
+  if (!scr_upd){
+    return;
+  }
+
+  lcd->clear();
+  DateTime corrected = DateTime(rtc->corrected_read());
+  char buffer[16];
+  sprintf(buffer,
+          "%02d.%02d.%04d",
+          corrected.day(), corrected.month(), corrected.year());
+  lcd->print(buffer, 0);
+  sprintf(buffer,
+          "%02d:%02d:%02d",
+          corrected.hour(), corrected.minute(), corrected.second());
+  lcd->print(buffer, 0, 1);
+  lcd->print(rtc->amendment_read(), -1, 1);
+  scr_upd = false;
+}
+
+// Отображение страницы установки поправки
+enum amendment_pos_type{
+  amendment_sign, amendment_integer, amendment_tenth, amendment_hundredth, amendment_thousandth, amendment_end
+};
+void show_amendment_edit(){
+  static float amendment = 0;
+  static amendment_pos_type amendment_pos = amendment_sign;
+  if (
+    ms - ms_prev < 500 &&
+    !scr_upd &&
+    !up_upd &&
+    !down_upd &&
+    !left_upd &&
+    !right_upd
+  ){
+    return;
+  }
+  ms_prev = ms;
+  // Если нажата кнопка right
+  if (right_upd){
+    amendment_pos = amendment_pos + 1;
+    if (amendment_end == amendment_pos){
+      right_upd = false;
+      rtc->amendment_write(amendment);
+      back();
+      return;
+    }
+  // Если нажата кнопка left
+  }else if (left_upd){
+    if (amendment_sign == amendment_pos){
+      left_upd = false;
+      back();
+      return;
+    }else{
+      amendment_pos = amendment_pos - 1;
+    }
+  // Если нажата кнопка up
+  }else if (up_upd){
+    switch (amendment_pos){
+      case amendment_sign:
+        amendment *= -1;
+        break;
+      case amendment_integer:
+        amendment -= 1;
+        break;
+      case amendment_tenth:
+        amendment -= 0.1;
+        break;
+      case amendment_hundredth:
+        amendment -= 0.01;
+        break;
+      case amendment_thousandth:
+        amendment -= 0.001;
+        break;
+    }
+  // Если нажата кнопка down
+  }else if (down_upd){
+    switch (amendment_pos){
+      case amendment_sign:
+        amendment *= -1;
+        break;
+      case amendment_integer:
+        amendment += 1;
+        break;
+      case amendment_tenth:
+        amendment += 0.1;
+        break;
+      case amendment_hundredth:
+        amendment += 0.01;
+        break;
+      case amendment_thousandth:
+        amendment += 0.001;
+        break;
+    }
+  }
+
+  if (scr_upd){
+    lcd->clear();
+    amendment_pos = amendment_sign;
+    amendment = rtc->amendment_read();
+  }
+
+  boolean hide = !up_upd && !down_upd && (ms / 500) % 2;
+  char buffer[5];
+  sprintf(buffer, "%c", amendment > 0 ? '+' : '-');
+  lcd->print(amendment_pos == amendment_sign && hide ? EMPTY : buffer, 3, 0, 1);
+  int tmp = amendment > 0 ? amendment : -amendment;
+  sprintf(buffer, "%04d", tmp);
+  lcd->print(amendment_pos == amendment_integer && hide ? EMPTY : buffer, POS, LINE, 4);
+  lcd->print('.', POS, LINE, 1);
+  tmp = (amendment - (int) amendment) * 1000;
+  tmp = tmp > 0 ? tmp % 1000 : -tmp % 1000;
+  sprintf(buffer, "%d", tmp / 100);
+  lcd->print(amendment_pos == amendment_tenth && hide ? EMPTY : buffer, POS, LINE, 1);
+  tmp = tmp % 100;
+  sprintf(buffer, "%d", tmp / 10);
+  lcd->print(amendment_pos == amendment_hundredth && hide ? EMPTY : buffer, POS, LINE, 1);
+  tmp = tmp % 10;
+  sprintf(buffer, "%d", tmp);
+  lcd->print(amendment_pos == amendment_thousandth && hide ? EMPTY : buffer, POS, LINE, 1);
+
+  scr_upd = false;
+  down_upd = false;
+  up_upd = false;
+  left_upd = false;
+  right_upd = false;
+}
+
+// Отображение страницы Инфо (о датчиках температуры)
+void show_temp_info(){
+  if (!scr_upd && ms - ms_prev < 500){
+    return;
+  }
+  ms_prev = ms;
+  if (scr_upd){
+    lcd->clear();
+    for (byte num = 0; num < ds_cnt; num++){
+      if (addr_id[num] == ds_id){
+        lcd->print('*', 0, num);
+      }
+      // Выводим id устройства
+      lcd->print((int) addr_id[num], -12, num);
+      lcd->print(F("\337C"), -1, num);
+    }
+  }
+
+  for (byte num = 0; num < ds_cnt; num++){
+    // Выводим температуру с устройства
+    lcd->print(celsius[num], -3, num, 6, 2);
+  }
+
+  scr_upd = false;
+}
+
+void setup() {
+  //Serial.begin(57600);
+  // Инициализация дисплея
+  lcd = new Cyrstal(8, 9, 4, 5, 6, 7, 16, 2, 10);
+  lcd->backlight();
+
+  // Обработка нажатий на пине A0
+  buttons = new ButtonsTact(A0);
+  // На первом месте стоит уровень по-умолчанию, когда ничего не нажато
+  buttons->addLevels(NONE, UP, DOWN, LEFT, RIGHT, SELECT, END);
+
+  // Инициализация часов
+#ifdef AVR
+  Wire.begin();
+#else
+  Wire1.begin();
+#endif
+  rtc = new ds1307();
+
+  // Обнуляем id устройств
+  for (byte num = 0; num < ds_cnt; num++){
+      addr_id[num] = 0;
+  }
+  // Ищем все устройства
+  ds_search();
+  // Загружаем из ПЗУ выбранный датчик
+  EEPROM.get(0, ds_id);
+  // Обнуляем показания датчиков
+  for (byte num = 0; num < ds_cnt; num++){
+    celsius[num] = 0;
+  }
+}
+
+void loop(){
+  // Время со старта скетча
+  ms = buttons->touch();
+  // Обрабатываем действия от нажатия кнопок на разных экранах
+  switch (buttons->state(A0)){
+    case UP:
+      switch (cur_scr){
+        case TIME:
+          menu();
+          break;
+        default:
+          up_upd = true;
+      }
+      break;
+    case DOWN:
+      switch (cur_scr){
+        case TIME:
+          menu();
+          break;
+        default:
+          down_upd = true;
+      }
+      break;
+    case LEFT:
+      switch (cur_scr){
+        case TIME:
+          menu();
+          break;
+        case MENU:
+          time();
+          break;
+        case DATE:
+        case ADJUST:
+        case AMENDMENT_EDIT:
+          left_upd = true;
+          break;
+        default:
+          back();
+      }
+      break;
+    case RIGHT:
+      switch (cur_scr){
+        case TIME:
+          menu();
+          break;
+        case TEMP_INFO:
+        case AMENDMENT_INFO:
+        case ABOUT:
+          back();
+          break;
+        default:
+          right_upd = true;
+      }
+      break;
+    case SELECT:
+      time();
+      break;
+  }
+
+  // Отображаем текущий экран
+  switch (cur_scr){
+    case TIME:
+      // Обновляем массив температур
+      update_temp();
+      // Отображение домашней страницы
+      show_time();
+      break;
+    case MENU:
+      // Отображение начальной страницу меню
+      show_menu(menu_items);
+      break;
+    case DATE:
+      // Отображение страницы установки времени на верное, также расчет коррекции
+      show_date();
+      break;
+    case TEMP:
+      // Отображение страницы меню Температура
+      show_menu(temp_items);
+      break;
+    case ADJUST:
+      // Отображение страницы установки времени на верное, без расчета коррекции
+      show_date(true);
+      break;
+    case AMENDMENT:
+      // Отображение страницы меню Поправка
+      show_menu(amendment_items);
+      break;
+    case ABOUT:
+      // Отображение страницы Об устройстве
+      show_about();
+      break;
+    case AMENDMENT_INFO:
+      // Отображение страницы Инфо (о поправке)
+      show_amendment_info();
+      break;
+    case AMENDMENT_EDIT:
+      // Отображение страницы установки поправки
+      show_amendment_edit();
+      break;
+    case TEMP_SENSOR:
+      // Отображение страницы меню c пунктами меню "Применить" для каждого датчика
+      show_menu(apply_items, addr_id, ds_cnt);
+      break;
+    case TEMP_INFO:
+      // Обновляем массив температур
+      update_temp();
+      // Отображение страницы Инфо (о датчиках температуры)
+      show_temp_info();
+      break;
+  }
 }
