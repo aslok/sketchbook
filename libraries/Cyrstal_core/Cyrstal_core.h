@@ -23,6 +23,11 @@
 #ifndef Cyrstal_core_h
 #define Cyrstal_core_h
 
+#define POS 127
+#define LINE 255
+#define SPACE 255
+const char* EMPTY = "";
+
 #include "Arduino.h"
 
 class Cyrstal_core {
@@ -41,17 +46,17 @@ class Cyrstal_core {
     virtual void lcd_clear()                          = 0;
 
     // Ф-ия печати строк переданных с помощью F()
-    void print(const __FlashStringHelper*, int8_t = 127, byte = 255, byte = 255);
+    void print(const __FlashStringHelper*, int8_t = POS, byte = LINE, byte = SPACE);
     // Ф-ия печати целых чисел
-    void print(int chr, int8_t position = 127, byte go_ln = 255, byte space = 255);
+    void print(const int chr, int8_t position = POS, byte go_ln = LINE, byte space = SPACE);
     // Печать чисел с плавающей точкой
-    void print(double, int8_t = 127, byte = 255, byte width = 5, byte prec = 2);
+    void print(const double, int8_t = POS, byte = LINE, byte width = 5, byte prec = 2);
     // Печать отдельного символа
-    void print(char, int8_t = 127, byte = 255, byte = 255);
+    void print(const char, int8_t = POS, byte = LINE, byte = SPACE);
     // Печать массива символов по указателю
-    void print(char*, int8_t = 127, byte = 255, byte = 255);
+    void print(const char*, int8_t = POS, byte = LINE, byte = SPACE);
     // Печать массива символов во внутренней кодировке
-    void print_enc(char*, int8_t = 127, byte = 255, byte = 255);
+    void print_enc(char*, int8_t = POS, byte = LINE, byte = SPACE);
 
     // Символы
     void power();
@@ -74,7 +79,7 @@ class Cyrstal_core {
     // Инициализация массива строк разделенных символом \r переданного через указатель
     void init(const char*);
     // Печать строки из ранее переданного массива по её номеру
-    void printn(byte num, int8_t = 127, byte = 255, byte = 255);
+    void printn(byte num, int8_t = POS, byte = LINE, byte = SPACE);
     // Подсчет количества строк массива разделенных символом \r переданного через F()
     byte count();
 

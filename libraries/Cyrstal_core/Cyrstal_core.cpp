@@ -98,7 +98,7 @@ void Cyrstal_core::print(const __FlashStringHelper* str, int8_t position, byte g
 }
 
 // Ф-ия печати целых чисел
-void Cyrstal_core::print(int chr, int8_t position, byte go_ln, byte space){
+void Cyrstal_core::print(const int chr, int8_t position, byte go_ln, byte space){
   char* str = new char[wh + 1];
   sprintf(str, "%d", chr);
   print(str, position, go_ln, space);
@@ -106,7 +106,7 @@ void Cyrstal_core::print(int chr, int8_t position, byte go_ln, byte space){
 }
 
 // Печать чисел с плавающей точкой
-void Cyrstal_core::print(double chr, int8_t position, byte go_ln, byte width, byte prec){
+void Cyrstal_core::print(const double chr, int8_t position, byte go_ln, byte width, byte prec){
   char* str = new char[wh + 1];
   dtostrf(chr, width, prec, str);
   print(str, position, go_ln);
@@ -114,13 +114,13 @@ void Cyrstal_core::print(double chr, int8_t position, byte go_ln, byte width, by
 }
 
 // Печать отдельного символа
-void Cyrstal_core::print(char chr, int8_t position, byte go_ln, byte space){
+void Cyrstal_core::print(const char chr, int8_t position, byte go_ln, byte space){
   char str[2]{chr};
   print(str, position, go_ln, space);
 }
 
 // Печать массива символов по указателю
-void Cyrstal_core::print(char* str, int8_t position, byte go_ln, byte space){
+void Cyrstal_core::print(const char* str, int8_t position, byte go_ln, byte space){
   byte cur_chr;
   for (cur_chr = 0; cur_chr < 255 && str[cur_chr]; cur_chr++);
   char* tmp = new char[cur_chr + 1];
@@ -132,19 +132,22 @@ void Cyrstal_core::print(char* str, int8_t position, byte go_ln, byte space){
 // Печать массива символов во внутренней кодировке
 void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space){
   byte cur, cur_chr, i, cur_pos;
-  if (go_ln != 255 && go_ln < h){
+  if (go_ln != LINE && go_ln < h){
     go(0, go_ln);
   }
-  if (position != 127 && position < w && position > -1 * (w + 1)){
+  if (position != POS && position < w && position > -1 * (w + 1)){
     if (position < 0){
       // Выясняем длину строки
       for (cur_chr = 0; str[cur_chr] && str[cur_chr] != '\n'; cur_chr++);
+      if (space != SPACE && space > cur_chr){
+        cur_chr = space;
+      }
       go(w + 1 - cur_chr + position, scr_pos / w);
     }else{
       go(position, scr_pos / w);
     }
   }
-  if (space != 255){
+  if (space != SPACE){
     // Выясняем длину строки
     for (cur_chr = 0; str[cur_chr] && str[cur_chr] != '\n'; cur_chr++);
     // Сдвиг относительно текущей позиции
