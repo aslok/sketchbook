@@ -6,6 +6,10 @@
  * Hardware:
  * Trickle-Charge Timekeeping Chip DS1307 (RTC Module V1.1 I2C)
  *   http://codehaus.blogspot.com/2012/02/i2c-rtc-ds1307-at24c32-real-time-clock.html
+ * LCD1602 KeyPad Shield For Arduino
+ *   https://www.dfrobot.com/wiki/index.php/LCD_KeyPad_Shield_For_Arduino_SKU:_DFR0009
+ * DS18B20 Temperature Sensor Shield with DS18B20 Chip
+ *   http://www.ebay.co.uk/itm/DS18B20-Temperature-Sensor-Shield-PCB-Module-Board-without-Chip-for-DIY-projects-/172041962079
  *
  *
  * created 01.11.2017
@@ -23,7 +27,7 @@
  * United States.
  *
  *
-Sketch uses 24,822 bytes (77.0%) of program storage space. Maximum is 32,256 bytes.
+Sketch uses 24,812 bytes (76.9%) of program storage space. Maximum is 32,256 bytes.
 Global variables use 631 bytes (30.8%) of dynamic memory, leaving 1,417 bytes for local variables. Maximum is 2,048 bytes.
  */
 
@@ -163,28 +167,28 @@ void update_temp(){
   static unsigned long ms_prev = 0;
   static byte ds_num = 0;
   static byte pass = 0;
+  if (!scr_upd && ms - ms_prev < 250){
+    return;
+  }
+  ms_prev = ms;
   if (scr_upd){
     pass = 0;
-    ms_prev = ms;
   }
-  if (ms - ms_prev > 250){
-    ms_prev = ms;
-    switch (pass){
-      case 0:
-        ds_raw_create(addr[ds_num]);
-        pass = 1;
-        break;
-      case 1:
-        byte data[9];
-        ds_raw_read(addr[ds_num], data);
-        celsius[ds_num] = ds_raw_to_celsius(addr[ds_num], data);
-        ds_num++;
-        if (ds_num == ds_cnt){
-          ds_num = 0;
-        }
-        pass = 0;
-        break;
-    }
+  switch (pass){
+    case 0:
+      ds_raw_create(addr[ds_num]);
+      pass = 1;
+      break;
+    case 1:
+      byte data[9];
+      ds_raw_read(addr[ds_num], data);
+      celsius[ds_num] = ds_raw_to_celsius(addr[ds_num], data);
+      ds_num++;
+      if (ds_num == ds_cnt){
+        ds_num = 0;
+      }
+      pass = 0;
+      break;
   }
 }
 
@@ -220,7 +224,7 @@ double readVcc() {
   long result = (high << 8) | low;
 
   /* измерив Vcc с помощью вольтметра и нашей функции readVcc().
-   * Далее заменяем константу 1125300L новой переменной:
+   * Далее заменяем константу 1125.3 новой переменной:
    * scale_constant = internal1.1Ref * 1023 * 1000
    * где
    * internal1.1Ref = 1.1 * Vcc1 (показания_вольтметра) / Vcc2 (показания_функции_readVcc())
