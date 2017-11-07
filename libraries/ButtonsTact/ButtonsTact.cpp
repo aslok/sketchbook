@@ -49,7 +49,7 @@ void ButtonsTact::addButton(byte pin){
         buttons_old = buttons;
     }
     // Указатель на новую версию массива кнопок
-    buttons = (Button*) malloc(buttons_cnt * sizeof(Button));
+    buttons = new Button[buttons_cnt];
     // Копируем кнопки из прошлой версии массива в новую
     for (byte num = 0; num < buttons_cnt_old; num++){
         buttons[num].pin = buttons_old[num].pin;
@@ -58,7 +58,7 @@ void ButtonsTact::addButton(byte pin){
     // Если в прошлой версии массива были кнопки
     if (buttons_cnt_old){
         // Освобождаем память выделенную для прошлой версии массива кнопок
-        free(buttons_old);
+        delete[] buttons_old;
     }
     buttons[buttons_cnt - 1].pin = pin;
     buttons[buttons_cnt - 1].levels = NULL;
@@ -77,7 +77,7 @@ void ButtonsTact::addLevels(...){
     for (; END != va_arg(arguments, int); ++arg_cnt);
     va_end(arguments);
     // Указатель на массив уровней
-    int* levels = (int*) malloc(arg_cnt * sizeof(int));
+    int* levels = new int[arg_cnt];
     va_start(arguments, 255);
     // Уровень по-умолчанию
     int level_default;
@@ -106,7 +106,7 @@ void ButtonsTact::addLevels(...){
     if (!levels_done){
         // TODO: Память нельзя освобождать, если ее использует больше чем одна кнопка
         // Освобождаем память занятую прошлой версией массива уровней
-        free(buttons[buttons_cnt - 1].levels);
+        delete[] buttons[buttons_cnt - 1].levels;
         // Указатель будет указывать на новый массив уровней
         buttons[buttons_cnt - 1].levels = levels;
         buttons[buttons_cnt - 1].level_default = level_default;
