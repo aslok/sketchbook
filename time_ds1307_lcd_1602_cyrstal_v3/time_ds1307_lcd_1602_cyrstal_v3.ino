@@ -13,7 +13,7 @@
  *
  *
  * created 01.11.2017
- * modifid 07.11.2017
+ * modifid 10.11.2017
  * with Arduino 1.8.3 (tested on Arduino Uno)
  *
  * Copyright 2017 Vitaliy Fust <aslok.zp@gmail.com>
@@ -27,11 +27,11 @@
  * United States.
  *
  *
-Sketch uses 24,812 bytes (76.9%) of program storage space. Maximum is 32,256 bytes.
-Global variables use 631 bytes (30.8%) of dynamic memory, leaving 1,417 bytes for local variables. Maximum is 2,048 bytes.
+Sketch uses 28,716 bytes (89.0%) of program storage space. Maximum is 32,256 bytes.
+Global variables use 678 bytes (33.1%) of dynamic memory, leaving 1,370 bytes for local variables. Maximum is 2,048 bytes.
  */
 
-const char version[] = "17110700";
+const char version[] = "17111000";
 
 // Библиотека для ввода с кнопок шилда
 #include "ButtonsTact.h"
@@ -47,8 +47,8 @@ const int NONE      = 1023;
 
 // Библиотека для термодатчика
 #include "OneWire.h"
-// Шина OneWire подключена к 12-му пину
-OneWire ds(12);
+// Шина OneWire подключена к 2-му пину
+OneWire ds(2);
 // Количество подключенных датчиков ds_cnt
 const byte ds_cnt = 2;
 // Массив из ds_cnt групп по 8 байт
@@ -225,11 +225,14 @@ double readVcc() {
 
   /* измерив Vcc с помощью вольтметра и нашей функции readVcc().
    * Далее заменяем константу 1125.3 новой переменной:
-   * scale_constant = internal1.1Ref * 1023 * 1000
+   * scale_constant = internal1.1Ref * 1023
    * где
    * internal1.1Ref = 1.1 * Vcc1 (показания_вольтметра) / Vcc2 (показания_функции_readVcc())
+   *
+   * Например:
    * internal1.1Ref = 1.1 * 4960 / 5138 = 1,06189178669
-   * scale_constant = 1,06189178669 * 1023 * 1000 = 1,08631529778
+   * scale_constant = 1,06189178669 * 1023 = 1086,31529778
+   *
    * Это калиброванное значение будет хорошим показателем
    * для измерений AVR чипом, но может зависеть от изменений
    * температуры
@@ -254,6 +257,8 @@ const char* EMPTY = "";
 #include "RTClib.h"
 #include "aRTClib.h"
 ds1307* rtc;
+#include "Eeprom24C32_64.h"
+Eeprom24C32_64* rtc_eeprom;
 
 const char month[][7] PROGMEM = {
   "янв", "фев", "мар", "апр", "мая", "июн", "июл", "авг", "сен", "окт", "ноя", "дек"
@@ -262,11 +267,61 @@ const char days[][5] PROGMEM = {
   "вс", "пн", "вт", "ср", "чт", "пт", "сб"
 };
 
+const byte speaker_pin = A3;
+// Тональности нот и структура note_item для мелодий
+#include "pitches.h"
+// Различные мелодии
+#include "melodies.h"
+byte melodies_count;
+int* melodies_titles;
+
+// Сейчас играет мелодия номер melodie_num
+byte melodie_num = NO_MELODIE;
+// Сейчас играет нота номер note_num
+unsigned int note_num = 0;
+// Фоновое воспроизведение мелодий
+void bg_melodie(){
+  static unsigned long ms_prev = 0;
+  // Сколько ждать конца ноты
+  static byte wait = 0;
+  // Если ничего не играем или ждем конца ноты
+  if (melodie_num == NO_MELODIE || ms - ms_prev < wait * 10){
+    return;
+  }
+  ms_prev = ms;
+  // Следующая нота
+  int note = (int) pgm_read_word_near(&melodies_notes[melodie_num][note_num].note);
+  // Если нот больше нет - заканчиваем
+  if (note == NOTE_END){
+    bg_melodie_off();
+    return;
+  }
+  // Начинаем играть ноту
+  tone(speaker_pin, note, ((byte) pgm_read_byte_near(&melodies_notes[melodie_num][note_num].duration)) * 10);
+  // Столько ждать конца ноты
+  wait = (byte) pgm_read_byte_near(&melodies_notes[melodie_num][note_num].wait);
+  // Номер следующей ноты
+  note_num++;
+}
+// Выключаем фоновое воспроизведение мелодий
+void bg_melodie_off(){
+  melodie_num = NO_MELODIE;
+  noTone(speaker_pin);
+}
+// Количество мелодий
+byte bg_melodie_count(){
+  byte count;
+  for (count = 0; melodies_notes[count] != NULL; count++);
+  return count;
+}
+
 // Названия разных страниц
 enum scr {
   TIME,
   MENU,
     DATE,
+    ALARM,
+      ALARM_MELODIES,
     TEMP,
       TEMP_SENSOR,
       TEMP_INFO,
@@ -322,6 +377,11 @@ void date(){
   cur_scr = DATE;
   scr_upd = true;
 }
+//    Переход на страницу меню Будильник
+void alarm(){
+  cur_scr = ALARM;
+  scr_upd = true;
+}
 //    Переход на страницу меню Температура
 void temp(){
   cur_scr = TEMP;
@@ -337,12 +397,17 @@ void about(){
   cur_scr = ABOUT;
   scr_upd = true;
 }
-//    Переход на страницу меню Инфо (о поправке)
+//    Переход на страницу меню Мелодии
+void melodies(){
+  cur_scr = ALARM_MELODIES;
+  scr_upd = true;
+}
+//    Переход на страницу Инфо (о поправке)
 void amendment_info(){
   cur_scr = AMENDMENT_INFO;
   scr_upd = true;
 }
-//    Переход на страницу меню установки поправки
+//    Переход на страницу установки поправки
 void amendment_edit(){
   cur_scr = AMENDMENT_EDIT;
   scr_upd = true;
@@ -352,7 +417,7 @@ void adjust(){
   cur_scr = ADJUST;
   scr_upd = true;
 }
-//    Переход на страницу меню Инфо (о датчиках температуры)
+//    Переход на страницу Инфо (о датчиках температуры)
 void temp_info(){
   cur_scr = TEMP_INFO;
   scr_upd = true;
@@ -372,6 +437,11 @@ void apply(){
       EEPROM.put(0, ds_id);
       back();
       break;
+    // На странице меню выбора мелодии для воспроизведения
+    case ALARM_MELODIES:
+      melodie_num = cur_suff;
+      note_num = 0;
+      break;
   }
   back();
 }
@@ -380,9 +450,18 @@ void apply(){
 const menu_item menu_items[] PROGMEM = {
 //  "Ширина   1602"
   { "Дата", date },
+  { "Будильник", alarm },
   { "Температура", temp },
   { "Поправка", amendment },
   { "Об устройстве", about },
+  { "", NULL },
+};
+const menu_item alarm_items[] PROGMEM = {
+  { "Мелодии", melodies },
+  { "", NULL },
+};
+const menu_item melodies_items[] PROGMEM = {
+  { "Мелодия", apply },
   { "", NULL },
 };
 const menu_item amendment_items[] PROGMEM = {
@@ -653,7 +732,7 @@ void show_about(){
   ms_prev = ms;
   if (scr_upd){
     lcd->clear();
-    lcd->print(F("Version"));
+    lcd->print(F("Версия"));
     lcd->print(version, -1);
     lcd->print(F("Vcc"), 0, 1);
     lcd->print('V', -1);
@@ -669,7 +748,6 @@ void show_amendment_info(){
   if (!scr_upd){
     return;
   }
-
   lcd->clear();
   DateTime corrected = DateTime(rtc->corrected_read());
   char buffer[16];
@@ -830,6 +908,17 @@ void setup() {
   // На первом месте стоит уровень по-умолчанию, когда ничего не нажато
   buttons->addLevels(NONE, UP, DOWN, LEFT, RIGHT, SELECT, END);
 
+  // Мелодии
+  melodies_count = bg_melodie_count();
+  melodies_titles = new int[melodies_count];
+  for (byte num = 0; num < melodies_count; num++){
+    melodies_titles[num] = num + 1;
+  }
+
+  // Управление динамиком
+  pinMode(speaker_pin, OUTPUT);
+  digitalWrite(speaker_pin, LOW);
+
   // Инициализация часов
 #ifdef AVR
   Wire.begin();
@@ -837,6 +926,15 @@ void setup() {
   Wire1.begin();
 #endif
   rtc = new ds1307();
+  rtc_eeprom = new Eeprom24C32_64(0x50);
+
+  // Питание (-) для динамика на A1-ом пине
+  pinMode(A2, OUTPUT);
+  digitalWrite(A2, LOW);
+
+  // Питание (+) для датчиков на 3-ем пине
+  pinMode(3, OUTPUT);
+  digitalWrite(3, HIGH);
 
   // Обнуляем id устройств
   for (byte num = 0; num < ds_cnt; num++){
@@ -855,27 +953,34 @@ void setup() {
 void loop(){
   // Время со старта скетча
   ms = buttons->touch();
+  // Фоновое воспроизведение мелодий
+  bg_melodie();
   // Обрабатываем действия от нажатия кнопок на разных экранах
   switch (buttons->state(A0)){
     case UP:
       switch (cur_scr){
         case TIME:
+          bg_melodie_off();
           menu();
           break;
         default:
           up_upd = true;
       }
+      //tone(speaker_pin, NOTE_C1, 100);
       break;
     case DOWN:
       switch (cur_scr){
         case TIME:
+          bg_melodie_off();
           menu();
           break;
         default:
           down_upd = true;
       }
+      //tone(speaker_pin, NOTE_E1, 100);
       break;
     case LEFT:
+      bg_melodie_off();
       switch (cur_scr){
         case TIME:
           menu();
@@ -891,8 +996,10 @@ void loop(){
         default:
           back();
       }
+      //tone(speaker_pin, NOTE_G1, 100);
       break;
     case RIGHT:
+      bg_melodie_off();
       switch (cur_scr){
         case TIME:
           menu();
@@ -905,9 +1012,12 @@ void loop(){
         default:
           right_upd = true;
       }
+      //tone(speaker_pin, NOTE_B1, 100);
       break;
     case SELECT:
+      bg_melodie_off();
       time();
+      //tone(speaker_pin, NOTE_F2, 100);
       break;
   }
 
@@ -927,13 +1037,13 @@ void loop(){
       // Отображение страницы установки времени на верное, также расчет коррекции
       show_date();
       break;
+    case ALARM:
+      // Отображение страницы меню Будильник
+      show_menu(alarm_items);
+      break;
     case TEMP:
       // Отображение страницы меню Температура
       show_menu(temp_items);
-      break;
-    case ADJUST:
-      // Отображение страницы установки времени на верное, без расчета коррекции
-      show_date(true);
       break;
     case AMENDMENT:
       // Отображение страницы меню Поправка
@@ -943,6 +1053,10 @@ void loop(){
       // Отображение страницы Об устройстве
       show_about();
       break;
+    case ALARM_MELODIES:
+      // Отображение страницы меню Мелодии
+      show_menu(melodies_items, melodies_titles, melodies_count);
+      break;
     case AMENDMENT_INFO:
       // Отображение страницы Инфо (о поправке)
       show_amendment_info();
@@ -950,6 +1064,10 @@ void loop(){
     case AMENDMENT_EDIT:
       // Отображение страницы установки поправки
       show_amendment_edit();
+      break;
+    case ADJUST:
+      // Отображение страницы установки времени на верное, без расчета коррекции
+      show_date(true);
       break;
     case TEMP_SENSOR:
       // Отображение страницы меню c пунктами меню "Применить" для каждого датчика
