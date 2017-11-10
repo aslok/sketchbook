@@ -27,7 +27,7 @@
  * United States.
  *
  *
-Sketch uses 28,716 bytes (89.0%) of program storage space. Maximum is 32,256 bytes.
+Sketch uses 28,700 bytes (89.0%) of program storage space. Maximum is 32,256 bytes.
 Global variables use 678 bytes (33.1%) of dynamic memory, leaving 1,370 bytes for local variables. Maximum is 2,048 bytes.
  */
 
@@ -928,13 +928,9 @@ void setup() {
   rtc = new ds1307();
   rtc_eeprom = new Eeprom24C32_64(0x50);
 
-  // Питание (-) для динамика на A1-ом пине
-  pinMode(A2, OUTPUT);
-  digitalWrite(A2, LOW);
-
-  // Питание (+) для датчиков на 3-ем пине
-  pinMode(3, OUTPUT);
-  digitalWrite(3, HIGH);
+  // Питание (-) для датчиков на A1-ом пине
+  pinMode(A1, OUTPUT);
+  digitalWrite(A1, LOW);
 
   // Обнуляем id устройств
   for (byte num = 0; num < ds_cnt; num++){
