@@ -40,6 +40,7 @@ ButtonsTact::ButtonsTact(byte pin){
 
 // Добавляем новую кнопку (кнопки) в массив кнопок
 void ButtonsTact::addButton(byte pin){
+    pinMode(pin, INPUT);
     // Указатель на прошлую версию массива кнопок
     struct Button* buttons_old;
     // Количество элементов в прошлой версии массива кнопок
@@ -138,11 +139,12 @@ unsigned long ButtonsTact::touch(unsigned long new_ms){
         byte levels_cnt;
         for (levels_cnt = 0; END != buttons[num].levels[levels_cnt]; levels_cnt++);
         int current;
+        int level_from;
         // Обходим массив уровней
-        for (byte num_from = 0; num_from < levels_cnt; num_from++){
-            byte num_to = num_from + 1;
+        for (byte num_from = 0, num_to; num_from < levels_cnt; num_from++){
+            num_to = num_from + 1;
             // Каждая пара уровней проверяется на вхождение текущего уровня
-            int level_from = buttons[num].levels[num_from];
+            level_from = buttons[num].levels[num_from];
             // Если это последняя итерация
             if (num_from == levels_cnt - 1 ||
                     // Или если текущий уровень меньше середины между парой уровней
@@ -167,9 +169,8 @@ unsigned long ButtonsTact::touch(unsigned long new_ms){
             buttons[num].ms_start = ms;
             // Сохраняем текущий уровень
             buttons[num].current = current;
-        }
         // Если кнопка нажата больше 50 милисекунд
-        if (current != buttons[num].level_default &&
+        }else if (current != buttons[num].level_default &&
                 (double) ms - buttons[num].ms_start > 50){
             // Игнорируем удерживание нажатия в течении 250 милисекунд
             buttons[num].ms_start = ms + 250;
