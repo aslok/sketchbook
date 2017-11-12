@@ -75,6 +75,9 @@ class QBPlay{
         unsigned long ms_prev = 0;
         // tempo * (dot ? 1.5 : 1) / length
         unsigned int ms_wait = 0;
+
+        // Кеширование для последнего прочитанного символа
+        unsigned int cache_pos;
 };
 
 #endif

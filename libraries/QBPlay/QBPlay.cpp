@@ -36,6 +36,7 @@ void QBPlay::start(const __FlashStringHelper* melodie_str){
     tempo = 2000;
     length = 4;
     duration = 7;
+    cache_pos = 65535;
 }
 
 void QBPlay::stop(){
@@ -126,6 +127,7 @@ unsigned long QBPlay::touch(unsigned long new_ms){
 
 int QBPlay::note_freq(byte num){
     unsigned int* freq_ptr;
+    boolean no_dot = false;
     switch (get_next_chr()){
         case '#':
         case '+':
@@ -144,9 +146,10 @@ int QBPlay::note_freq(byte num){
             break;
         default:
             melodie_pos--;
+            no_dot = true;
             freq_ptr = &freq[octave][num];
     }
-    if (!dot){
+    if (!dot && !no_dot){
         switch (get_next_chr()){
             case '.':
                 dot = true;
@@ -159,7 +162,13 @@ int QBPlay::note_freq(byte num){
 }
 
 char QBPlay::get_next_chr(){
-    return toupper((char) pgm_read_byte_near((char *) melodie + melodie_pos++));
+    static char cache_chr;
+    if (cache_pos != melodie_pos){
+        cache_pos = melodie_pos;
+        cache_chr = toupper((char) pgm_read_byte_near((char *) melodie + melodie_pos));
+    }
+    melodie_pos++;
+    return cache_chr;
 }
 
 byte QBPlay::get_next_num(){
