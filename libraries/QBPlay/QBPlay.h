@@ -44,7 +44,7 @@ class QBPlay{
 
         void start(const __FlashStringHelper* melodie);
         void stop();
-        void touch(unsigned long new_ms = 0);
+        unsigned long touch(unsigned long new_ms = 0);
     private:
         int note_freq(byte num);
         char get_next_chr();

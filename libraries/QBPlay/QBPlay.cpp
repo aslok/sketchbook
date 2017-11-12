@@ -42,17 +42,16 @@ void QBPlay::stop(){
     play = false;
 }
 
-void QBPlay::touch(unsigned long new_ms){
+unsigned long QBPlay::touch(unsigned long new_ms){
     ms = new_ms ? new_ms : millis();
     if (!play || ms - ms_prev < ms_wait){
         return;
     }
-    ms_prev = ms;
 
     dot = false;
     unsigned int freq = 0;
     boolean done = false;
-    while (!freq && !done && play){
+    while (!freq && !done){
         switch (get_next_chr()){
             case 'M':
                 switch (get_next_chr()){
@@ -118,8 +117,11 @@ void QBPlay::touch(unsigned long new_ms){
     }
     if (freq){
         ms_wait = tempo * (dot ? 1.5 : 1) / length;
+        noTone(pin);
         tone(pin, freq, ms_wait * duration / 8);
     }
+    ms_prev = millis();
+    return ms_prev;
 }
 
 int QBPlay::note_freq(byte num){
@@ -136,16 +138,22 @@ int QBPlay::note_freq(byte num){
                 &freq[octave][num - 1] :
                 (octave ? &freq[octave - 1][11] : NULL);
             break;
+        case '.':
+            dot = true;
+            freq_ptr = &freq[octave][num];
+            break;
         default:
             melodie_pos--;
             freq_ptr = &freq[octave][num];
     }
-    switch (get_next_chr()){
-        case '.':
-            dot = true;
-            break;
-        default:
-            melodie_pos--;
+    if (!dot){
+        switch (get_next_chr()){
+            case '.':
+                dot = true;
+                break;
+            default:
+                melodie_pos--;
+        }
     }
     return freq_ptr != NULL ? (int) pgm_read_word_near(freq_ptr) : 0;
 }
