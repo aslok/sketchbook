@@ -179,7 +179,7 @@ byte QBPlay::get_next_num(){
     for (out_pos = 0; out_pos < 4 && (tmp = get_next_chr()) && tmp >= '0' && tmp <= '9'; out[out_pos++] = tmp);
     melodie_pos--;
     // Ошибка - в числе ни одной цифры или больше трех цифр
-    if (!out_pos || out_pos >= 3){
+    if (!out_pos || out_pos == 4){
         return 0;
     }
     out[out_pos] = 0;
