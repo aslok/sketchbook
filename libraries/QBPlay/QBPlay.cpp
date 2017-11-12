@@ -95,6 +95,7 @@ unsigned long QBPlay::touch(unsigned long ms){
                 break;
             case 0:
                 play = false;
+                melodie_pos = 0;
                 return;
             case 'C':
                 freq = note_freq(0);
