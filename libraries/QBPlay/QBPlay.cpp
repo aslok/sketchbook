@@ -42,14 +42,11 @@ void QBPlay::start(const __FlashStringHelper* melodie_str){
 unsigned long QBPlay::touch(unsigned long ms){
     static unsigned long ms_prev = 0;
     static unsigned int ms_wait = 0;
-    if (!play){
-        return;
-    }
     if (!ms){
         ms = millis();
     }
-    if (ms - ms_prev < ms_wait){
-        return;
+    if (!play || ms - ms_prev < ms_wait){
+        return ms;
     }
 
     dot = false;
@@ -96,7 +93,7 @@ unsigned long QBPlay::touch(unsigned long ms){
             case 0:
                 play = false;
                 melodie_pos = 0;
-                return;
+                return ms;
             case 'C':
                 freq = note_freq(0);
                 break;
