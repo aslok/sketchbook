@@ -1,0 +1,36 @@
+/*
+ * Chopin_3.ino
+ * Файл с примером использования библиотеки QBPlay
+ * https://en.wikibooks.org/wiki/QBasic/Appendix#PLAY
+ *
+ * created 10.11.2017
+ * modified 12.11.2017
+ * with Arduino 1.8.3 (tested on Arduino Uno)
+ *
+ * Copyright 2017 Vitaliy Fust <aslok.zp@gmail.com>
+ *
+ * This work is licensed under the MIT License (MIT). To view a copy of this
+ * license, visit http://opensource.org/licenses/MIT or send a letter to:
+ * Open Source Initiative
+ * 855 El Camino Real
+ * Ste 13A, #270
+ * Palo Alto, CA 94301
+ * United States.
+ *
+ *
+ */
+
+#include "QBPlay.h"
+QBPlay* play;
+const byte speaker_pin = A3;
+
+const char Chopin_3[] PROGMEM = "MNT150L4O2A+L1>GL4FGL2F.D+L4<A+L2>GL4CL2>CL4<GL2A+.G+L4GL2F.GL4DL2D+.C.L4<A+O4DCL8<A+G+GG+CDL2D+.P2L4<A+L2>G.L8FL16GL32FGL8FEFGL4FL2D+P16L16FL32D+FL8D+DD+FG<B>CDCFEG+G>C+C<GL2A+.G+L4GL32FL64GL32FL64GL32FL64GFGL32FL64GL32FL64GL32FL64GL32FL64GFL8FL16EFL4GGDL2D+.C.L4<A+O4DCL8<A+G+GL32G+.G+L8CDL2D+.P4L4DD+L2F.GL4FL2F.C.L4D+D+D+D+L8DD+F.L16D+L2D+.<A+.>A+.AL4GL2F.D.D+.L4DCD<A+BB>CCL8D.L32<GA+>D+L2GL8<AA+BA+>C+DG.L16FL4FL2D+P16L32F.D+FL8D+DD+FG<B>CC+CFEG+G>C+C<GL2A+.G+L4GL64FGFGFGFGFGFGFGFGFGFGL8F.L16EFL4GGDL2D+.C.L4<A+O4DC+L16C<BA+AG+FD<BA+>DGL32FD+L2D+.P4L4DD+L2F.GL4FL2F.C.L4D+D+D+D+L8DD+FD+L2D+.<A+.>A+.AL4GL2F.D.D+.L4DCD<A+BB>CCL8D.L32<GA+>D+L2GL8<AA+BA+>C+DG.L16FL4FL2D+P16L16FL32D+FL8D+DD+FG<B>CC+CFEG+G>C+C<GL2A+.G+L4GL64FGFGFGFGFGFGFGFGFGFGL8F.L16EFL4GGDL2D+.C.L8<A+.L4O4DL16C+L8C.L16<BL8A+.L16AG+<AA+.B.>C.C+DG.F.D+.L2D+.P2P4D+.L4FD+FL2G.P2P4D+.P8L8FD+FD+FL2GL8D+L32FD+DD+L4>D+DCL2<A+L4AG+CDD+L8FL16D+FD+L8DD+L4>GL8FD+DCL4<BA+AL8AG+G+GG.L16FL2D+.P2P4D+.P8L8FD+L16FD+L8FL16D+FL2G.P2P4L4D+L8<G+L16A+L32G+A+L8G+GG+B>D+.L16FL4GD+L2>D+L4DC<BA+AG+GDD+L2>D+.L4<F>CL1<B.L2A+L8>BA+>C<AL16B.A+.>C.<A.BA+>C<AL32B.A+.>C.<A.BA+>C<AL64B.A+.>C.<A.BA+>C<ABA+>C<AL32BA+>C<AB.A+.>C.<A.L16BA+>C<AB.A+.>C.<A.L8BA+>C<ABA+>DC<A+AG+GFDD+C<A+G+CDL2D+L4<A+>GD+<A+>GD+<A+>GL2D+.>D+.L1O2D+.";
+
+void setup(){
+    play = new QBPlay(speaker_pin);
+    play->start((__FlashStringHelper*) Chopin_3);
+}
+
+void loop(){
+    play->touch();
+}

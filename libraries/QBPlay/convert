@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+for FILENAME in *.BAS; do
+    TITLE="$(grep REM "$FILENAME")"
+    if [ -z "$TITLE" ]; then
+        TITLE="$(grep \' "$FILENAME")"
+    fi
+    TITLE="$(echo "$TITLE" | sed -e "s/REM //" -e "s/ /_/g" -e "s/,//g" -e "s/\.//g" -e "s/!//g" -e "s/\//_/g" -e "s/(//" -e "s/)//" -e "s/&/and/g" -e "s/^_//" -e "s/_\$//" -e "s/'//g" -e "s/-/_/g" | tr -d "\r\n")"
+    if [ -z "$TITLE" ]; then
+        TITLE="$(echo "$FILENAME" | sed "s/.BAS//" | tr '[:upper:]' '[:lower:]')"
+        TITLE="${TITLE^}"
+        #echo "$TITLE"
+    fi
+    TITLE_UPPER="$(echo "$TITLE" | tr '[:lower:]' '[:upper:]')"
+    if [[ "$TITLE" == "$TITLE_UPPER" ]]; then
+        TITLE="$(echo "$TITLE" | tr '[:upper:]' '[:lower:]')"
+        TITLE="${TITLE^}"
+        #echo "$TITLE"
+    fi
+    #echo "$TITLE"
+    #continue
+    CONTENT="$(grep -v REM "$FILENAME" | sed -e "s/PLAY //" -e "s/\"//g" | tr -d "\r\n")"
+    CONST="const char $TITLE[] PROGMEM = \"$CONTENT\";"
+    mkdir -p "../examples/$TITLE"
+    #continue
+    cat template | sed -e "s/template/$TITLE/" -e "s/string/$CONST/" -e "s/melodie/$TITLE/" > "../examples/$TITLE/$TITLE.ino"
+done
