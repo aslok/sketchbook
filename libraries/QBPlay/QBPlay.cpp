@@ -39,13 +39,16 @@ void QBPlay::start(const __FlashStringHelper* melodie_str){
     cache_pos = 65535;
 }
 
-void QBPlay::stop(){
-    play = false;
-}
-
-unsigned long QBPlay::touch(unsigned long new_ms){
-    ms = new_ms ? new_ms : millis();
-    if (!play || ms - ms_prev < ms_wait){
+unsigned long QBPlay::touch(unsigned long ms){
+    static unsigned long ms_prev = 0;
+    static unsigned int ms_wait = 0;
+    if (!play){
+        return;
+    }
+    if (!ms){
+        ms = millis();
+    }
+    if (ms - ms_prev < ms_wait){
         return;
     }
 

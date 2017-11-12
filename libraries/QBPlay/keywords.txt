@@ -6,3 +6,4 @@ QBPlay KEYWORD1
 start KEYWORD2
 stop KEYWORD2
 touch KEYWORD2
+play KEYWORD2

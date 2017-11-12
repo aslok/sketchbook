@@ -43,18 +43,15 @@ class QBPlay{
         QBPlay(const byte speaker_pin);
 
         void start(const __FlashStringHelper* melodie);
-        void stop();
-        unsigned long touch(unsigned long new_ms = 0);
+        unsigned long touch(unsigned long ms = 0);
+
+        // Флаг - воспроизводим или нет
+        boolean play = false;
     private:
         int note_freq(byte num);
         char get_next_chr();
         byte get_next_num();
 
-        // Текущая милисекунда uptime
-        unsigned long ms;
-
-        // Флаг - воспроизводим или пауза
-        boolean play = false;
         // Cтрока с мелодией в памяти
         __FlashStringHelper* melodie;
         // Текущий символ строки
@@ -71,10 +68,6 @@ class QBPlay{
         byte duration;
         // Текущая нота в полтора раза дольше чем остальные
         boolean dot;
-        // Время начала предыдущей ноты
-        unsigned long ms_prev = 0;
-        // tempo * (dot ? 1.5 : 1) / length
-        unsigned int ms_wait = 0;
 
         // Кеширование для последнего прочитанного символа
         unsigned int cache_pos;
