@@ -5,7 +5,7 @@
  * https://en.wikibooks.org/wiki/QBasic/Appendix#PLAY
  *
  * created 10.11.2017
- * modified 12.11.2017
+ * modified 13.11.2017
  * with Arduino 1.8.3 (tested on Arduino Uno)
  *
  * Copyright 2017 Vitaliy Fust <aslok.zp@gmail.com>
@@ -26,6 +26,8 @@
 
 #include "Arduino.h"
 
+const boolean QBPlay_REPEAT = true;
+
 //    0     1     2     3     4     5     6     7     8     9     10    11
 //    C     C#    D     D#    E     F     F#    G     G#    A     A#    B
 const unsigned int freq[][12] PROGMEM = {
@@ -42,11 +44,13 @@ class QBPlay{
     public:
         QBPlay(const byte speaker_pin);
 
-        void start(const __FlashStringHelper* melodie);
+        void start(const __FlashStringHelper* melodie_str, boolean melodie_repeat = false);
         unsigned long touch(unsigned long ms = 0);
 
         // Флаг - воспроизводим или нет
         boolean play = false;
+        // Флаг - повтор воспроизведения
+        boolean repeat = false;
     private:
         int note_freq(byte num);
         char get_next_chr();

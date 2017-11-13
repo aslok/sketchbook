@@ -5,7 +5,7 @@
  * https://en.wikibooks.org/wiki/QBasic/Appendix#PLAY
  *
  * created 10.11.2017
- * modified 12.11.2017
+ * modified 13.11.2017
  * with Arduino 1.8.3 (tested on Arduino Uno)
  *
  * Copyright 2017 Vitaliy Fust <aslok.zp@gmail.com>
@@ -28,8 +28,9 @@ QBPlay::QBPlay(const byte speaker_pin){
     pinMode(pin, OUTPUT);
 }
 
-void QBPlay::start(const __FlashStringHelper* melodie_str){
+void QBPlay::start(const __FlashStringHelper* melodie_str, boolean melodie_repeat = false){
     play = true;
+    repeat = melodie_repeat;
     melodie = melodie_str;
     melodie_pos = 0;
     octave = 3;
@@ -91,8 +92,10 @@ unsigned long QBPlay::touch(unsigned long ms){
                 done = true;
                 break;
             case 0:
-                play = false;
                 melodie_pos = 0;
+                if (!repeat){
+                    play = false;
+                }
                 return ms;
             case 'C':
                 freq = note_freq(0);
