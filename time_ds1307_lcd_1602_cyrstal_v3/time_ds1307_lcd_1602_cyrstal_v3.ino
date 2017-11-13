@@ -13,7 +13,7 @@
  *
  *
  * created 01.11.2017
- * modifid 10.11.2017
+ * modifid 13.11.2017
  * with Arduino 1.8.3 (tested on Arduino Uno)
  *
  * Copyright 2017 Vitaliy Fust <aslok.zp@gmail.com>
@@ -27,11 +27,11 @@
  * United States.
  *
  *
-Sketch uses 28,700 bytes (89.0%) of program storage space. Maximum is 32,256 bytes.
-Global variables use 678 bytes (33.1%) of dynamic memory, leaving 1,370 bytes for local variables. Maximum is 2,048 bytes.
+Sketch uses 29,324 bytes (90.9%) of program storage space. Maximum is 32,256 bytes.
+Global variables use 676 bytes (33.0%) of dynamic memory, leaving 1,372 bytes for local variables. Maximum is 2,048 bytes.
  */
 
-const char version[] = "17111000";
+const char version[] = "17111300";
 
 // Библиотека для ввода с кнопок шилда
 #include "ButtonsTact.h"
@@ -267,53 +267,21 @@ const char days[][5] PROGMEM = {
   "вс", "пн", "вт", "ср", "чт", "пт", "сб"
 };
 
+// Библиотека для мелодий
+#include "QBPlay.h"
+QBPlay* speaker;
 const byte speaker_pin = A3;
-// Тональности нот и структура note_item для мелодий
-#include "pitches.h"
-// Различные мелодии
-#include "melodies.h"
+const char Hava[] PROGMEM = "MST200L4O2DDP16L8F+D+DL4F+F+P16L8AGF+L4GGP16L8A+AGL4F+D+L2DL4DDP16L8F+D+DL4F+F+P16L8AGF+L4GGP16L8A+AGL4F+D+L2DP16L8F+L4F+L8D+DDL4DP16L8D+L4D+L8DCCL4CP16CD+CGF+D+L16D+L2DL8F+L4F+L8D+DDL4DP16L8D+L4D+L8DCCL4CP16CD+CGF+D+L16D+L2DP16GP16GP16L4GA+L2A+L8GGA+AGA+AGGGA+AGA+AGAA>C<A+A>C<A+AAA>C<A+A>C<A+AP8AL4>DL8<AAL4>DL8<A>C<A+AL2G";
+const char When_Johnny_Comes_Marching_Home_Again[] PROGMEM = "MNT150L32O1DEFGL4AP4L32DEFGL4AP4L32DEFGL4AP4L32DEFGL4AP4L8O3EEAAL4AP64L8BL4>CL8<BL4>CL8<AL2GP8L8EL2GP16L8EEAAL4AP64L8BL4>CL8<BL4>CL8DL2EP16L8CL2EP16L8CL4EL8EEDCL4DL8DL4DP32L8<BL4>CL8CC<BAL4BL8BBP32>CDL4E.D.C.<B.L8EAAL4AL8GL2A.";
+const char Theme_from_Star_Wars[] PROGMEM = "MNT150L2O3CGP16L16FEDL2>C<GP16L16FEDL2>C<GP16L16FEFL2DP16L16<GGGL2>CGP32L16FEDL2>C<GP16L16FEDL2>C<GP16L16A+AA+L1GL2G.L8<G.L16GL4A.L8A>FEDCL16CDEDP16L8<AL4BL8G.L16GL4A.L8A>FEDCGP8L4D.P8L8<G.L16GL4A.L8A>FEDCL16CDEDP16L8<AL4BP16L8>G.L16GL8>C.L16<A+L8G+.L16GL8F.L16D+L8D.L16CL1GL2G.P16L16GGGL8>CP8L16<CCCL2C.";
+char* melodies_base[] = {
+  Hava,
+  When_Johnny_Comes_Marching_Home_Again,
+  Theme_from_Star_Wars,
+  NULL
+};
 byte melodies_count;
 int* melodies_titles;
-
-// Сейчас играет мелодия номер melodie_num
-byte melodie_num = NO_MELODIE;
-// Сейчас играет нота номер note_num
-unsigned int note_num = 0;
-// Фоновое воспроизведение мелодий
-void bg_melodie(){
-  static unsigned long ms_prev = 0;
-  // Сколько ждать конца ноты
-  static byte wait = 0;
-  // Если ничего не играем или ждем конца ноты
-  if (melodie_num == NO_MELODIE || ms - ms_prev < wait * 10){
-    return;
-  }
-  ms_prev = ms;
-  // Следующая нота
-  int note = (int) pgm_read_word_near(&melodies_notes[melodie_num][note_num].note);
-  // Если нот больше нет - заканчиваем
-  if (note == NOTE_END){
-    bg_melodie_off();
-    return;
-  }
-  // Начинаем играть ноту
-  tone(speaker_pin, note, ((byte) pgm_read_byte_near(&melodies_notes[melodie_num][note_num].duration)) * 10);
-  // Столько ждать конца ноты
-  wait = (byte) pgm_read_byte_near(&melodies_notes[melodie_num][note_num].wait);
-  // Номер следующей ноты
-  note_num++;
-}
-// Выключаем фоновое воспроизведение мелодий
-void bg_melodie_off(){
-  melodie_num = NO_MELODIE;
-  noTone(speaker_pin);
-}
-// Количество мелодий
-byte bg_melodie_count(){
-  byte count;
-  for (count = 0; melodies_notes[count] != NULL; count++);
-  return count;
-}
 
 // Названия разных страниц
 enum scr {
@@ -439,8 +407,7 @@ void apply(){
       break;
     // На странице меню выбора мелодии для воспроизведения
     case ALARM_MELODIES:
-      melodie_num = cur_suff;
-      note_num = 0;
+      speaker->start((__FlashStringHelper*) melodies_base[cur_suff], QBPlay_REPEAT);
       break;
   }
   back();
@@ -499,10 +466,6 @@ void show_time() {
   char buffer[32];
   sprintf(buffer, "%d %s", rtc->date.day(), mon);
   lcd->print(buffer, -6, 0, 6);
-
-  /*dtostrf(readVcc(), 4, 2, buffer);
-  sprintf(buffer, "%sV", buffer);
-  lcd->print(buffer, -1, 0);*/
 
   sprintf(buffer, "%02d:%02d:%02d", rtc->date.hour(), rtc->date.minute(), rtc->date.second());
   lcd->print(buffer, 0, 1, 16);
@@ -909,15 +872,14 @@ void setup() {
   buttons->addLevels(NONE, UP, DOWN, LEFT, RIGHT, SELECT, END);
 
   // Мелодии
-  melodies_count = bg_melodie_count();
+  for (melodies_count = 0; melodies_base[melodies_count] != NULL; melodies_count++);
   melodies_titles = new int[melodies_count];
   for (byte num = 0; num < melodies_count; num++){
     melodies_titles[num] = num + 1;
   }
 
   // Управление динамиком
-  pinMode(speaker_pin, OUTPUT);
-  digitalWrite(speaker_pin, LOW);
+  speaker = new QBPlay(speaker_pin);
 
   // Инициализация часов
 #ifdef AVR
@@ -950,13 +912,13 @@ void loop(){
   // Время со старта скетча
   ms = buttons->touch();
   // Фоновое воспроизведение мелодий
-  bg_melodie();
+  speaker->touch(ms);
   // Обрабатываем действия от нажатия кнопок на разных экранах
   switch (buttons->state(A0)){
     case UP:
       switch (cur_scr){
         case TIME:
-          bg_melodie_off();
+          speaker->play = false;
           menu();
           break;
         default:
@@ -967,7 +929,7 @@ void loop(){
     case DOWN:
       switch (cur_scr){
         case TIME:
-          bg_melodie_off();
+          speaker->play = false;
           menu();
           break;
         default:
@@ -976,7 +938,7 @@ void loop(){
       //tone(speaker_pin, NOTE_E1, 100);
       break;
     case LEFT:
-      bg_melodie_off();
+      speaker->play = false;
       switch (cur_scr){
         case TIME:
           menu();
@@ -995,7 +957,7 @@ void loop(){
       //tone(speaker_pin, NOTE_G1, 100);
       break;
     case RIGHT:
-      bg_melodie_off();
+      speaker->play = false;
       switch (cur_scr){
         case TIME:
           menu();
@@ -1011,7 +973,7 @@ void loop(){
       //tone(speaker_pin, NOTE_B1, 100);
       break;
     case SELECT:
-      bg_melodie_off();
+      speaker->play = false;
       time();
       //tone(speaker_pin, NOTE_F2, 100);
       break;
