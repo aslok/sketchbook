@@ -36,6 +36,8 @@ const char version[] = "17111300";
 // Библиотека для ввода с кнопок шилда
 #include "ButtonsTact.h"
 ButtonsTact* buttons;
+// Обработка нажатий на пине A0
+const byte buttons_pin = A0;
 
 // Уровни напряжения на A0 для разных кнопок
 const int RIGHT     = 0;
@@ -45,10 +47,11 @@ const int LEFT      = 475;
 const int SELECT    = 720;
 const int NONE      = 1023;
 
+// Шина OneWire подключена к 2-му пину
+const byte onewire_pin = 2;
 // Библиотека для термодатчика
 #include "OneWire.h"
-// Шина OneWire подключена к 2-му пину
-OneWire ds(2);
+OneWire ds(onewire_pin);
 // Количество подключенных датчиков ds_cnt
 const byte ds_cnt = 2;
 // Массив из ds_cnt групп по 8 байт
@@ -866,8 +869,7 @@ void setup() {
   lcd = new Cyrstal(8, 9, 4, 5, 6, 7, 16, 2, 10);
   lcd->backlight();
 
-  // Обработка нажатий на пине A0
-  buttons = new ButtonsTact(A0);
+  buttons = new ButtonsTact(buttons_pin);
   // На первом месте стоит уровень по-умолчанию, когда ничего не нажато
   buttons->addLevels(NONE, UP, DOWN, LEFT, RIGHT, SELECT, END);
 
@@ -924,7 +926,6 @@ void loop(){
         default:
           up_upd = true;
       }
-      //tone(speaker_pin, NOTE_C1, 100);
       break;
     case DOWN:
       switch (cur_scr){
@@ -935,7 +936,6 @@ void loop(){
         default:
           down_upd = true;
       }
-      //tone(speaker_pin, NOTE_E1, 100);
       break;
     case LEFT:
       speaker->play = false;
@@ -954,7 +954,6 @@ void loop(){
         default:
           back();
       }
-      //tone(speaker_pin, NOTE_G1, 100);
       break;
     case RIGHT:
       speaker->play = false;
@@ -970,12 +969,10 @@ void loop(){
         default:
           right_upd = true;
       }
-      //tone(speaker_pin, NOTE_B1, 100);
       break;
     case SELECT:
       speaker->play = false;
       time();
-      //tone(speaker_pin, NOTE_F2, 100);
       break;
   }
 
