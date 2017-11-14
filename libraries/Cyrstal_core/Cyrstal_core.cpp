@@ -381,13 +381,8 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
             continue;
           }
           // Сохраняем в ячейку номер символа который заменяем
-          create_char(i, cur, next_scr);
           // Будем заменять его при выводе на номер ячейки
-          lcd_replace[cur_chr] = i;
-          /*Serial.print("char_map[");
-          Serial.print(i);
-          Serial.print("] = read_pgm(ru_num + cur) = ");
-          Serial.println(char_map[i]);*/
+          create_char(i--, cur, next_scr);
           found = true;
         }
       }
@@ -558,7 +553,9 @@ void Cyrstal_core::get_str_enc(char* str, char* result){
 
 // Создание кастомного символа по номеру в указанной ячейке
 void Cyrstal_core::create_char(byte cell, byte num, char* next_scr){
-  /*Serial.print("Create char ");
+  /*Serial.print("Create char #");
+  Serial.print(num);
+  Serial.print(" = ");
   Serial.print(read_pgm(ru_num + num));
   Serial.print(" on cell #");
   Serial.println(cell);*/
@@ -588,14 +585,6 @@ void Cyrstal_core::create_char(byte cell, byte num, char* next_scr){
     pos < 8;
     tmp_arr[pos] = read_pgm(ru + num * 8 + pos++) - 1
   );
-  /*Serial.print("lcd_createChar(");
-  Serial.print(cell);
-  Serial.print(", [ ");
-  for (byte pos = 0; pos < 8; pos++){
-    Serial.print(tmp_arr[pos]);
-    Serial.print(",");
-  }
-  Serial.println(" ])");*/
   // Создаем кастомный символ
   // Бага lcd_createChar - приходится обновлять курсор
   lcd_createChar(cell, tmp_arr);
