@@ -7,12 +7,12 @@
  * 1. Максимальное количество кнопок на одном пине - 255
  * 2. Максимальное количество используемых пинов - 255
  * 3. Определение нажатия при расхождениях по уровню напряжения
- * 4. Срабатывание нажатия только через 50 милисекунд удержания
+ * 4. Срабатывание нажатия только через wait милисекунд удержания
  * 5. Очистка флага нажатия после передачи этого флага в скетч
- * 6. Повторное срабатывание нажатия только через 250 милисекунд
+ * 6. Повторное срабатывание нажатия только через repeat милисекунд
  *
  * created 12.10.2017
- * modified 22.10.2017
+ * modified 14.11.2017
  * with Arduino 1.8.3 (tested on Arduino Uno)
  *
  * Copyright 2017 Vitaliy Fust <aslok.zp@gmail.com>
@@ -31,15 +31,15 @@
 #include "ButtonsTact.h"
 
 // Конструктор, можно задать номер пина кнопки
-ButtonsTact::ButtonsTact(byte pin){
+ButtonsTact::ButtonsTact(byte pin, unsigned int wait, unsigned int repeat){
     if (pin == 255){
         return;
     }
-    addButton(pin);
+    addButton(pin, wait, repeat);
 }
 
 // Добавляем новую кнопку (кнопки) в массив кнопок
-void ButtonsTact::addButton(byte pin){
+void ButtonsTact::addButton(byte pin, unsigned int wait, unsigned int repeat){
     pinMode(pin, INPUT);
     // Указатель на прошлую версию массива кнопок
     struct Button* buttons_old;
@@ -54,6 +54,8 @@ void ButtonsTact::addButton(byte pin){
     // Копируем кнопки из прошлой версии массива в новую
     for (byte num = 0; num < buttons_cnt_old; num++){
         buttons[num].pin = buttons_old[num].pin;
+        buttons[num].wait = buttons_old[num].wait;
+        buttons[num].repeat = buttons_old[num].repeat;
         buttons[num].levels = buttons_old[num].levels;
     }
     // Если в прошлой версии массива были кнопки
@@ -62,6 +64,8 @@ void ButtonsTact::addButton(byte pin){
         delete[] buttons_old;
     }
     buttons[buttons_cnt - 1].pin = pin;
+    buttons[buttons_cnt - 1].wait = wait;
+    buttons[buttons_cnt - 1].repeat = repeat;
     buttons[buttons_cnt - 1].levels = NULL;
     buttons[buttons_cnt - 1].state = ERROR;
     buttons[buttons_cnt - 1].current = ERROR;
@@ -169,11 +173,11 @@ unsigned long ButtonsTact::touch(unsigned long new_ms){
             buttons[num].ms_start = ms;
             // Сохраняем текущий уровень
             buttons[num].current = current;
-        // Если кнопка нажата больше 50 милисекунд
+        // Если кнопка нажата больше wait милисекунд
         }else if (current != buttons[num].level_default &&
-                (double) ms - buttons[num].ms_start > 50){
-            // Игнорируем удерживание нажатия в течении 250 милисекунд
-            buttons[num].ms_start = ms + 250;
+                (double) ms - buttons[num].ms_start > buttons[num].wait){
+            // Игнорируем удерживание нажатия в течении repeat милисекунд
+            buttons[num].ms_start = ms + buttons[num].repeat;
             // Устанавливаем значение кнопки на текущий уровень
             buttons[num].state = current;
         }

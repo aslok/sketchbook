@@ -7,12 +7,12 @@
  * 1. Максимальное количество кнопок на одном пине - 255
  * 2. Максимальное количество используемых пинов - 255
  * 3. Определение нажатия при расхождениях по уровню напряжения
- * 4. Срабатывание нажатия только через 50 милисекунд удержания
+ * 4. Срабатывание нажатия только через wait милисекунд удержания
  * 5. Очистка флага нажатия после передачи этого флага в скетч
- * 6. Повторное срабатывание нажатия только через 250 милисекунд
+ * 6. Повторное срабатывание нажатия только через repeat милисекунд
  *
  * created 12.10.2017
- * modified 22.10.2017
+ * modified 14.11.2017
  * with Arduino 1.8.3 (tested on Arduino Uno)
  *
  * Copyright 2017 Vitaliy Fust <aslok.zp@gmail.com>
@@ -40,6 +40,8 @@
 
 struct Button {
   byte pin;
+  unsigned int wait;
+  unsigned int repeat;
   int* levels;
   int current;
   unsigned long ms_start;
@@ -50,9 +52,9 @@ struct Button {
 class ButtonsTact{
     public:
         // Конструктор, можно задать номер пина кнопки
-        ButtonsTact(byte pin = 255);
+        ButtonsTact(byte pin = 255, unsigned int wait = 75, unsigned int repeat = 300);
         // Добавляем новую кнопку (кнопки) в массив кнопок
-        void addButton(byte pin);
+        void addButton(byte pin, unsigned int wait = 75, unsigned int repeat = 300);
         // Добавляем уровни срабатывания кнопки (кнопок). int, int, int...
         void addLevels(...);
         // Возвращаем значение (текущий уровень) кнопки
