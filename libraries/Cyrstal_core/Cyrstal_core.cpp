@@ -121,6 +121,17 @@ void Cyrstal_core::print(const char chr, int8_t position, byte go_ln, byte space
 
 // Печать массива символов по указателю
 void Cyrstal_core::print(const char* str, int8_t position, byte go_ln, byte space){
+#ifdef debug
+  Serial.print(F("print("));
+  Serial.print(str);
+  Serial.print(F(", "));
+  Serial.print(position);
+  Serial.print(F(", "));
+  Serial.print(go_ln);
+  Serial.print(F(", "));
+  Serial.print(space);
+  Serial.println(F(")"));
+#endif
   byte cur_chr;
   for (cur_chr = 0; cur_chr < 255 && str[cur_chr]; cur_chr++);
   char* tmp = new char[cur_chr + 1];
@@ -131,8 +142,22 @@ void Cyrstal_core::print(const char* str, int8_t position, byte go_ln, byte spac
 
 // Печать массива символов во внутренней кодировке
 void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space){
+#ifdef debug
+  Serial.print(F("print_enc("));
+  Serial.print(str);
+  Serial.print(F(", "));
+  Serial.print(position);
+  Serial.print(F(", "));
+  Serial.print(go_ln);
+  Serial.print(F(", "));
+  Serial.print(space);
+  Serial.println(F(")"));
+#endif
   byte cur, cur_chr, i, cur_pos;
   if (go_ln != LINE && go_ln < h){
+#ifdef debug
+    Serial.println(F("go #1"));
+#endif
     go(0, go_ln);
   }
   if (position != POS && position < w && position > -1 * (w + 1)){
@@ -142,8 +167,14 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
       if (space != SPACE && space > cur_chr){
         cur_chr = space;
       }
+#ifdef debug
+    Serial.println(F("go #2"));
+#endif
       go(w + 1 - cur_chr + position, scr_pos / w);
     }else{
+#ifdef debug
+    Serial.println(F("go #3"));
+#endif
       go(position, scr_pos / w);
     }
   }
@@ -155,6 +186,9 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
     // Если сдвиг влево
     if (i < 0) {
       // Если край экрана - переносим курсор
+#ifdef debug
+    Serial.println(F("go #4"));
+#endif
       go(i + scr_pos >= 0 ? i + scr_pos : i % wh + scr_pos);
     }else{
       // Если сдвиг вправо - сдвигаем курсор пробелами
@@ -163,6 +197,11 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
         cur_pos < (space - cur_chr) / 2;
         cur_pos++, print(' ')
       );
+#ifdef debug
+      Serial.print(F("print_enc("));
+      Serial.print(str);
+      Serial.println(F(")"));
+#endif
       // Печатаем строку
       print_enc(str);
       // Сдвигаем курсор пробелами
@@ -179,12 +218,32 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
   char* next_scr = new char[wh];
   //Serial.println(str);
   get_next_scr(str, next_scr);
-  /*for (cur_chr = 0; cur_chr < wh; cur_chr++){
-    Serial.println((byte) next_scr[cur_chr], DEC);
-  }*/
+#ifdef debug
+  Serial.print(F("next_scr = ["));
+  for (cur_chr = 0; cur_chr < wh; cur_chr++){
+    Serial.print((byte) next_scr[cur_chr], DEC);
+    Serial.print(F(", "));
+  }
+  Serial.println(F("]"));
+#endif
   // Массив символов, на которые нужно будет заменить соответствующие
   // символы кирилицы при выводе
   char* lcd_replace = new char[wh];
+  for (
+    cur_chr = 0; 
+    cur_chr < wh; 
+    lcd_replace[cur_chr++] = -1){
+  }
+#ifdef debug
+  Serial.print(F("wh = "));
+  Serial.println(wh);
+  Serial.print(F("lcd_replace = ["));
+  for (cur_chr = 0; cur_chr < wh; cur_chr++){
+    Serial.print((byte) lcd_replace[cur_chr], DEC);
+    Serial.print(F(", "));
+  }
+  Serial.println(F("]"));
+#endif
   boolean found;
   byte tmp;
 
@@ -210,9 +269,13 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
     }
     // Символ не используется - очищаем
     char_map[i] = 0;
-    /*Serial.print("Can to use char_map[");
+#ifdef debug
+    Serial.print(F("Can to use char_map["));
     Serial.print(i);
-    Serial.println("] = 0");*/
+    Serial.println(F("] = 0"));
+    Serial.print(F("wh = "));
+    Serial.println(wh);
+#endif
   }
   //Serial.println("///////////////////////////////////////////////////////////");
 
@@ -220,12 +283,6 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
   // надо сначала освободить эти ячейки и поместить туда нужные символы
   for (cur_chr = 0; cur_chr < wh; cur_chr++){
     lcd_replace[cur_chr] = -1;
-    /*Serial.println();
-    Serial.print("next_scr[");
-    Serial.print(cur_chr);
-    Serial.print("] = ");
-    Serial.println((byte) next_scr[cur_chr]);
-    delay(100);*/
     // Если не нужно заменять текущий символ
     if ((byte) next_scr[cur_chr] < 128 || (byte) next_scr[cur_chr] > 180){
       // Смотрим следующий
@@ -246,9 +303,13 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
       // Смотрим следующий
       continue;
     }
-    /*Serial.print("Char ");
+#ifdef debug
+    Serial.print(F("Char "));
     Serial.print((byte) next_scr[cur_chr]);
-    Serial.println(" it is primary char");*/
+    Serial.println(F(" it is primary char"));
+    Serial.print(F("wh = "));
+    Serial.println(wh);
+#endif
 
     found = false;
     // Ищем текущий символ среди использованных самодельных символов для замены
@@ -256,10 +317,12 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
       if (char_map[i] && char_map[i] == (byte) next_scr[cur_chr]){
         // Символ для замены найден, запоминаем по позиции в next_scr
         lcd_replace[cur_chr] = i;
-        /*Serial.print("Char ");
+#ifdef debug
+        Serial.print(F("Char "));
         Serial.print(cur_chr);
-        Serial.print(" replaced to ");
-        Serial.println(i);*/
+        Serial.print(F(" replaced to "));
+        Serial.println(i);
+#endif
         found = true;
       }
     }
@@ -275,21 +338,45 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
     for (i = 0; !found && i < 8; i++){
       // Ячейка занята
       if (char_map[i]){
-        /*Serial.print("Cant to use char_map[");
+#ifdef debug
+        Serial.print(F("Cant to use char_map["));
         Serial.print(i);
-        Serial.print("] = ");
-        Serial.println(char_map[i]);*/
+        Serial.print(F("] = "));
+        Serial.println(char_map[i]);
+#endif
         continue;
       }
       found = true;
+#ifdef debug
+      Serial.print(F("Can to use char_map["));
+      Serial.print(i);
+      Serial.println(F("]"));
+      Serial.print(F("wh = "));
+      Serial.println(wh);
+      Serial.println(F("Start create char"));
+#endif
       // Сохраняем в ячейку номер символа который заменяем
       create_char(i, cur, next_scr);
+#ifdef debug
+      Serial.println(F("Char created"));
+      Serial.print(F("wh = "));
+      Serial.println(wh);
+
+      Serial.print(F("lcd_replace["));
+      Serial.print(cur_chr);
+      Serial.print(F("] = "));
+      Serial.println(i);
+#endif
       // Будем заменять его при выводе на номер ячейки
       lcd_replace[cur_chr] = i;
-      /*Serial.print("char_map[");
+#ifdef debug
+      Serial.print(F("wh = "));
+      Serial.println(wh);
+      Serial.print(F("char_map["));
       Serial.print(i);
-      Serial.print("] = ");
-      Serial.println(char_map[i]);*/
+      Serial.print(F("] = "));
+      Serial.println(char_map[i]);
+#endif
     }
     // Если мы нашли свободную ячейку, создали, заменили
     if (found){
@@ -403,8 +490,10 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
       // Смотрим следующий
       continue;
     }
-    /*Serial.print("Need to replace standart char ");
-    Serial.print((byte) next_scr[cur_chr]);*/
+#ifdef debug
+    Serial.print(F("Need to replace standart char "));
+    Serial.print((byte) next_scr[cur_chr]);
+#endif
     found = false;
     // Обходим основной набор символов для замены
     for (cur = 0; !found && (char) (tmp = read_pgm(en_num + cur)); cur++){
@@ -414,25 +503,31 @@ void Cyrstal_core::print_enc(char* str, int8_t position, byte go_ln, byte space)
       found = true;
       // Символ для замены найден, запоминаем по позиции в next_scr
       lcd_replace[cur_chr] = read_pgm(en + cur);
-      //Serial.println(" => Found");
+#ifdef debug
+      Serial.println(F(" => Found"));
+#endif
     }
   }
-  //Serial.println("///////////////////////////////////////////////////////////");
 
-  /*for (cur_chr = 0; cur_chr < wh; cur_chr++){
-    Serial.print("lcd_replace[");
+#ifdef debug
+  Serial.println(F("///////////////////////////////////////////////////////////"));
+  Serial.print(F("wh = "));
+  Serial.println(wh);
+  for (cur_chr = 0; cur_chr < wh; cur_chr++){
+    Serial.print(F("lcd_replace["));
     Serial.print(cur_chr);
-    Serial.print("] = ");
+    Serial.print(F("] = "));
     Serial.println((byte) lcd_replace[cur_chr]);
   }
 
   for (cur_chr = 0; cur_chr < wh; cur_chr++){
-    Serial.print("next_scr[");
+    Serial.print(F("next_scr["));
     Serial.print(cur_chr);
-    Serial.print("] = ");
+    Serial.print(F("] = "));
     Serial.println((byte) next_scr[cur_chr]);
   }
-  Serial.println("///////////////////////////////////////////////////////////");*/
+  Serial.println(F("///////////////////////////////////////////////////////////"));
+#endif
 
   write_str_enc(str, lcd_replace);
   delete[] lcd_replace;
@@ -464,15 +559,29 @@ void Cyrstal_core::get_next_scr(char* str, char* next_scr){
 
 // Печатаем строку сгенерированную для экрана по строке во внутренней кодировке
 void Cyrstal_core::write_str_enc(char* str, char* lcd_chars){
-  //Serial.println("--------------------------------------------------------");
-  //Serial.print("write_str_enc('");
-  //Serial.print(str);
-  //Serial.println("')");
+#ifdef debug
+  Serial.print(F("write_str_enc("));
+  Serial.print(str);
+  Serial.println(F(")"));
+  Serial.print(F("w = "));
+  Serial.println(w);
+#endif
   char out;
   for (byte cur_chr = 0; str[cur_chr] && cur_chr < 255; cur_chr++){
     out = str[cur_chr];
+#ifdef debug
+    Serial.print(F("scr_pos = "));
+    Serial.println(scr_pos);
+    Serial.print(F("cur_chr = "));
+    Serial.println(cur_chr);
+    Serial.print(F("out = "));
+    Serial.println((byte) out);
+#endif
     if (out == '\n'){
       scr_pos = scr_pos < w ? w : 0;
+#ifdef debug
+      Serial.println(F("go #1"));
+#endif
       go();
       continue;
     }
@@ -480,14 +589,26 @@ void Cyrstal_core::write_str_enc(char* str, char* lcd_chars){
       scr_pos = 0;
     }
     if (scr_pos == 0 || scr_pos == w){
+#ifdef debug
+      Serial.println(F("go #2"));
+#endif
       go();
     }
     if ((byte) out >= 128 && (byte) out <= 180){
+#ifdef debug
+      Serial.println(F("(byte) out >= 128 && (byte) out <= 180"));
+      Serial.print(F("lcd_chars[scr_pos] = "));
+      Serial.println((byte) lcd_chars[scr_pos]);
+#endif
       out = lcd_chars[scr_pos];
     }
     scr[scr_pos++] = str[cur_chr];
 
-    //Serial.println((byte) out);
+#ifdef debug
+    Serial.print(F("lcd_write("));
+    Serial.print((byte) out);
+    Serial.println(F(")"));
+#endif
     lcd_write(out);
     if (scr_pos > wh - 1){
       scr_pos = 0;
@@ -553,12 +674,23 @@ void Cyrstal_core::get_str_enc(char* str, char* result){
 
 // Создание кастомного символа по номеру в указанной ячейке
 void Cyrstal_core::create_char(byte cell, byte num, char* next_scr){
-  /*Serial.print("Create char #");
+#ifdef debug
+  Serial.print(F("create_char("));
+  Serial.print(cell);
+  Serial.print(F(", "));
   Serial.print(num);
-  Serial.print(" = ");
+  Serial.print(F(", "));
+  Serial.print(next_scr);
+  Serial.println(F(")"));
+  Serial.print(F("Create char #"));
+  Serial.print(num);
+  Serial.print(F(" = "));
   Serial.print(read_pgm(ru_num + num));
-  Serial.print(" on cell #");
-  Serial.println(cell);*/
+  Serial.print(F(" on cell #"));
+  Serial.println(cell);
+  Serial.print(F("wh = "));
+  Serial.println(wh);
+#endif
   // Динамическое обновление символов
   // Перетираем отображающееся предыдущее содержимое ячейки
   // Если в ячейке есть номер символа
@@ -571,7 +703,19 @@ void Cyrstal_core::create_char(byte cell, byte num, char* next_scr){
       tmp = read_pgm(en + cur);
       for (byte cur_chr = 0; cur_chr < wh; cur_chr++){
         if (char_map[cell] == (byte) next_scr[cur_chr]){
+#ifdef debug
+          Serial.print(F("lcd_setCursor("));
+          Serial.print(cur_chr - cur_chr / w * w);
+          Serial.print(F(", "));
+          Serial.print(cur_chr / w);
+          Serial.println(F(")"));
+#endif
           lcd_setCursor(cur_chr - cur_chr / w * w, cur_chr / w);
+#ifdef debug
+          Serial.print(F("lcd_write("));
+          Serial.print(tmp);
+          Serial.println(F(")"));
+#endif
           lcd_write(tmp);
         }
       }
@@ -583,14 +727,40 @@ void Cyrstal_core::create_char(byte cell, byte num, char* next_scr){
   for (
     byte pos = 0;
     pos < 8;
-    tmp_arr[pos] = read_pgm(ru + num * 8 + pos++) - 1
+    tmp_arr[pos++] = read_pgm(ru + num * 8 + pos) - 1
   );
+#ifdef debug
+  Serial.print(F("lcd_createChar("));
+  Serial.print(cell);
+  Serial.print(F(", ["));
+  for (
+    byte pos = 0;
+    pos < 8;
+    Serial.print(tmp_arr[pos++]),
+    Serial.print(F(", "))
+  );
+  Serial.println(F("])"));
+#endif
   // Создаем кастомный символ
   // Бага lcd_createChar - приходится обновлять курсор
   lcd_createChar(cell, tmp_arr);
   for (byte cur_chr = 0; cur_chr < wh; cur_chr++){
     if (char_map[cell] == (byte) next_scr[cur_chr]){
+#ifdef debug
+      Serial.print(F("lcd_setCursor("));
+      Serial.print(cur_chr - cur_chr / w * w);
+      Serial.print(F(", "));
+      Serial.print(cur_chr / w);
+      Serial.println(F(")"));
+#endif
       lcd_setCursor(cur_chr - cur_chr / w * w, cur_chr / w);
+#ifdef debug
+      Serial.print(F("lcd_write("));
+      Serial.print(cell);
+      Serial.println(F(")"));
+      Serial.print(F("wh = "));
+      Serial.println(wh);
+#endif
       lcd_write(cell);
     }
   }
@@ -640,17 +810,37 @@ void Cyrstal_core::clear(){
   for (byte cur_chr = 0; cur_chr < wh; scr[cur_chr++] = ' ');
   scr[wh] = 0;
   scr_pos = 0;
+#ifdef debug
+  Serial.println(F("lcd_clear()"));
+#endif
   lcd_clear();
 }
 
 // Установка курсора в выбранные столбец-строка
 void Cyrstal_core::go(byte col, byte row){
-  //Serial.println("go");
-  //Serial.println(col);
-  //Serial.println(row);
+#ifdef debug
+  Serial.print(F("go("));
+  Serial.print(col);
+  Serial.print(F(", "));
+  Serial.print(row);
+  Serial.println(F(")"));
+  Serial.print(F("wh = "));
+  Serial.println(wh);
+#endif
   if (col < w && row < h){
+#ifdef debug
+    Serial.print(F("lcd_setCursor("));
+    Serial.print(col);
+    Serial.print(F(", "));
+    Serial.print(row);
+    Serial.println(F(")"));
+#endif
     lcd_setCursor(col, row);
     scr_pos = row * w + col;
+#ifdef debug
+    Serial.print(F("scr_pos = "));
+    Serial.println(scr_pos);
+#endif
   }
 }
 
@@ -658,7 +848,7 @@ void Cyrstal_core::go(byte col, byte row){
 void Cyrstal_core::go(byte col){
   if (col < wh){
     go(col - col / w * w, col / w);
-  }else if (col == wh){
+  }else if (col == POS){
     go(scr_pos);
   }
 }

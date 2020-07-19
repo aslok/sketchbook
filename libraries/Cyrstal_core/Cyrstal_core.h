@@ -23,6 +23,8 @@
 #ifndef Cyrstal_core_h
 #define Cyrstal_core_h
 
+//#define debug
+
 #define POS 127
 #define LINE 255
 #define SPACE 255
@@ -71,7 +73,7 @@ class Cyrstal_core {
     // Установка курсора в выбранные столбец-строка
     void go(byte col, byte row);
     // Установка курсора в выбранную позицию справа-налево сверху-вниз
-    void go(byte = 32);
+    void go(byte = POS);
 
     // Инициализация массива строк разделенных символом \r переданного через F()
     void init(const __FlashStringHelper*);

@@ -26,8 +26,17 @@
 // Конструктор
 Cyrstal_i2c::Cyrstal_i2c(byte address, byte width, byte height) :
 Cyrstal_core(width, height){
+#ifdef debug
+  Serial.println("lcd = new LiquidCrystal_I2C");
+#endif
   lcd = new LiquidCrystal_I2C(address, width, height);
+#ifdef debug
+  Serial.println("lcd->init()");
+#endif
   lcd->init();
+#ifdef debug
+  Serial.println("clear();");
+#endif
   clear();
 }
 

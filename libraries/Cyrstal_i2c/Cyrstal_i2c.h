@@ -29,6 +29,12 @@
 #include "LiquidCrystal_I2C.h"
 #include "Cyrstal_core.h"
 
+#if defined(ARDUINO) && ARDUINO >= 100
+#define printByte(args)  write(args);
+#else
+#define printByte(args)  print(args,BYTE);
+#endif
+
 class Cyrstal_i2c : public Cyrstal_core{
   public:
     Cyrstal_i2c(byte address, byte width, byte height);
@@ -43,7 +49,7 @@ class Cyrstal_i2c : public Cyrstal_core{
       delay(200);
 #endif
     };
-    void lcd_write(char chr){                   lcd->write(chr);
+    void lcd_write(char chr){                   lcd->printByte(chr);
 #ifdef debug
       delay(200);
 #endif
@@ -59,7 +65,7 @@ class Cyrstal_i2c : public Cyrstal_core{
     void lcd_noCursor(){                        lcd->noCursor();            };
     void lcd_blink(){                           lcd->blink();               };
     void lcd_noBlink(){                         lcd->noBlink();             };
-    void lcd_clear(){                           lcd->clear();
+    void lcd_clear(){                           lcd->home();
 #ifdef debug
       delay(200);
 #endif
